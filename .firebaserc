@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "demo-fe-cr"
+    "default": "demo-fe-cr",
+    "nube": "simulador-fe-cr-1023"
   }
 }

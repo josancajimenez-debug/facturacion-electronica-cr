@@ -46,7 +46,25 @@ npm run dev
 
 El proyecto `demo-fe-cr` es exclusivo de emuladores: no existe en la nube y no requiere credenciales.
 
-## 3. Configuración de un proyecto Firebase real (opcional)
+## 3. Proyecto en la nube actual
+
+| Elemento | Estado (23/10/2026) |
+|---|---|
+| Proyecto | `simulador-fe-cr-1023` (alias `nube` en `.firebaserc`) |
+| Hosting | Publicado en <https://simulador-fe-cr-1023.web.app>, en **modo local** (los datos quedan en el navegador de cada usuario) |
+| Firestore | Base `(default)` en `nam5`, con las reglas e índices del repositorio |
+| Authentication | Correo/contraseña habilitado (declarado en `firebase.json` → `auth`) |
+| Cloud Functions | **No desplegadas**: requieren el plan Blaze |
+
+Para pasar a la arquitectura completa (Auth + Firestore + Functions en la nube):
+
+1. Active el plan Blaze en <https://console.firebase.google.com/project/simulador-fe-cr-1023/usage/details> (puede fijar un presupuesto con alertas).
+2. Asegúrese de tener `apps/web/.env.nube` (no se versiona). Si falta, regénerelo con `firebase apps:sdkconfig WEB --project nube` y use `.env.example` como guía, con `VITE_BACKEND=firebase` y `VITE_USAR_EMULADORES=false`.
+3. Ejecute `npm run deploy:nube` (compila Functions y la web en modo `nube` y despliega todo).
+
+Mientras tanto, `npm run deploy:nube:sin-functions` vuelve a publicar Hosting (modo local), reglas de Firestore y la configuración de Auth.
+
+## 4. Configuración de otro proyecto Firebase (opcional)
 
 > Esto publica la aplicación en Internet. Sigue siendo un **simulador**: no envía nada a Hacienda.
 

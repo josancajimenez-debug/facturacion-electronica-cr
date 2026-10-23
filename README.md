@@ -24,6 +24,8 @@ npm run dev        # modo local: http://localhost:5173
 
 Modo Firebase (Auth, Firestore, Functions) con emuladores: ver [docs/INSTALACION.md](docs/INSTALACION.md).
 
+Versión publicada (modo local): <https://simulador-fe-cr-1023.web.app>
+
 ## Documentación
 
 | Documento | Contenido |

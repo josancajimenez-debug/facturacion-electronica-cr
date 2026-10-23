@@ -17,7 +17,9 @@
     "test": "npm run test -w packages/core && npm run test -w apps/web",
     "test:reglas": "firebase emulators:exec --only firestore --project demo-fe-cr \"npm run test:reglas -w functions\"",
     "typecheck": "npm run typecheck -w packages/core && npm run typecheck -w apps/web && npm run typecheck -w functions",
-    "test:integracion": "npm run build -w functions && firebase emulators:exec --only auth,firestore,functions --project demo-fe-cr \"npm run test:integracion -w functions\""
+    "test:integracion": "npm run build -w functions && firebase emulators:exec --only auth,firestore,functions --project demo-fe-cr \"npm run test:integracion -w functions\"",
+    "deploy:nube": "npm run build -w functions && npm run build -w apps/web -- --mode nube && firebase deploy --project nube",
+    "deploy:nube:sin-functions": "npm run build -w apps/web && firebase deploy --only hosting,firestore,auth --project nube"
   },
   "engines": {
     "node": ">=20"
