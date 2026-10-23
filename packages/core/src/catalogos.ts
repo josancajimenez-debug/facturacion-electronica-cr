@@ -8,6 +8,8 @@
  * notas de crédito/débito que ajustan comprobantes previos, según las notas al pie del Anexo.
  */
 
+import formasMinsa from './datos/formas-farmaceuticas-minsa.json';
+
 export interface Codigo {
   codigo: string;
   descripcion: string;
@@ -333,10 +335,7 @@ export const MONEDA: Codigo[] = [
   { codigo: 'EUR', descripcion: 'Euro' },
 ];
 
-/**
- * Nota 14 remite a "Codificacionubicacion_V4.4" (no incluido en la bibliografía).
- * Solo se incorporan las siete provincias; cantón y distrito se capturan como código numérico.
- */
+/** Provincias (nota 14). Cantones y distritos: ver ubicacion.ts (División Territorial Administrativa 2022). */
 export const PROVINCIA: Codigo[] = [
   { codigo: '1', descripcion: 'San José' },
   { codigo: '2', descripcion: 'Alajuela' },
@@ -361,3 +360,12 @@ export function codigoTarifaDesdeCabys(impuesto: string): string | undefined {
   const mapa: Record<string, string> = { '13%': '08', '4%': '04', '2%': '03', '1%': '02', '0.5%': '09', Exento: '10' };
   return mapa[impuesto.trim()];
 }
+
+/**
+ * Formas farmacéuticas del Ministerio de Salud (CodeSystem FHIR "drugs-presentation-code",
+ * versión 1.1.0-ballot, estado borrador). Sus códigos son SNOMED CT de hasta 14 dígitos, por lo
+ * que NO caben en el campo FormaFarmaceutica del XML (String 3, nota 19 de Hacienda): se usan como
+ * catálogo de referencia del producto y se muestran en la representación gráfica.
+ */
+export const FORMAS_FARMACEUTICAS_MINSA: Codigo[] = formasMinsa.codigos;
+export const FUENTE_FORMAS_FARMACEUTICAS = formasMinsa.fuente;

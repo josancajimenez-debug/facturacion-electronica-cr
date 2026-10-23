@@ -1,6 +1,5 @@
 import {
   INSTITUCION_EXONERACION,
-  PROVINCIA,
   REGEX_CORREO,
   TIPO_EXONERACION,
   TIPO_IDENTIFICACION,
@@ -11,6 +10,7 @@ import {
 } from '@fe-cr/core';
 import { Pencil, Plus, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
+import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, Modal, Selector, Texto, Vacio } from '../components/ui';
 import { useApp } from '../estado';
 
@@ -120,13 +120,16 @@ function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () =
         ) : (
           <details>
             <summary className="small" style={{ cursor: 'pointer' }}>Ubicación (opcional en TE; condicional en FE)</summary>
-            <div className="grid grid-3" style={{ marginTop: 8 }}>
-              <Selector etiqueta="Provincia" valor={r.ubicacion?.provincia} vacio="—" onCambio={(v) => set({ ubicacion: v ? { canton: '01', distrito: '01', otrasSenas: '', ...r.ubicacion, provincia: v } : undefined })} opciones={PROVINCIA} />
-              <Texto etiqueta="Cantón" valor={r.ubicacion?.canton} onCambio={(v) => r.ubicacion && set({ ubicacion: { ...r.ubicacion, canton: v.replace(/\D/g, '').slice(0, 2) } })} />
-              <Texto etiqueta="Distrito" valor={r.ubicacion?.distrito} onCambio={(v) => r.ubicacion && set({ ubicacion: { ...r.ubicacion, distrito: v.replace(/\D/g, '').slice(0, 2) } })} />
-              <div style={{ gridColumn: '1 / -1' }}>
-                <Texto etiqueta="Otras señas" valor={r.ubicacion?.otrasSenas} onCambio={(v) => r.ubicacion && set({ ubicacion: { ...r.ubicacion, otrasSenas: v } })} max={160} />
-              </div>
+            <div className="stack" style={{ marginTop: 8 }}>
+              <label className="check">
+                <input type="checkbox" checked={!!r.ubicacion} onChange={(e) => set({ ubicacion: e.target.checked ? { provincia: '1', canton: '01', distrito: '01', otrasSenas: '' } : undefined })} />
+                Registrar ubicación
+              </label>
+              {r.ubicacion && (
+                <div className="grid grid-3">
+                  <UbicacionCampos valor={r.ubicacion} onCambio={(u) => set({ ubicacion: u })} maxSenas={160} />
+                </div>
+              )}
             </div>
           </details>
         )}

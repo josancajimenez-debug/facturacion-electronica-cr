@@ -1,0 +1,370 @@
+{
+ "fuente": "Ministerio de Salud de Costa Rica – CodeSystem DrugsPresentationCode (https://ministeriodesalud.go.cr/fhir/receta/CodeSystem/drugs-presentation-code), versión 1.1.0-ballot, estado draft",
+ "consultado": "2026-10-23",
+ "codigos": [
+  {
+   "codigo": "36",
+   "descripcion": "Spray Nasal"
+  },
+  {
+   "codigo": "385027000",
+   "descripcion": "polvo para suspensión oral"
+  },
+  {
+   "codigo": "732936001",
+   "descripcion": "Comprimidos"
+  },
+  {
+   "codigo": "3",
+   "descripcion": "Tabletas"
+  },
+  {
+   "codigo": "16",
+   "descripcion": "Solución Oral"
+  },
+  {
+   "codigo": "732994000",
+   "descripcion": "Gotas"
+  },
+  {
+   "codigo": "73297800",
+   "descripcion": "Ampollas"
+  },
+  {
+   "codigo": "732937005",
+   "descripcion": "Cápsulas"
+  },
+  {
+   "codigo": "733005001",
+   "descripcion": "Parches"
+  },
+  {
+   "codigo": "14",
+   "descripcion": "Inyectable"
+  },
+  {
+   "codigo": "15",
+   "descripcion": "Solución Inyectable"
+  },
+  {
+   "codigo": "733018009",
+   "descripcion": "tira"
+  },
+  {
+   "codigo": "733025002",
+   "descripcion": "vaso"
+  },
+  {
+   "codigo": "733026001",
+   "descripcion": "vial"
+  },
+  {
+   "codigo": "732991008",
+   "descripcion": "taza"
+  },
+  {
+   "codigo": "733024003",
+   "descripcion": "tubo"
+  },
+  {
+   "codigo": "732987003",
+   "descripcion": "sello"
+  },
+  {
+   "codigo": "732982009",
+   "descripcion": "bolsa"
+  },
+  {
+   "codigo": "733011003",
+   "descripcion": "tapón"
+  },
+  {
+   "codigo": "733002003",
+   "descripcion": "matriz"
+  },
+  {
+   "codigo": "732985006",
+   "descripcion": "bloque"
+  },
+  {
+   "codigo": "733009007",
+   "descripcion": "pipeta"
+  },
+  {
+   "codigo": "733022004",
+   "descripcion": "tampón"
+  },
+  {
+   "codigo": "732983004",
+   "descripcion": "barril"
+  },
+  {
+   "codigo": "733013000",
+   "descripcion": "sachet"
+  },
+  {
+   "codigo": "732990009",
+   "descripcion": "envase"
+  },
+  {
+   "codigo": "732993006",
+   "descripcion": "apósito"
+  },
+  {
+   "codigo": "732998002",
+   "descripcion": "inserto"
+  },
+  {
+   "codigo": "732984005",
+   "descripcion": "blíster"
+  },
+  {
+   "codigo": "733014006",
+   "descripcion": "esponja"
+  },
+  {
+   "codigo": "733020007",
+   "descripcion": "jeringa"
+  },
+  {
+   "codigo": "733021006",
+   "descripcion": "sistema"
+  },
+  {
+   "codigo": "732981002",
+   "descripcion": "disparo"
+  },
+  {
+   "codigo": "733017004",
+   "descripcion": "pajuela"
+  },
+  {
+   "codigo": "732992001",
+   "descripcion": "cilindro"
+  },
+  {
+   "codigo": "732995004",
+   "descripcion": "película"
+  },
+  {
+   "codigo": "732988008",
+   "descripcion": "cartucho"
+  },
+  {
+   "codigo": "732996003",
+   "descripcion": "implante"
+  },
+  {
+   "codigo": "733004002",
+   "descripcion": "pastilla"
+  },
+  {
+   "codigo": "733006000",
+   "descripcion": "lapicera"
+  },
+  {
+   "codigo": "732980001",
+   "descripcion": "aplicador"
+  },
+  {
+   "codigo": "732997007",
+   "descripcion": "inhalador"
+  },
+  {
+   "codigo": "733015007",
+   "descripcion": "cucharada"
+  },
+  {
+   "codigo": "733001005",
+   "descripcion": "liofilizado"
+  },
+  {
+   "codigo": "733019001",
+   "descripcion": "supositorio"
+  },
+  {
+   "codigo": "733003008",
+   "descripcion": "almohadilla"
+  },
+  {
+   "codigo": "733012005",
+   "descripcion": "bolsa pequeña"
+  },
+  {
+   "codigo": "733007009",
+   "descripcion": "óvulo vaginal"
+  },
+  {
+   "codigo": "732989000",
+   "descripcion": "goma de mascar"
+  },
+  {
+   "codigo": "733008004",
+   "descripcion": "píldora pequeña"
+  },
+  {
+   "codigo": "733010002",
+   "descripcion": "apósito adhesivo"
+  },
+  {
+   "codigo": "733016008",
+   "descripcion": "palillo medicamentoso"
+  },
+  {
+   "codigo": "733000006",
+   "descripcion": "comprimido de disolución oral"
+  },
+  {
+   "codigo": "732999005",
+   "descripcion": "contenedor de boca ancha con tapa"
+  },
+  {
+   "codigo": "385023001",
+   "descripcion": "solución para administración oral"
+  },
+  {
+   "codigo": "421026006",
+   "descripcion": "comprimido oral"
+  },
+  {
+   "codigo": "385165005",
+   "descripcion": "crema vaginal"
+  },
+  {
+   "codigo": "421366001",
+   "descripcion": "comprimido dispersable"
+  },
+  {
+   "codigo": "1163573008",
+   "descripcion": "comprimido recubierto con película oral"
+  },
+  {
+   "codigo": "1230389004",
+   "descripcion": "comprimido recubierto oral"
+  },
+  {
+   "codigo": "385223009",
+   "descripcion": "polvo para solución inyectable"
+  },
+  {
+   "codigo": "385024007",
+   "descripcion": "suspensión oral"
+  },
+  {
+   "codigo": "3681000122101",
+   "descripcion": "polvo para solución para infusión"
+  },
+  {
+   "codigo": "385084005",
+   "descripcion": "comprimido sublingual"
+  },
+  {
+   "codigo": "385060002",
+   "descripcion": "comprimido oral de liberación prolongada"
+  },
+  {
+   "codigo": "385219001",
+   "descripcion": "solución inyectable"
+  },
+  {
+   "codigo": "420692007",
+   "descripcion": "cápsula oral"
+  },
+  {
+   "codigo": "385049006",
+   "descripcion": "cápsula"
+  },
+  {
+   "codigo": "385029002",
+   "descripcion": "gránulos para suspensión oral"
+  },
+  {
+   "codigo": "385053008",
+   "descripcion": "cápsula oral de liberación prolongada"
+  },
+  {
+   "codigo": "385224003",
+   "descripcion": "polvo para suspensión inyectable"
+  },
+  {
+   "codigo": "385114002",
+   "descripcion": "parche transdérmico de liberación prolongada"
+  },
+  {
+   "codigo": "385026009",
+   "descripcion": "polvo para solución oral"
+  },
+  {
+   "codigo": "420378007",
+   "descripcion": "comprimido recubierto oral de liberación prolongada"
+  },
+  {
+   "codigo": "385124005",
+   "descripcion": "gotas oftálmicas"
+  },
+  {
+   "codigo": "10711000122109",
+   "descripcion": "gotas óticas"
+  },
+  {
+   "codigo": "385164009",
+   "descripcion": "ungüento para aplicación oftálmica, ótica o nasal"
+  },
+  {
+   "codigo": "385157007",
+   "descripcion": "aerosol nasal"
+  },
+  {
+   "codigo": "1217285003",
+   "descripcion": "cápsula dura oral de liberación prolongada"
+  },
+  {
+   "codigo": "385100002",
+   "descripcion": "gel"
+  },
+  {
+   "codigo": "385166006",
+   "descripcion": "gel para administración por vía vaginal"
+  },
+  {
+   "codigo": "66076007",
+   "descripcion": "comprimido masticable"
+  },
+  {
+   "codigo": "421628006",
+   "descripcion": "crema para aplicación cutánea"
+  },
+  {
+   "codigo": "385198000",
+   "descripcion": "solución para nebulización"
+  },
+  {
+   "codigo": "421221008",
+   "descripcion": "suspensión para inhalación"
+  },
+  {
+   "codigo": "385207009",
+   "descripcion": "polvo para inhalación oral"
+  },
+  {
+   "codigo": "385050006",
+   "descripcion": "cápsula dura"
+  },
+  {
+   "codigo": "385108009",
+   "descripcion": "solución para administración cutánea"
+  },
+  {
+   "codigo": "785908001",
+   "descripcion": "champú para aplicación cutánea"
+  },
+  {
+   "codigo": "385177000",
+   "descripcion": "cápsula vaginal blanda"
+  },
+  {
+   "codigo": "425753008",
+   "descripcion": "ungüento cutáneo"
+  }
+ ]
+}

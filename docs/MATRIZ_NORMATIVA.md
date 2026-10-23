@@ -24,7 +24,9 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | 12 | **Resolución MH-DGT-RES-0043-2025**, modificaciones por TRIBU-CR | 27/08/2025; Alcance 114, La Gaceta 166 (5/09/2025) | Vigente | Art. 21 reforma el Transitorio I de la RES-0027; ATV deja de operar y TRIBU-CR inicia el 6/10/2025; el facturador gratuito ATV v4.3 funcionó hasta el 5/10/2025 | Actividades en formato CIIU 4 de TRIBU-CR |
 | 13 | **Resolución MH-DGT-RES-0033-2025** (formularios de IVA) y **MH-DGT-RES-0013-2024** (deber de declarar de exentos) | 22/07/2025 y 10/06/2024 | Vigentes | Formularios de declaración del IVA en TRIBU-CR; los exentos deben presentar la D-104 | Reportes de apoyo (no sustituyen la declaración) |
 | 14 | **Catálogo CAByS 2025** (BCCR, comunicado CP-BCCR-015-2025) | 1/04/2025 | Vigente | Código de 13 dígitos por línea (nota 17); la columna «Impuesto» orienta la tarifa del IVA | Los 20 506 códigos se usan en la búsqueda y en la validación de nivel 3 |
-| 15 | **API público del Ministerio de Hacienda** (`api.hacienda.go.cr/docs`) | Consulta del 23/10/2026 | En servicio; límites de 20 solicitudes/s en ráfaga y 10/s sostenidas (bloqueo de IP por 10 min) | `/fe/ae`, `/fe/ex`, `/fe/cabys`, `/indicadores/tc/dolar` | Consulta de actividades del emisor y tipo de cambio (solo lectura). **No** es el API de recepción de comprobantes |
+| 15 | **División Territorial Administrativa 2022** (Registro Nacional – Instituto Geográfico Nacional), tabla por provincia, cantón y distrito, v3 | 2022 (archivo en la bibliografía) | Referencia oficial de la codificación territorial | 7 provincias, 83 cantones y 488 distritos con códigos de 1, 3 y 5 dígitos | Listas dependientes provincia → cantón → distrito; el XML usa los 2 últimos dígitos de cantón y distrito (nota 14); validación con advertencia |
+| 16 | **CodeSystem FHIR «drugs-presentation-code»** – Catálogo de formas farmacéuticas, Ministerio de Salud | Versión 1.1.0-ballot, estado *draft*; página generada el 22/10/2025 | Borrador publicado en la guía FHIR de receta electrónica | 91 formas farmacéuticas con códigos SNOMED CT (1 a 14 dígitos) | Catálogo de referencia del producto y de la línea; se imprime en el PDF. No se envía en el XML (ver sección 3) |
+| 17 | **API público del Ministerio de Hacienda** (`api.hacienda.go.cr/docs`) | Consulta del 23/10/2026 | En servicio; límites de 20 solicitudes/s en ráfaga y 10/s sostenidas (bloqueo de IP por 10 min) | `/fe/ae`, `/fe/ex`, `/fe/cabys`, `/indicadores/tc/dolar` | Consulta de actividades del emisor y tipo de cambio (solo lectura). **No** es el API de recepción de comprobantes |
 
 ## 2. Requisitos técnicos implementados
 
@@ -43,7 +45,7 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | Consulta por cédula, número, medio de pago, condición, fecha, montos, impuestos y estados | Decreto 44739-H art. 14 inc. 10 | Página «Comprobantes emitidos» |
 | Separación de entornos y bloqueo del envío real | Requisito del encargo | `core/entorno.ts`, `functions/src/pasarela-real.ts`, proyecto `demo-fe-cr` |
 
-**Fuera de alcance (no implementado):** firma XAdES-EPES (Anexo 2) y firmas de receptor o endoso; envío real al API de recepción; impuestos específicos no tarifarios (códigos 03-06), IVA cobrado en fábrica (nota 21), IVA de bienes usados por factor (08) y surtidos; catálogos externos no incluidos en la bibliografía (codificación de ubicación V4.4, códigos de moneda V4.4 y forma farmacéutica).
+**Fuera de alcance (no implementado):** firma XAdES-EPES (Anexo 2) y firmas de receptor o endoso; envío real al API de recepción; impuestos específicos no tarifarios (códigos 03-06), IVA cobrado en fábrica (nota 21), IVA de bienes usados por factor (08) y surtidos; el documento oficial de Hacienda «Código de forma farmacéutica» (nota 19) y la tabla «Codigodemoneda_V4.4» (nota 13.1), que no forman parte de la bibliografía.
 
 ## 3. Contradicciones y decisiones de interpretación
 
@@ -59,6 +61,8 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | Códigos nuevos (notas 9 y 10) | El comunicado de actualización agrega 13-17 (nota 9) y 19-20 (nota 10) desde el 1.º de noviembre, sin transcribir las descripciones de la nota 9 | Se incorporan 19 (FEE) y 20 (REP); 13-17 quedan pendientes del Anexo actualizado |
 | Código de actividad | `CodigoActividadEmisor` es String(6); TRIBU-CR publica códigos CIIU 4 con punto («6920.0») y ATV usaba 6 dígitos | Se usa el formato del API público; validar con el XSD vigente |
 | Espacios de nombres de los mensajes | La nota 2 no enumera los de MensajeReceptor y MensajeHacienda | Se usa el mismo patrón del CDN; verificar con los XSD |
+| Forma farmacéutica (nota 19) | El campo FormaFarmaceutica del XML es String(3) y remite al documento «Código de forma farmacéutica» de Hacienda; el catálogo del Ministerio de Salud usa códigos SNOMED CT de hasta 14 dígitos (solo 5 de 91 caben en 3 caracteres) y está en estado borrador | El catálogo del Ministerio de Salud se usa como referencia descriptiva (producto, línea y PDF). En el XML solo se acepta un código de hasta 3 caracteres digitado por el usuario según la tabla de Hacienda; códigos más largos se rechazan |
+| Codificación de ubicación (nota 14) | La nota 14 remite a «Codificacionubicacion_V4.4», no incluido; se usa la DTA 2022 del Registro Nacional. El archivo convertido termina en el distrito 70603 (Pocora, Guácimo), por lo que podría faltar el final de la tabla | Una ubicación ausente del catálogo genera advertencia, no rechazo |
 | Material de terceros | El resumen de ACC Contadores habla de «código CAByS de la actividad económica del receptor» | Impreciso: se exige el código de actividad económica, no un CAByS |
 | Video de referencia | Charla del Colegio de Contadores Privados de Costa Rica (22/10/2026); no se pudo obtener la transcripción | Se cita solo como referencia; ningún requisito depende de él |
 
@@ -98,9 +102,13 @@ Dirección General de Tributación. (s. f.). *Correspondencia de actividades eco
 
 Grant Thornton Costa Rica. (2025, setiembre). *Factura electrónica: prepárese para los cambios de la versión 4.4* [Presentación]. CAMTIC.
 
+Instituto Geográfico Nacional y Registro Nacional. (2022). *Tabla por provincias, cantones y distritos de Costa Rica: División territorial administrativa 2022* (v3) [Tabla].
+
 KPMG Costa Rica. (2024, noviembre). *NewsFlash: Reglamento de Comprobantes Electrónicos para efectos tributarios*. https://kpmg.com/cr/es/home/tendencias/2024/11/newsflash-noviembre-2024-2.html
 
 Ministerio de Hacienda de Costa Rica. (s. f.). *API Hacienda* [Documentación de API]. Recuperado el 23 de octubre de 2026, de https://api.hacienda.go.cr/docs
+
+Ministerio de Salud de Costa Rica. (2025). *Catálogo de formas farmacéuticas de medicamento* (CodeSystem drugs-presentation-code, versión 1.1.0-ballot) [Conjunto de datos FHIR]. Recuperado el 23 de octubre de 2026, de https://www.ministeriodesalud.go.cr/fhir/receta/CodeSystem-drugs-presentation-code.html
 
 Poder Ejecutivo de la República de Costa Rica. (2014). *Reglamento de Procedimiento Tributario* (Decreto Ejecutivo N.° 38277-H). Sistema Costarricense de Información Jurídica. Recuperado el 23 de octubre de 2026, de https://sinalevi.go.cr/ResultadosNormativa/Informacion?param1=76926&param2=152753&param3=1
 

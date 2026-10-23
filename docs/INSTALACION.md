@@ -24,7 +24,8 @@ Cree una cuenta (solo existe en ese navegador) y pulse **Cargar datos ficticios*
 El catálogo CAByS ya viene en `apps/web/public/data/cabys-2025.json`. Para regenerarlo desde la bibliografía:
 
 ```bash
-npm run datos:cabys   # lee ../Bibliogafía/2025-04-01-catalogo-de-bienes-servicios-1.md
+npm run datos:cabys      # lee ../Bibliogafía/2025-04-01-catalogo-de-bienes-servicios-1.md
+npm run datos:catalogos  # División Territorial 2022 (bibliografía) + formas farmacéuticas (Ministerio de Salud, en línea)
 ```
 
 ## 2. Modo Firebase con emuladores (recomendado para probar la arquitectura completa)

@@ -1,4 +1,4 @@
-import { MONEDA, TARIFA_IVA, TIPO_CODIGO_COMERCIAL, UNIDAD_MEDIDA, descripcion, esCabysServicio, type Producto } from '@fe-cr/core';
+import { FORMAS_FARMACEUTICAS_MINSA, MONEDA, TARIFA_IVA, TIPO_CODIGO_COMERCIAL, UNIDAD_MEDIDA, descripcion, esCabysServicio, type Producto } from '@fe-cr/core';
 import { Package, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { CabysBuscador } from '../components/CabysBuscador';
@@ -103,6 +103,11 @@ function FormProducto({ inicial, onCerrar }: { inicial: Producto; onCerrar: () =
           <Selector etiqueta="Tipo de código comercial (nota 12)" valor={p.codigoComercial?.tipo} vacio="— Sin código comercial —" onCambio={(v) => set({ codigoComercial: v ? { tipo: v, codigo: p.codigoComercial?.codigo ?? '' } : undefined })} opciones={TIPO_CODIGO_COMERCIAL} />
           <Texto etiqueta="Código comercial" valor={p.codigoComercial?.codigo} onCambio={(v) => p.codigoComercial && set({ codigoComercial: { ...p.codigoComercial, codigo: v } })} max={20} />
           <Texto etiqueta="Registro de medicamento" valor={p.registroMedicamento} onCambio={(v) => set({ registroMedicamento: v || undefined })} max={100} />
+          <Selector etiqueta="Forma farmacéutica (catálogo Ministerio de Salud)" valor={p.formaFarmaceuticaMinsa} vacio="— No aplica —" mostrarCodigo={false}
+            onCambio={(v) => set({ formaFarmaceuticaMinsa: v || undefined })} opciones={FORMAS_FARMACEUTICAS_MINSA}
+            ayuda="CodeSystem FHIR drugs-presentation-code (v1.1.0-ballot, borrador). Referencia: no se envía en el XML." />
+          <Texto etiqueta="Forma farmacéutica – código Hacienda (nota 19)" valor={p.formaFarmaceutica} max={3} onCambio={(v) => set({ formaFarmaceutica: v.trim() || undefined })}
+            ayuda="Campo FormaFarmaceutica del XML (hasta 3 caracteres), según el documento «Código de forma farmacéutica» de Hacienda." />
           <Texto etiqueta="Partida arancelaria (FEE)" valor={p.partidaArancelaria} onCambio={(v) => set({ partidaArancelaria: v.replace(/\D/g, '') || undefined })} max={12} ayuda="Obligatoria para mercancías en factura de exportación." />
         </div>
         <label className="check">

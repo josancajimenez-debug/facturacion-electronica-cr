@@ -108,6 +108,8 @@ export interface Producto {
   partidaArancelaria?: string;
   registroMedicamento?: string;
   formaFarmaceutica?: string;
+  /** Forma farmacéutica según el catálogo del Ministerio de Salud (referencia; no va al XML). */
+  formaFarmaceuticaMinsa?: string;
   /** Servicio de salud (relevante para TotalIVADevuelto cuando se paga con tarjeta). */
   servicioSalud?: boolean;
   impuestosAdicionales?: ImpuestoAdicional[];
@@ -140,6 +142,8 @@ export interface LineaBorrador {
   numeroVinSerie?: string[];
   registroMedicamento?: string;
   formaFarmaceutica?: string;
+  /** Forma farmacéutica según el catálogo del Ministerio de Salud (referencia; no va al XML). */
+  formaFarmaceuticaMinsa?: string;
   servicioSalud?: boolean;
   montoExportacion?: number;
 }
@@ -237,6 +241,8 @@ export interface LineaCalculada {
   numeroVinSerie?: string[];
   registroMedicamento?: string;
   formaFarmaceutica?: string;
+  /** Forma farmacéutica según el catálogo del Ministerio de Salud (referencia; no va al XML). */
+  formaFarmaceuticaMinsa?: string;
   precioUnitario: number;
   montoTotal: number;
   descuentos: DescuentoCalculado[];

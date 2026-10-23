@@ -12,9 +12,11 @@ import {
   type Codigo,
 } from './catalogos';
 import { REGEX_FECHA_RFC3339 } from './fechas';
+import { verificarUbicacion } from './ubicacion';
 import type { BorradorComprobante, Emisor, Identificacion, Resumen, Validacion } from './tipos';
 
 const ANEXO = 'Anexos y Estructuras v4.4';
+const FUENTE_DTA = 'División Territorial Administrativa 2022 (Registro Nacional – IGN); nota 14';
 
 /** Expresión regular de correo electrónico publicada en el Anexo 1 v4.4 (campo CorreoElectronico). */
 export const REGEX_CORREO =
@@ -70,6 +72,8 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   if (emisor.correos.length < 1 || emisor.correos.length > 4) err('emisor.correos', 'Debe registrar entre 1 y 4 correos electrónicos.');
   emisor.correos.forEach((c, i) => !REGEX_CORREO.test(c) && err(`emisor.correos.${i}`, `Correo inválido: ${c}`));
   if (!emisor.proveedorSistemas) err('proveedorSistemas', 'Indique la identificación del proveedor de sistemas (o la propia si es desarrollo propio).');
+  const ubicEmisor = verificarUbicacion(emisor.ubicacion);
+  if (ubicEmisor) adv('emisor.ubicacion', ubicEmisor, FUENTE_DTA);
 
   // ---- Actividad económica ----
   const requiereActEmisor = ['FE', 'FEE', 'TE'].includes(b.tipo) || (esAjuste(b.tipo) && !!b.codigoActividadEmisor);
@@ -107,6 +111,10 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
     }
     if (c.correo && !REGEX_CORREO.test(c.correo)) err('contraparte.correo', 'El correo de la contraparte no cumple el formato del Anexo.');
     if (b.tipo === 'FEC' && tipoId !== '05' && !c.ubicacion) err('contraparte.ubicacion', 'La ubicación del vendedor es obligatoria en la FEC salvo extranjero no domiciliado.');
+    if (c.ubicacion) {
+      const u = verificarUbicacion(c.ubicacion);
+      if (u) adv('contraparte.ubicacion', u, FUENTE_DTA);
+    }
   }
 
   // ---- Condición de venta ----
@@ -156,6 +164,12 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
     else if (tarifa.soloAjustes && !esAjuste(b.tipo)) err(`${p}.codigoTarifaIva`, `Línea ${n}: la tarifa "${tarifa.descripcion}" solo se usa en notas de crédito o débito.`);
     if (b.tipo === 'FEE' && /^[0-4]/.test(l.codigoCabys) && !/^\d{12,}$/.test(l.partidaArancelaria ?? '')) {
       err(`${p}.partidaArancelaria`, `Línea ${n}: la partida arancelaria (al menos 12 dígitos) es obligatoria para mercancías en FEE.`);
+    }
+    if (l.formaFarmaceutica && !/^[A-Za-z0-9]{1,3}$/.test(l.formaFarmaceutica)) {
+      err(`${p}.formaFarmaceutica`, `Línea ${n}: FormaFarmaceutica admite hasta 3 caracteres (nota 19). Los códigos SNOMED del catálogo del Ministerio de Salud no caben en este campo.`);
+    }
+    if (l.registroMedicamento && !l.formaFarmaceutica) {
+      adv(`${p}.formaFarmaceutica`, `Línea ${n}: con registro de medicamento, la forma farmacéutica (nota 19) se vuelve obligatoria.`);
     }
     if (l.exoneracion) {
       const ex = l.exoneracion;

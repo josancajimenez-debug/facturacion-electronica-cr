@@ -101,6 +101,7 @@ export function calcularLinea(linea: LineaBorrador, numeroLinea: number, tipo: T
     numeroVinSerie: linea.numeroVinSerie,
     registroMedicamento: linea.registroMedicamento,
     formaFarmaceutica: linea.formaFarmaceutica,
+    formaFarmaceuticaMinsa: linea.formaFarmaceuticaMinsa,
     precioUnitario: r5(linea.precioUnitario),
     montoTotal: r5(montoTotal),
     descuentos,

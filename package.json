@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "datos:cabys": "node scripts/extraer-cabys.mjs",
+    "datos:catalogos": "node scripts/extraer-catalogos.mjs",
     "dev": "npm run dev -w apps/web",
     "dev:firebase": "npm run build -w functions && firebase emulators:start --project demo-fe-cr",
     "build": "npm run build -w packages/core && npm run build -w functions && npm run build -w apps/web",

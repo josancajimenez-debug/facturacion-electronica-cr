@@ -1,4 +1,5 @@
-import { PROVINCIA, REGEX_CORREO, TIPO_IDENTIFICACION, validarIdentificacion, type Emisor } from '@fe-cr/core';
+import { REGEX_CORREO, TIPO_IDENTIFICACION, validarIdentificacion, type Emisor } from '@fe-cr/core';
+import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Alerta, Selector, Texto } from '../components/ui';
@@ -123,13 +124,7 @@ export function EmisorPagina() {
       <div className="card">
         <div className="card-head"><h2>Ubicación y contacto</h2></div>
         <div className="card-body grid grid-3">
-          <Selector etiqueta="Provincia" valor={form.ubicacion.provincia} onCambio={(v) => set({ ubicacion: { ...form.ubicacion, provincia: v } })} opciones={PROVINCIA} />
-          <Texto etiqueta="Cantón (código)" valor={form.ubicacion.canton} onCambio={(v) => set({ ubicacion: { ...form.ubicacion, canton: v.replace(/\D/g, '').slice(0, 2) } })} ayuda="2 dígitos según la codificación de ubicación v4.4." />
-          <Texto etiqueta="Distrito (código)" valor={form.ubicacion.distrito} onCambio={(v) => set({ ubicacion: { ...form.ubicacion, distrito: v.replace(/\D/g, '').slice(0, 2) } })} />
-          <Texto etiqueta="Barrio" valor={form.ubicacion.barrio} onCambio={(v) => set({ ubicacion: { ...form.ubicacion, barrio: v || undefined } })} max={50} />
-          <div style={{ gridColumn: 'span 2' }}>
-            <Texto etiqueta="Otras señas" valor={form.ubicacion.otrasSenas} onCambio={(v) => set({ ubicacion: { ...form.ubicacion, otrasSenas: v } })} max={250} requerido />
-          </div>
+          <UbicacionCampos valor={form.ubicacion} onCambio={(u) => set({ ubicacion: u })} />
           <Texto etiqueta="Teléfono" valor={form.telefono?.numero} onCambio={(v) => set({ telefono: v ? { codigoPais: '506', numero: v.replace(/\D/g, '') } : undefined })} ayuda="8 a 20 dígitos." />
           {form.correos.map((c, i) => (
             <Texto key={i} etiqueta={`Correo ${i + 1}`} tipo="email" valor={c} onCambio={(v) => set({ correos: form.correos.map((x, j) => (j === i ? v : x)) })} requerido={i === 0} />

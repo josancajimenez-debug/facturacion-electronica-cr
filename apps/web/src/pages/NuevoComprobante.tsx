@@ -2,11 +2,11 @@ import {
   CODIGO_DESCUENTO,
   CODIGO_REFERENCIA,
   CONDICION_VENTA,
+  FORMAS_FARMACEUTICAS_MINSA,
   INSTITUCION_EXONERACION,
   MEDIO_PAGO,
   MONEDA,
   NOMBRE_COMPROBANTE,
-  PROVINCIA,
   SITUACION,
   TARIFA_IVA,
   TIPO_DOC_REFERENCIA,
@@ -29,6 +29,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ErrorConValidaciones } from '../backend/tipos';
 import { CabysBuscador } from '../components/CabysBuscador';
+import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, ListaValidaciones, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { dinero } from '../lib/formato';
@@ -142,6 +143,8 @@ export function NuevoComprobante() {
       codigoComercial: p.codigoComercial?.codigo ? p.codigoComercial : undefined,
       partidaArancelaria: b.tipo === 'FEE' ? p.partidaArancelaria : undefined,
       registroMedicamento: p.registroMedicamento,
+      formaFarmaceutica: p.formaFarmaceutica,
+      formaFarmaceuticaMinsa: p.formaFarmaceuticaMinsa,
       servicioSalud: p.servicioSalud,
       exoneracion: receptor?.exoneracion && b.tipo !== 'FEE' ? receptor.exoneracion : undefined,
     };
@@ -244,10 +247,10 @@ export function NuevoComprobante() {
                   <Selector etiqueta="Tipo de identificación" valor={b.contraparte?.identificacion?.tipo} vacio="—" onCambio={(v) => set({ contraparte: { nombre: '', ...b.contraparte, identificacion: v ? { tipo: v, numero: b.contraparte?.identificacion?.numero ?? '' } : undefined } })} opciones={TIPO_IDENTIFICACION} />
                   <Texto etiqueta="Número" valor={b.contraparte?.identificacion?.numero} onCambio={(v) => b.contraparte?.identificacion && set({ contraparte: { ...b.contraparte, identificacion: { ...b.contraparte.identificacion, numero: v.trim() } } })} />
                   {esFEC && (
-                    <>
-                      <Selector etiqueta="Provincia" valor={b.contraparte?.ubicacion?.provincia} vacio="—" onCambio={(v) => set({ contraparte: { nombre: '', ...b.contraparte, ubicacion: v ? { canton: '01', distrito: '01', otrasSenas: '', ...b.contraparte?.ubicacion, provincia: v } : undefined } })} opciones={PROVINCIA} />
-                      <Texto etiqueta="Otras señas" valor={b.contraparte?.ubicacion?.otrasSenas} onCambio={(v) => b.contraparte?.ubicacion && set({ contraparte: { ...b.contraparte, ubicacion: { ...b.contraparte.ubicacion, otrasSenas: v } } })} />
-                    </>
+                    <UbicacionCampos
+                      valor={b.contraparte?.ubicacion ?? { provincia: '1', canton: '01', distrito: '01', otrasSenas: '' }}
+                      onCambio={(u) => set({ contraparte: { nombre: '', ...b.contraparte, ubicacion: u } })}
+                    />
                   )}
                 </div>
               )}
@@ -335,6 +338,12 @@ export function NuevoComprobante() {
                           {b.tipo !== 'TE' && b.tipo !== 'REP' && <Selector etiqueta="Tipo de transacción (nota 22)" valor={l.tipoTransaccion} vacio="— No aplica —" onCambio={(v) => setLinea(i, { tipoTransaccion: v || undefined })} opciones={TIPO_TRANSACCION} />}
                           {b.tipo === 'FEE' && <Texto etiqueta="Partida arancelaria" valor={l.partidaArancelaria} onCambio={(v) => setLinea(i, { partidaArancelaria: v.replace(/\D/g, '') || undefined })} max={12} />}
                           <Texto etiqueta="Registro de medicamento" valor={l.registroMedicamento} onCambio={(v) => setLinea(i, { registroMedicamento: v || undefined })} />
+                          {l.registroMedicamento && (
+                            <>
+                              <Texto etiqueta="Forma farmacéutica – código Hacienda (nota 19)" valor={l.formaFarmaceutica} max={3} onCambio={(v) => setLinea(i, { formaFarmaceutica: v.trim() || undefined })} ayuda="Hasta 3 caracteres." />
+                              <Selector etiqueta="Forma farmacéutica (catálogo Min. Salud)" valor={l.formaFarmaceuticaMinsa} vacio="—" onCambio={(v) => setLinea(i, { formaFarmaceuticaMinsa: v || undefined })} opciones={FORMAS_FARMACEUTICAS_MINSA} mostrarCodigo={false} ayuda="Referencia; se imprime en el PDF, no va en el XML." />
+                            </>
+                          )}
                           <label className="check" style={{ alignSelf: 'end' }}>
                             <input type="checkbox" checked={!!l.servicioSalud} onChange={(e) => setLinea(i, { servicioSalud: e.target.checked || undefined })} /> Servicio de salud
                           </label>

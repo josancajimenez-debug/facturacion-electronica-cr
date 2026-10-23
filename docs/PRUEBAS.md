@@ -2,7 +2,7 @@
 
 | Comando | Qué prueba | Requiere | Resultado verificado (23/10/2026) |
 |---|---|---|---|
-| `npm test` | Core: clave, consecutivo, fechas y plazos, cálculos, validaciones, XML, simulador, recepción y bloqueo de entornos (46). Web: backend local completo y CSV (5) | Node | 51/51 ✔ |
+| `npm test` | Core: clave, consecutivo, fechas y plazos, cálculos, validaciones, XML, simulador, recepción, bloqueo de entornos, división territorial y formas farmacéuticas (51). Web: backend local completo y CSV (5) | Node | 56/56 ✔ |
 | `npm run typecheck` | TypeScript estricto en core, web y functions | Node | Sin errores ✔ |
 | `npm run test:reglas` | Reglas de Firestore: membresía, consultas, escrituras prohibidas, validación de productos (7) | Java + emulador | 7/7 ✔ |
 | `npm run test:integracion` | Auth + Firestore + Functions: sembrar demo, emitir FE aceptada con su historial de estados, rechazo por validación, escritura directa denegada, recepción y confirmación 05 (5) | Java + emuladores | 5/5 ✔ |
