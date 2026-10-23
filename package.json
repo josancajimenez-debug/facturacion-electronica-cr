@@ -1,0 +1,24 @@
+{
+  "name": "facturacion-electronica-cr",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Simulador educativo de comprobantes electrónicos de Costa Rica (Anexos y Estructuras v4.4). No envía comprobantes reales.",
+  "workspaces": [
+    "packages/core",
+    "apps/web",
+    "functions"
+  ],
+  "scripts": {
+    "datos:cabys": "node scripts/extraer-cabys.mjs",
+    "dev": "npm run dev -w apps/web",
+    "dev:firebase": "npm run build -w functions && firebase emulators:start --project demo-fe-cr",
+    "build": "npm run build -w packages/core && npm run build -w functions && npm run build -w apps/web",
+    "test": "npm run test -w packages/core && npm run test -w apps/web",
+    "test:reglas": "firebase emulators:exec --only firestore --project demo-fe-cr \"npm run test:reglas -w functions\"",
+    "typecheck": "npm run typecheck -w packages/core && npm run typecheck -w apps/web && npm run typecheck -w functions",
+    "test:integracion": "npm run build -w functions && firebase emulators:exec --only auth,firestore,functions --project demo-fe-cr \"npm run test:integracion -w functions\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,75 @@
+# Guía de usuario
+
+> Todo lo que hace esta herramienta es **simulado**. Ningún documento se envía al Ministerio de Hacienda ni tiene validez tributaria. La franja naranja en la parte superior lo recuerda en todo momento.
+
+## 1. Primer ingreso
+
+1. Cree una cuenta con correo y contraseña.
+2. Elija **Cargar datos ficticios** (recomendado) o **Registrar mi propio emisor**.
+
+## 2. Emisor y actividades económicas
+
+Menú **Emisor y actividades**.
+
+- **Identificación**: tipo y número sin guiones (física 9 dígitos, jurídica 10, DIMEX 11-12, NITE 10). El botón **Consultar** lee el padrón público de Hacienda (`/fe/ae`) y trae las actividades inscritas.
+- **Proveedor de sistemas**: cédula del proveedor del software; si es desarrollo propio, la del mismo emisor.
+- **Actividades**: códigos CIIU 4 de TRIBU-CR (p. ej. `6920.0`). Marque la principal.
+- **Sucursales y terminales**: `001` casa matriz; terminal `00001` si solo hay una. Forman los primeros 8 dígitos del consecutivo.
+- **Números SINPE Móvil**: el Decreto 45953-H obliga a registrarlos en el RUT cuando se usan para cobrar.
+
+## 3. Receptores y productos
+
+- **Receptores**: nombre, identificación, correo, actividad económica y, si aplica, **exoneración** (tipo de documento, número, institución, tarifa exonerada y fecha). Las exoneraciones se aplican automáticamente a las líneas.
+- **Productos y servicios**: busque el código en el **CAByS 2025** por palabra o número. El sistema sugiere la tarifa del IVA del catálogo; confírmela según su operación. Elija unidad de medida (nota 15) y precio sin IVA.
+
+## 4. Emitir un comprobante
+
+Menú **Emitir comprobante**.
+
+1. Elija el tipo: Factura, Tiquete, Nota de crédito, Nota de débito, Factura de compra, Exportación o Recibo de pago.
+2. **Encabezado**: sucursal, terminal, situación (normal, contingencia o sin internet), actividad económica, condición de venta (con plazo si es crédito) y moneda (con el botón *BCCR/Hacienda* obtiene el tipo de cambio de venta).
+3. **Receptor** (o **vendedor** en la factura de compra): elíjalo de la lista o ingréselo manualmente. En el tiquete puede quedar como consumidor final.
+4. **Detalle**: agregue productos del catálogo o líneas libres. En «Descuentos, exoneración y datos adicionales» puede registrar hasta 5 descuentos (nota 20), exoneración, tipo de transacción, partida arancelaria (exportación) y si es un servicio de salud.
+5. **Otros cargos** (p. ej. impuesto de servicio 10 %), **medios de pago** (hasta 4; con varios, los montos deben sumar el total; use *Completar saldo en el último*) e **información de referencia** (obligatoria en NC, ND, FEC y REP).
+6. A la derecha verá el **resumen** calculado y las **validaciones** con su fuente normativa. El botón **Emitir** solo se habilita sin errores.
+7. Al emitir se asignan consecutivo y clave, se genera el XML v4.4 y se envía al simulador. En el detalle verá avanzar los estados: *Generado → Enviado → Recibido → Procesando → Aceptado/Rechazado*.
+
+## 5. Detalle de un comprobante
+
+- Pestañas: **Resumen**, **XML comprobante**, **Mensaje Hacienda** (respuesta simulada), **API (JSON)** y **Representación gráfica** (PDF).
+- Descargas con los nombres de la Nota 3: `clave.xml`, `clave_respuesta.xml`, `clave.pdf`.
+- **Clave numérica** desglosada y **trazabilidad** con fecha de cada estado.
+- Acciones:
+  - **Nota de crédito / débito** (comprobantes aceptados): abre el formulario con la referencia ya llena.
+  - **Emitir comprobante sustituto** (rechazados): un comprobante rechazado no tiene validez y **no** se anula con nota de crédito; se emite uno nuevo que lo referencia.
+  - **Registrar pago (REP)**: para facturas con condición 08 o 10.
+
+## 6. Recepción de comprobantes de proveedores
+
+Menú **Recepción**.
+
+- **Simular comprobante de proveedor** o **Cargar XML** recibido.
+- **Confirmar**: aceptación total (05), parcial (06) o rechazo (07); condición del IVA (nota 18), actividad, impuesto a acreditar y gasto aplicable. En aceptación parcial o rechazo el motivo es obligatorio.
+- La columna **Plazo** muestra el vencimiento: 8 días hábiles desde el primer día del mes siguiente. Si vence sin confirmar, se presume aceptado (cuando no hay beneficio fiscal).
+
+## 7. Consultas, reportes y auditoría
+
+- **Comprobantes emitidos**: filtros por cédula, número, tipo, estado, medio de pago, condición, tarifa de IVA, fechas y montos; exportación a CSV.
+- **Reportes**: ventas por tarifa de IVA, cobros por medio de pago (SINPE destacado), totales por tipo y crédito fiscal de compras confirmadas. Es material de apoyo; no reemplaza la declaración D-104.
+- **Auditoría**: cada creación, modificación, emisión, respuesta, recepción y confirmación con fecha y usuario; exportable a CSV.
+
+## 8. Escenarios de prueba
+
+Trece casos listos para ejecutar con un clic, con el resultado esperado y la fuente normativa de cada uno.
+
+## 9. Configuración
+
+- **Código QR** en el PDF: desactivado por defecto porque el Transitorio III de la RES-0027 lo suspende.
+- **Feriados**: agréguelos para que el plazo de confirmación excluya esos días.
+- **Borrar datos locales** (solo en modo local).
+
+## Preguntas frecuentes
+
+- **¿Por qué no hay firma digital?** La firma XAdES-EPES requiere un certificado real; en simulación el XML incluye un comentario en su lugar.
+- **¿Puedo usar esto para facturar?** No. Use un sistema autorizado o el facturador del Ministerio de Hacienda.
+- **¿El consecutivo se pierde si hay errores?** No: solo se consume cuando el comprobante pasa las validaciones.

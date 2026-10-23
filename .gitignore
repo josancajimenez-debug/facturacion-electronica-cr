@@ -1,0 +1,19 @@
+node_modules/
+dist/
+lib/
+functions/deploy/
+coverage/
+.firebase/
+*.log
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+.env
+.env.*
+!.env.example
+# Credenciales: nunca versionar llaves criptográficas, certificados ni contraseñas de Hacienda
+*.p12
+*.pfx
+*.pem
+secrets/
+emulator-data/
