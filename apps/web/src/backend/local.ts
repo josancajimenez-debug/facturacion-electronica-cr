@@ -1,6 +1,6 @@
 /**
  * Backend LOCAL: persiste en localStorage y ejecuta en el navegador la misma lógica del paquete
- * @fe-cr/core que usan las Cloud Functions. Pensado para práctica individual sin Firebase.
+ * @fe-cr/core que usa la función Edge de Supabase. Pensado para práctica individual sin servicios externos.
  * La autenticación local es solo una conveniencia de demostración (no es un mecanismo seguro).
  */
 import {
@@ -75,7 +75,7 @@ export function borrarDatosLocales(): void {
 
 export class LocalBackend implements Backend {
   modo = 'local' as const;
-  descripcion = 'Modo local: datos en este navegador (localStorage). Sin Firebase.';
+  descripcion = 'Modo local: datos en este navegador (localStorage).';
   private estado = cargar();
   private oyentes = new Set<() => void>();
 

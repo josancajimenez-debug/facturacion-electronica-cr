@@ -60,10 +60,10 @@ type Desuscribir = () => void;
 /**
  * Contrato común para los dos modos de persistencia:
  * - LocalBackend: navegador (localStorage), lógica del core ejecutada en el cliente.
- * - FirebaseBackend: Auth + Firestore (tiempo real) + Cloud Functions para operaciones seguras.
+ * - SupabaseBackend: Auth + PostgreSQL con RLS (tiempo real) + función Edge para operaciones seguras.
  */
 export interface Backend {
-  modo: 'local' | 'firebase';
+  modo: 'local' | 'supabase';
   descripcion: string;
   onAuth(cb: (u: Usuario | null) => void): Desuscribir;
   ingresar(email: string, clave: string): Promise<void>;

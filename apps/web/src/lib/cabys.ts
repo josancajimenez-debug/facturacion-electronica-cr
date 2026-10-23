@@ -20,12 +20,12 @@ const normalizar = (s: string) =>
   s
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
+    .replace(/[\u0300-\u036f]/g, '');
 
 /** Carga diferida del Catálogo de Bienes y Servicios 2025 (generado por scripts/extraer-cabys.mjs). */
 export function cargarCabys(): Promise<Catalogo> {
   if (!promesa) {
-    promesa = fetch('/data/cabys-2025.json')
+    promesa = fetch(`${import.meta.env.BASE_URL}data/cabys-2025.json`)
       .then((r) => {
         if (!r.ok) throw new Error('No se pudo cargar el catálogo CAByS.');
         return r.json() as Promise<{ fuente: string; total: number; codigos: [string, string, string][] }>;

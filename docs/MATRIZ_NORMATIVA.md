@@ -41,9 +41,9 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | Mensaje de confirmación del receptor (05/06/07) | Anexo sección III; RES-0027 art. 10 | `generarConfirmacion`, módulo Recepción |
 | Nombres de archivo `clave.xml`, `clave_respuesta.xml`, `clave.pdf`, `clave-consecutivo.xml` | Nota 3 | `nombresArchivo` |
 | Representación gráfica PDF; tipo, clave y consecutivo juntos; descripciones de códigos | RES-0027 art. 5; notas 1 y 7 | `web/lib/pdf.ts` |
-| Bitácora de cada transacción | RES-0027 art. 6 | Colección `bitacora` escrita solo por Cloud Functions |
+| Bitácora de cada transacción | RES-0027 art. 6 | Tabla `bitacora` escrita solo por la función Edge y triggers de PostgreSQL (RLS impide escribirla desde el cliente) |
 | Consulta por cédula, número, medio de pago, condición, fecha, montos, impuestos y estados | Decreto 44739-H art. 14 inc. 10 | Página «Comprobantes emitidos» |
-| Separación de entornos y bloqueo del envío real | Requisito del encargo | `core/entorno.ts`, `functions/src/pasarela-real.ts`, proyecto `demo-fe-cr` |
+| Separación de entornos y bloqueo del envío real | Requisito del encargo | `core/entorno.ts`; la función Edge fija el ambiente «simulacion» y no contiene código de envío real |
 
 **Fuera de alcance (no implementado):** firma XAdES-EPES (Anexo 2) y firmas de receptor o endoso; envío real al API de recepción; impuestos específicos no tarifarios (códigos 03-06), IVA cobrado en fábrica (nota 21), IVA de bienes usados por factor (08) y surtidos; el documento oficial de Hacienda «Código de forma farmacéutica» (nota 19) y la tabla «Codigodemoneda_V4.4» (nota 13.1), que no forman parte de la bibliografía.
 

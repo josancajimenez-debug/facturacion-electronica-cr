@@ -14,14 +14,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm test
       - run: npm run build
-      - run: npm install -g firebase-tools
-      - run: npm run test:reglas
-      - run: npm run test:integracion
+      - run: npm run typecheck
+      # core + web + supabase (esquema, RLS y función Edge sobre PostgreSQL en PGlite)
+      - run: npm test

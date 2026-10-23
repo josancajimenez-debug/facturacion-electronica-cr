@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@fe-cr/core": "../_shared/core.js"
+  }
+}

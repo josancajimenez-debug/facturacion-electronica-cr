@@ -1,0 +1,51 @@
+name: Publicar en GitHub Pages
+
+# Publica la app web. Si el repositorio tiene las variables VITE_SUPABASE_URL y
+# VITE_SUPABASE_ANON_KEY (Settings > Secrets and variables > Actions > Variables),
+# se compila en modo Supabase; si no, en modo local.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Compilar la web
+        run: npm run build -w apps/web
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BACKEND: ${{ vars.VITE_SUPABASE_URL != '' && 'supabase' || 'local' }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      # Las rutas internas (p. ej. /comprobantes) se resuelven en el navegador.
+      - run: cp apps/web/dist/index.html apps/web/dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

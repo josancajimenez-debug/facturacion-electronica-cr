@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@fe-cr/core": "0.1.0",
-    "firebase": "11.1.0",
+    "@supabase/supabase-js": "2.47.10",
     "jspdf": "2.5.2",
     "lucide-react": "0.468.0",
     "qrcode": "1.5.4",

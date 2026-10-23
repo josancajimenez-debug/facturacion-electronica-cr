@@ -17,7 +17,7 @@ export function Bitacora() {
           <h1>Auditoría</h1>
           <p>
             Bitácora de cada transacción (art. 6, MH-DGT-RES-0027-2024).{' '}
-            {backend.modo === 'firebase' ? 'Solo las Cloud Functions escriben en ella; las reglas de Firestore impiden modificarla desde el cliente.' : 'En modo local se guarda en este navegador.'}
+            {backend.modo === 'supabase' ? 'Solo la función Edge y los triggers de la base de datos escriben en ella; la seguridad por fila impide modificarla desde el cliente.' : 'En modo local se guarda en este navegador.'}
           </p>
         </div>
         <button className="btn" disabled={!lista.length} onClick={() => descargar(`bitacora-${new Date().toISOString().slice(0, 10)}.csv`, csv([['Fecha', 'Acción', 'Clave', 'Consecutivo', 'Documento', 'Detalle', 'Usuario', 'Ambiente'], ...lista.map((b) => [b.fecha, b.accion, b.clave, b.consecutivo, b.documento, b.detalle, b.usuario, b.ambiente])]), 'text/csv')}>

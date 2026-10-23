@@ -6,20 +6,16 @@
   "workspaces": [
     "packages/core",
     "apps/web",
-    "functions"
+    "supabase"
   ],
   "scripts": {
     "datos:cabys": "node scripts/extraer-cabys.mjs",
     "datos:catalogos": "node scripts/extraer-catalogos.mjs",
     "dev": "npm run dev -w apps/web",
-    "dev:firebase": "npm run build -w functions && firebase emulators:start --project demo-fe-cr",
-    "build": "npm run build -w packages/core && npm run build -w functions && npm run build -w apps/web",
-    "test": "npm run test -w packages/core && npm run test -w apps/web",
-    "test:reglas": "firebase emulators:exec --only firestore --project demo-fe-cr \"npm run test:reglas -w functions\"",
-    "typecheck": "npm run typecheck -w packages/core && npm run typecheck -w apps/web && npm run typecheck -w functions",
-    "test:integracion": "npm run build -w functions && firebase emulators:exec --only auth,firestore,functions --project demo-fe-cr \"npm run test:integracion -w functions\"",
-    "deploy:nube": "npm run build -w functions && npm run build -w apps/web -- --mode nube && firebase deploy --project nube",
-    "deploy:nube:sin-functions": "npm run build -w apps/web && firebase deploy --only hosting,firestore,auth --project nube"
+    "build": "npm run build -w packages/core && npm run build -w supabase && npm run build -w apps/web",
+    "test": "npm run test -w packages/core && npm run test -w apps/web && npm run test -w supabase",
+    "typecheck": "npm run typecheck -w packages/core && npm run typecheck -w apps/web && npm run typecheck -w supabase",
+    "supabase:desplegar": "npm run build -w supabase && npx supabase@latest db push && npx supabase@latest functions deploy api"
   },
   "engines": {
     "node": ">=20"

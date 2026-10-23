@@ -22,7 +22,7 @@ export function App() {
   if (cargandoAuth) return <div className="content muted">Cargando…</div>;
   if (!usuario) return <Login />;
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Routes>
         <Route element={<Layout />}>
           {emisores.length === 0 ? (

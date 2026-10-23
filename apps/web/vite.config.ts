@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // En GitHub Pages el sitio vive en /<repositorio>/; VITE_BASE lo fija el flujo de despliegue.
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   server: { port: 5173 },
   build: {
@@ -10,7 +12,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/functions'],
+          supabase: ['@supabase/supabase-js'],
           pdf: ['jspdf', 'qrcode'],
         },
       },

@@ -22,9 +22,7 @@ npm install
 npm run dev        # modo local: http://localhost:5173
 ```
 
-Modo Firebase (Auth, Firestore, Functions) con emuladores: ver [docs/INSTALACION.md](docs/INSTALACION.md).
-
-Versión publicada (modo local): <https://simulador-fe-cr-1023.web.app>
+Supabase (Auth, PostgreSQL con RLS, Realtime y función Edge) y publicación en GitHub Pages: ver [docs/INSTALACION.md](docs/INSTALACION.md).
 
 ## Documentación
 
@@ -32,17 +30,15 @@ Versión publicada (modo local): <https://simulador-fe-cr-1023.web.app>
 |---|---|
 | [docs/MATRIZ_NORMATIVA.md](docs/MATRIZ_NORMATIVA.md) | Normas vigentes, reformas, contradicciones y referencias APA 7 |
 | [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Componentes, modelo de datos, separación de entornos y estructura del repositorio |
-| [docs/INSTALACION.md](docs/INSTALACION.md) | Instalación, emuladores, configuración de Firebase y GitHub |
+| [docs/INSTALACION.md](docs/INSTALACION.md) | Instalación, Supabase y GitHub Pages |
 | [docs/PRUEBAS.md](docs/PRUEBAS.md) | Pruebas automatizadas y escenarios |
 | [docs/GUIA_USUARIO.md](docs/GUIA_USUARIO.md) | Uso paso a paso |
 
 ## Pruebas
 
 ```bash
-npm test               # core + web
+npm test           # core + web + Supabase (PostgreSQL en PGlite, sin Docker)
 npm run typecheck
-npm run test:reglas    # requiere Java (emulador de Firestore)
-npm run test:integracion
 ```
 
 ## Licencia y responsabilidad

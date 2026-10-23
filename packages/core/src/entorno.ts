@@ -6,8 +6,8 @@ import type { Ambiente } from './tipos';
  * - "simulacion": todo el flujo (envío, recepción y respuesta) lo resuelve el simulador local.
  * - "produccion": requiere TODAS las condiciones siguientes; si falta una, se bloquea el envío.
  *
- * Este proyecto no implementa el envío real: aun cumpliendo las condiciones, la pasarela real
- * (functions/src/pasarela-real.ts) rehúsa enviar hasta que se incorpore la firma XAdES-EPES.
+ * Este proyecto no implementa el envío real: la función Edge de Supabase y el modo local construyen
+ * todos los comprobantes con ambiente "simulacion" y no existe código que llame al API de Hacienda.
  */
 export const URLS_HACIENDA = {
   // Anexo 3 de Anexos y Estructuras v4.4.

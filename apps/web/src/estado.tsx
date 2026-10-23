@@ -5,9 +5,9 @@ import { LocalBackend } from './backend/local';
 import type { Backend, EntradaBitacora, Recibido, Usuario } from './backend/tipos';
 
 async function crearBackend(): Promise<Backend> {
-  if (config.backend === 'firebase') {
-    const { FirebaseBackend } = await import('./backend/firebase');
-    return new FirebaseBackend();
+  if (config.backend === 'supabase') {
+    const { SupabaseBackend } = await import('./backend/supabase');
+    return new SupabaseBackend();
   }
   return new LocalBackend();
 }

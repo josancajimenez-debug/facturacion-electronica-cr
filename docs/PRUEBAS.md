@@ -2,11 +2,9 @@
 
 | Comando | Qué prueba | Requiere | Resultado verificado (23/10/2026) |
 |---|---|---|---|
-| `npm test` | Core: clave, consecutivo, fechas y plazos, cálculos, validaciones, XML, simulador, recepción, bloqueo de entornos, división territorial y formas farmacéuticas (51). Web: backend local completo y CSV (5) | Node | 56/56 ✔ |
-| `npm run typecheck` | TypeScript estricto en core, web y functions | Node | Sin errores ✔ |
-| `npm run test:reglas` | Reglas de Firestore: membresía, consultas, escrituras prohibidas, validación de productos (7) | Java + emulador | 7/7 ✔ |
-| `npm run test:integracion` | Auth + Firestore + Functions: sembrar demo, emitir FE aceptada con su historial de estados, rechazo por validación, escritura directa denegada, recepción y confirmación 05 (5) | Java + emuladores | 5/5 ✔ |
-| `npm run build` | Compilación de producción de Functions y web | Node | ✔ |
+| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial y formas farmacéuticas (51). Web: backend local y CSV (5). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (7) | Node | 70/70 ✔ |
+| `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge | Node | Sin errores ✔ |
+| `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 
 ## Casos de cálculo verificados a mano
 
@@ -24,9 +22,11 @@
 
 ## Prueba de punta a punta en navegador
 
-Se ejecutó un guion con Playwright sobre Microsoft Edge, en **modo local** y en **modo Firebase con emuladores**, que registra un usuario, carga la demo, ejecuta los 13 escenarios de prueba, emite una factura desde el formulario, abre el XML, descarga el PDF (`clave.pdf`), simula y confirma un comprobante recibido, recorre reportes, auditoría y matriz, y revisa la vista móvil (390 px).
+Se ejecutó un guion con Playwright sobre Microsoft Edge contra la compilación de GitHub Pages servida bajo `/facturacion-electronica-cr/` (modo local): registra un usuario, carga la demo, ejecuta los 13 escenarios, emite una factura desde el formulario, abre el XML, descarga el PDF (`clave.pdf`), confirma un comprobante recibido, abre rutas internas directamente y revisa la vista móvil (390 px). Resultado: los 13 escenarios con el resultado esperado, sin errores de consola y sin desbordamiento horizontal.
 
-Resultado en ambos modos: los 13 escenarios dieron el resultado esperado (9 aceptados, 3 rechazados en nivel 3 y 1 error de validación local sin consumir consecutivo), sin errores de consola y sin desbordamiento horizontal en móvil. En modo Firebase el único 400 registrado es el del escenario de error de validación, que la función rechaza a propósito.
+Además, la función Edge se ejecutó en **Deno 2.1.4**: carga el mapa de importaciones, el paquete `npm:@supabase/supabase-js` y el JSON de CAByS, responde la verificación CORS y rechaza solicitudes sin sesión (401).
+
+**Pendiente de verificar en la nube**: el despliegue real en un proyecto Supabase (requiere la cuenta del usuario).
 
 ## Escenarios incluidos en la app (página «Escenarios de prueba»)
 

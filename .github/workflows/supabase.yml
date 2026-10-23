@@ -1,0 +1,30 @@
+name: Desplegar en Supabase
+
+# Ejecución manual. Requiere en Settings > Secrets and variables > Actions:
+#   Secrets:   SUPABASE_ACCESS_TOKEN (token personal de supabase.com) y SUPABASE_DB_PASSWORD
+#   Variables: SUPABASE_PROJECT_REF (identificador del proyecto)
+on:
+  workflow_dispatch:
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w supabase
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+      - run: supabase config push --project-ref "$SUPABASE_PROJECT_REF"
+      - run: supabase functions deploy api --project-ref "$SUPABASE_PROJECT_REF"

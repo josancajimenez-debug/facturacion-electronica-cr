@@ -1,13 +1,7 @@
 node_modules/
 dist/
-functions/lib/
-functions/deploy/
 coverage/
-.firebase/
 *.log
-firebase-debug.log*
-firestore-debug.log*
-ui-debug.log*
 .env
 .env.*
 !.env.example
@@ -17,3 +11,7 @@ ui-debug.log*
 *.pem
 secrets/
 emulator-data/
+
+# Generados por supabase/construir-edge.mjs
+supabase/functions/_shared/core.js
+supabase/functions/_shared/cabys-codigos.json

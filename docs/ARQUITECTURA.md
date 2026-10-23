@@ -3,84 +3,76 @@
 ## Visión general
 
 ```
-┌──────────────────────────── apps/web (React + Vite) ────────────────────────────┐
-│ Páginas: Panel · Emitir · Comprobantes · Recepción · Emisor · Receptores ·       │
-│ Productos · Reportes · Auditoría · Escenarios · Matriz normativa · Configuración │
-│                     │ interfaz Backend (backend/tipos.ts)                        │
-│        ┌────────────┴─────────────┐                                              │
-│   LocalBackend               FirebaseBackend                                     │
-│   (localStorage,             (Auth + Firestore onSnapshot                        │
-│    core en el navegador)      + Cloud Functions)                                 │
-└────────┬───────────────────────────┬────────────────────────────────────────────┘
-         │                           │ httpsCallable / onSnapshot
-         │                 ┌─────────┴──────── functions/ (Node 22, 2.ª gen.) ───┐
-         │                 │ emitirComprobante · procesarEnvio (trigger)          │
-         │                 │ simularRecepcionProveedor · registrarRecibidoXml     │
-         │                 │ confirmarRecibido · sembrarDatosDemo                 │
-         │                 │ obtenerTipoCambio · auditar* (triggers)              │
-         │                 │ pasarela-real.ts (BLOQUEADA)                         │
-         │                 └─────────┬────────────────────────────────────────────┘
-         └──────────────┬────────────┘
-              packages/core (TypeScript puro, sin dependencias de Firebase)
-   catalogos · tipos · fechas · clave · calculos · validaciones · xml · emision
-   simulador · recepcion · entorno · datos-demo
+┌───────────────────── apps/web (React + Vite) — GitHub Pages ─────────────────────┐
+│ Páginas: Panel · Emitir · Comprobantes · Recepción · Emisor · Receptores ·        │
+│ Productos · Reportes · Auditoría · Escenarios · Matriz normativa · Configuración  │
+│                    │ interfaz Backend (backend/tipos.ts)                          │
+│        ┌───────────┴──────────────┐                                               │
+│   LocalBackend                SupabaseBackend                                     │
+│   (localStorage,              (Auth + PostgREST con RLS + Realtime                │
+│    core en el navegador)       + functions.invoke('api'))                         │
+└────────┬──────────────────────────┬──────────────────────────────────────────────┘
+         │                          │ HTTPS (JWT del usuario)
+         │            ┌─────────────┴─────── Supabase ─────────────────────────────┐
+         │            │ Función Edge "api" (Deno): emitir · sembrarDemo ·           │
+         │            │ simularRecepcion · registrarRecibidoXml · confirmar          │
+         │            │   └─ logica.ts (independiente del entorno) + core.js         │
+         │            │ PostgreSQL: tablas, RLS, triggers de auditoría,             │
+         │            │ siguiente_consecutivo() atómico, publicación Realtime       │
+         │            └─────────────┬──────────────────────────────────────────────┘
+         └──────────────┬───────────┘
+              packages/core (TypeScript puro, sin dependencias de infraestructura)
+   catalogos · ubicacion · tipos · fechas · clave · calculos · validaciones · xml
+   emision · simulador · recepcion · entorno · datos-demo
 ```
 
 ## Decisiones
 
 | Decisión | Motivo |
 |---|---|
-| **Un único paquete `core`** con toda la lógica tributaria | La misma función calcula, valida y genera el XML en el navegador (modo local) y en Cloud Functions (modo Firebase). Se prueba una sola vez (46 pruebas). |
-| **Dos backends con la misma interfaz** | `local` permite practicar sin instalar nada más; `firebase` cumple el requisito de Auth, Firestore, Functions y Hosting con operaciones seguras. |
-| **Escrituras sensibles solo desde Functions** | Las reglas de Firestore niegan al cliente escribir comprobantes, recibidos, contadores y bitácora. Así el consecutivo es atómico (transacción), la clave no se puede alterar y la trazabilidad es confiable. |
-| **El consecutivo se consume solo si el comprobante es válido** | La validación ocurre dentro de la transacción; si falla, la transacción se aborta (Decreto 44739-H art. 13 inc. 4: sin saltos). |
-| **`decimal.js` y redondeo «mitad hacia arriba» a 5 decimales** | Regla de redondeo del Anexo 1 y campos Decimal(18,5). |
-| **Matriz de condición por tipo en el generador XML** | Cada campo lleva la cadena de condiciones del Anexo (FE, FEE, FEC, TE, NC, ND, REP); los campos «4 = inexistente» no se emiten. |
-| **Proyecto `demo-fe-cr`** | Los proyectos con prefijo `demo-` solo funcionan con emuladores: es imposible tocar recursos reales por error. |
-| **Pasarela real bloqueada** | `motivosBloqueoEnvioReal` exige ambiente de producción, autorización expresa, credenciales, llave criptográfica y firma XAdES; esta última no está implementada, así que el envío real nunca ocurre. |
+| **Un único paquete `core`** con toda la lógica tributaria | Se ejecuta igual en el navegador (modo local) y en la función Edge (Supabase). Se prueba una sola vez. |
+| **Dos backends con la misma interfaz** | `local` permite practicar sin servicios externos; `supabase` aporta cuentas, base de datos compartida, tiempo real y operaciones seguras en servidor. |
+| **Escrituras sensibles solo en el servidor** | La seguridad por fila (RLS) solo da permisos de lectura sobre comprobantes, recibidos y bitácora; los escribe la función Edge con la llave de servicio. Los contadores son inaccesibles para el cliente. |
+| **Consecutivo atómico en PostgreSQL** | `siguiente_consecutivo()` usa `insert … on conflict do update … returning`; solo `service_role` puede ejecutarla. La función valida el borrador **antes** de pedir el número, de modo que un comprobante con errores no consume numeración. |
+| **Auditoría por triggers** | Altas, cambios y bajas de emisores, receptores y productos se registran en la base de datos, con el correo del usuario del JWT, aunque los haga el cliente directamente. |
+| **`logica.ts` separada del adaptador Deno** | Permite probar la función completa en Node contra PostgreSQL (PGlite) con el esquema real. `index.ts` solo autentica, aplica CORS e implementa el repositorio con supabase-js. |
+| **`core` empaquetado para Deno** | `supabase/construir-edge.mjs` genera `functions/_shared/core.js` (esbuild) y la lista de códigos CAByS; `functions/api/deno.json` mapea `@fe-cr/core` a ese archivo. |
+| **Sin envío real** | La función construye todo con ambiente `simulacion` y no contiene código que llame al API de Hacienda. |
 
-## Separación de entornos
+## Modelo de datos (PostgreSQL)
 
-1. El cliente web fija `ambiente = 'simulacion'` e ignora cualquier otro valor.
-2. Functions toma `APP_AMBIENTE`; por defecto `simulacion`. Si alguien la cambia a `produccion`, el trigger llama a la pasarela real, que se niega y deja el comprobante en estado `error` con los motivos en la bitácora.
-3. Todo XML generado lleva el comentario «ENTORNO DE SIMULACIÓN, sin validez tributaria»; la respuesta simulada y el PDF también lo indican.
-4. Las URL reales de Hacienda (Anexo 3) solo aparecen como referencia en `core/entorno.ts`.
+| Tabla | Contenido | Cliente (RLS) | Función Edge |
+|---|---|---|---|
+| `emisores` | `datos` (Emisor), `propietario`, `miembros[]` | Leer/crear/modificar si es miembro; la membresía no se puede cambiar (trigger) | Crea emisores demo |
+| `receptores`, `productos` | `datos` jsonb por emisor | Todo si es miembro; productos validados (CAByS 13 dígitos, precio > 0, tarifa) | Lee el padrón simulado |
+| `comprobantes` | clave, tipo, estado, `datos` (Comprobante completo con XML e historial) | Solo lectura | Inserta y actualiza estados |
+| `recibidos` | Comprobantes de proveedores y su confirmación | Solo lectura | Inserta y confirma |
+| `bitacora` | Auditoría | Solo lectura | Inserta |
+| `contadores` | Último número por emisor/sucursal/terminal/tipo | Sin acceso | Vía `siguiente_consecutivo()` |
 
-## Modelo de datos (Firestore)
-
-```
-usuarios/{uid}                         { emisorActivo }
-parametros/tipoCambioUSD               caché del tipo de cambio (escribe Functions)
-emisores/{emisorId}                    Emisor + propietarioUid + miembros[]
-  ├─ receptores/{id}                   escribe el cliente (validado por reglas) → auditado
-  ├─ productos/{id}                    escribe el cliente (CAByS 13 dígitos, precio > 0) → auditado
-  ├─ comprobantes/{clave}              solo Functions: XML, cálculos, estado, historial, respuesta
-  ├─ recibidos/{clave}                 solo Functions: comprobantes de proveedores y confirmaciones
-  ├─ contadores/{emisor_suc_term_tipo} solo Functions: último número
-  └─ bitacora/{id}                     solo Functions: auditoría inmutable
-```
+Tiempo real: emisores, receptores, productos, comprobantes, recibidos y bitácora están en la publicación `supabase_realtime`; la web vuelve a consultar ante cada cambio.
 
 ## Estados de un comprobante
 
-`generado → enviado → recibido → procesando → aceptado | rechazado` (y `error` si el envío real está bloqueado). Cada transición queda en `historial` con fecha y detalle, y en la bitácora.
+`generado → enviado → recibido → procesando → aceptado | rechazado`. Cada transición queda en `historial` y la respuesta final en la bitácora. En Supabase el procesamiento continúa después de responder gracias a `EdgeRuntime.waitUntil`.
 
 ## Estructura del repositorio
 
 ```
 facturacion-electronica-cr/
 ├─ package.json                 workspaces y scripts
-├─ firebase.json · .firebaserc  Hosting, Functions, Firestore y emuladores (proyecto demo-fe-cr)
-├─ firestore.rules · firestore.indexes.json
-├─ packages/core/               lógica tributaria + pruebas (vitest)
-│  ├─ src/{catalogos,tipos,fechas,clave,calculos,validaciones,xml,emision,simulador,recepcion,entorno,datos-demo}.ts
-│  └─ test/
-├─ functions/                   Cloud Functions; build.mjs empaqueta en functions/deploy/
-│  ├─ src/{index,pasarela-real}.ts
-│  └─ test/{reglas,integracion}.test.ts
-├─ apps/web/                    interfaz React
-│  ├─ public/data/cabys-2025.json  (generado por scripts/extraer-cabys.mjs)
+├─ packages/core/               lógica tributaria + pruebas
+│  └─ src/datos/                división territorial y formas farmacéuticas (generados)
+├─ apps/web/                    interfaz React (GitHub Pages)
+│  ├─ public/data/cabys-2025.json
 │  └─ src/{backend,components,lib,pages}/
-├─ scripts/extraer-cabys.mjs
-├─ docs/                        esta documentación
-└─ .github/workflows/ci.yml
+├─ supabase/
+│  ├─ config.toml               configuración del proyecto (Auth, URLs de redirección)
+│  ├─ migrations/               esquema, RLS, triggers y funciones SQL
+│  ├─ functions/api/            index.ts (Deno) · logica.ts · deno.json
+│  ├─ construir-edge.mjs        genera functions/_shared/
+│  └─ test/                     esquema y función sobre PGlite
+├─ scripts/                     extracción de CAByS y catálogos
+├─ docs/
+└─ .github/workflows/           ci.yml · pages.yml · supabase.yml
 ```
