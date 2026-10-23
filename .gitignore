@@ -1,6 +1,6 @@
 node_modules/
 dist/
-lib/
+functions/lib/
 functions/deploy/
 coverage/
 .firebase/
