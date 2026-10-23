@@ -15,20 +15,32 @@ export class SupabaseBackend implements Backend {
   modo = 'supabase' as const;
   descripcion = `Supabase (${new URL(config.supabase.url).host})`;
   private sb = createClient(config.supabase.url, config.supabase.anonKey);
+  private refrescos = new Map<string, Set<() => void>>();
 
-  /** Consulta inicial + suscripción en tiempo real a los cambios de la tabla. */
+  /**
+   * Consulta inicial + suscripción en tiempo real a los cambios de la tabla. Se vuelve a consultar
+   * al quedar suscrito, porque los cambios ocurridos entre la consulta y la suscripción no llegan.
+   */
   private vivo<T>(tabla: string, filtro: string | null, cargar: () => Promise<T>, cb: (v: T) => void): () => void {
     let activo = true;
-    const refrescar = () => cargar().then((v) => activo && cb(v), (e) => console.error(tabla, e));
-    void refrescar();
+    const refrescar = () => void cargar().then((v) => activo && cb(v), (e) => console.error(tabla, e));
+    refrescar();
     const canal: RealtimeChannel = this.sb
       .channel(`${tabla}-${filtro ?? 'todo'}-${nuevoId()}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: tabla, ...(filtro ? { filter: filtro } : {}) }, () => void refrescar())
-      .subscribe();
+      .on('postgres_changes', { event: '*', schema: 'public', table: tabla, ...(filtro ? { filter: filtro } : {}) }, refrescar)
+      .subscribe((estado) => estado === 'SUBSCRIBED' && refrescar());
+    const set = this.refrescos.get(tabla) ?? new Set();
+    this.refrescos.set(tabla, set.add(refrescar));
     return () => {
       activo = false;
+      set.delete(refrescar);
       void this.sb.removeChannel(canal);
     };
+  }
+
+  /** Refresca a los suscriptores de una tabla tras un cambio propio (no depende del tiempo real). */
+  private refrescar(tabla: string) {
+    this.refrescos.get(tabla)?.forEach((f) => f());
   }
 
   private async datos<T>(consulta: PromiseLike<{ data: T | null; error: { message: string } | null }>): Promise<T> {
@@ -98,11 +110,14 @@ export class SupabaseBackend implements Backend {
     if (!u.user) throw new Error('Debe iniciar sesión.');
     const fila = await this.datos<{ id: string } | null>(this.sb.from('emisores').insert({ propietario: u.user.id, miembros: [u.user.id], datos: limpiar(datos) }).select('id').single());
     if (!fila) throw new Error('No se pudo crear el emisor.');
+    this.refrescar('emisores');
     return fila.id as string;
   }
 
   async sembrarDemo() {
-    return (await this.api<{ emisorId: string }>('sembrarDemo', {})).emisorId;
+    const { emisorId } = await this.api<{ emisorId: string }>('sembrarDemo', {});
+    this.refrescar('emisores');
+    return emisorId;
   }
 
   // ---------------- Receptores y productos ----------------
