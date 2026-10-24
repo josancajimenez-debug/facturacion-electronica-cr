@@ -54,7 +54,7 @@ En **Settings → Secrets and variables → Actions** del repositorio:
 - *Secrets*: `SUPABASE_ACCESS_TOKEN` (cree uno en <https://supabase.com/dashboard/account/tokens>) y `SUPABASE_DB_PASSWORD`.
 - *Variables*: `SUPABASE_PROJECT_REF`.
 
-Luego ejecute el flujo **Desplegar en Supabase** en la pestaña *Actions*.
+Con eso, el flujo **Desplegar en Supabase** se ejecuta solo en cada push a `main` que cambie `supabase/` o `packages/core/`: corre las pruebas y, si pasan, aplica las migraciones, la configuración de Auth y la función Edge. También puede lanzarse a mano desde la pestaña *Actions*. La web (GitHub Pages) se publica en cada push a `main`.
 
 ### 2.4 Usar Supabase en desarrollo local
 
