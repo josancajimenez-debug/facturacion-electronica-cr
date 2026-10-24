@@ -288,6 +288,10 @@ deno_version = 1
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Mapa de importaciones de la función "api" (resuelve @fe-cr/core hacia _shared/core.js).
+[functions.api]
+import_map = "./functions/api/deno.json"
+
 [analytics]
 enabled = true
 port = 54327
