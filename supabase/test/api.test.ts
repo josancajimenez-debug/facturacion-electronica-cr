@@ -2,7 +2,7 @@
 // El repositorio replica en SQL lo que index.ts hace con supabase-js y la llave de servicio.
 import type { Emisor, Receptor } from '@fe-cr/core';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { ejecutar, type ComprobanteGuardado, type Opciones, type Recibido, type Repo } from '../functions/api/logica';
+import { ejecutar, procesarEnvio, type ComprobanteGuardado, type Opciones, type Recibido, type Repo } from '../functions/api/logica';
 import { crearBase } from './pg';
 
 const ANA = '00000000-0000-0000-0000-00000000000a';
@@ -37,8 +37,9 @@ const repo: Repo = {
   async insertarRecibido(e, r) {
     await como(null, 'insert into recibidos (emisor_id, clave, estado, fecha_emision, datos) values ($1,$2,$3,$4,$5)', [e, r.clave, r.estado, r.fechaEmision, r]);
   },
-  async guardarRecibido(e, r) {
-    await como(null, 'update recibidos set estado = $3, datos = $4 where emisor_id = $1 and clave = $2', [e, r.clave, r.estado, r]);
+  async confirmarRecibido(e, r) {
+    const filas = await como(null, "update recibidos set estado = $3, datos = $4 where emisor_id = $1 and clave = $2 and estado = 'pendiente' returning clave", [e, r.clave, r.estado, r]);
+    return filas.length === 1;
   },
   async crearEmisor(uid, e, receptores, productos) {
     const [f] = await como<{ id: string }>(null, 'insert into emisores (propietario, miembros, datos) values ($1, array[$1]::uuid[], $2) returning id', [uid, { ...e, id: undefined }]);
@@ -113,6 +114,24 @@ describe('función Edge api', () => {
     expect((await ejecutar('confirmar', { emisorId, clave: r.cuerpo.clave, mensaje: '1' }, ana, repo, op)).status).toBe(409);
     const rechazo = await ejecutar('simularRecepcion', { emisorId }, ana, repo, op);
     expect((await ejecutar('confirmar', { emisorId, clave: rechazo.cuerpo.clave, mensaje: '3' }, ana, repo, op)).status).toBe(400);
+  });
+
+  it('dos confirmaciones simultáneas: solo una gana', async () => {
+    const r = await ejecutar('simularRecepcion', { emisorId }, ana, repo, op);
+    const datos = { emisorId, clave: r.cuerpo.clave, mensaje: '1', condicionImpuesto: '01', codigoActividad: '6920.0' };
+    const estados = (await Promise.all([ejecutar('confirmar', datos, ana, repo, op), ejecutar('confirmar', datos, ana, repo, op)])).map((x) => x.status).sort();
+    expect(estados).toEqual([200, 409]);
+  });
+
+  it('si el simulador falla, el comprobante queda en "error" y no en "procesando"', async () => {
+    const r = await ejecutar('emitir', { emisorId, borrador: borrador() }, ana, repo, op);
+    const conFalla: Repo = { ...repo, receptores: async () => { throw new Error('base de datos no disponible'); } };
+    const [c] = await como<{ datos: ComprobanteGuardado }>(ANA, 'select datos from comprobantes where clave = $1', [r.cuerpo.clave]);
+    await Promise.all(pendientes.splice(0));
+    await expect(procesarEnvio(conFalla, { ...c.datos, historial: [] }, op)).rejects.toThrow('base de datos no disponible');
+    const [despues] = await como<{ estado: string; datos: ComprobanteGuardado }>(ANA, 'select estado, datos from comprobantes where clave = $1', [r.cuerpo.clave]);
+    expect(despues.estado).toBe('error');
+    expect(despues.datos.historial.at(-1)?.detalle).toMatch(/Falla del simulador/);
   });
 
   it('registra todo en la bitácora visible solo para el miembro', async () => {

@@ -4,20 +4,18 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Estado, Vacio } from '../components/ui';
 import { useApp } from '../estado';
-import { dinero, fecha, fechaHora } from '../lib/formato';
-
-const aColones = (monto: number, tipoCambio: number) => monto * (tipoCambio || 1);
+import { aColones, dinero, fecha, fechaHora, mesCR, signoVenta } from '../lib/formato';
 
 export function Dashboard() {
   const { emisor, comprobantes, recibidos } = useApp();
-  const mesActual = new Date().toISOString().slice(0, 7);
+  const mesActual = mesCR();
 
   const kpi = useMemo(() => {
     const delMes = comprobantes.filter((c) => c.fechaEmision.startsWith(mesActual) && c.estado === 'aceptado');
-    const signo = (t: string) => (t === 'NC' ? -1 : t === 'FEC' || t === 'REP' ? 0 : 1);
-    const ventas = delMes.reduce((s, c) => s + signo(c.tipo) * aColones(c.resumen.totalVentaNeta, c.resumen.tipoCambio), 0);
-    const iva = delMes.reduce((s, c) => s + signo(c.tipo) * aColones(c.resumen.totalImpuesto, c.resumen.tipoCambio), 0);
-    const porEstado = comprobantes.reduce<Record<string, number>>((acc, c) => ({ ...acc, [c.estado]: (acc[c.estado] ?? 0) + 1 }), {});
+    const ventas = delMes.reduce((s, c) => s + signoVenta(c.tipo) * aColones(c.resumen.totalVentaNeta, c.resumen.tipoCambio), 0);
+    const iva = delMes.reduce((s, c) => s + signoVenta(c.tipo) * aColones(c.resumen.totalImpuesto, c.resumen.tipoCambio), 0);
+    const porEstado: Record<string, number> = {};
+    for (const c of comprobantes) porEstado[c.estado] = (porEstado[c.estado] ?? 0) + 1;
     const pendientes = recibidos.filter((r) => r.estado === 'pendiente');
     return { ventas, iva, porEstado, pendientes, cantidadMes: delMes.length };
   }, [comprobantes, recibidos, mesActual]);
@@ -69,7 +67,7 @@ export function Dashboard() {
           <div className="card">
             <div className="card-head"><h2>Estados ante Hacienda (simulado)</h2></div>
             <div className="card-body stack" style={{ gap: 8 }}>
-              {['aceptado', 'rechazado', 'procesando', 'recibido', 'enviado', 'error'].map((e) => (
+              {['aceptado', 'rechazado', 'procesando', 'recibido', 'enviado', 'generado', 'error'].map((e) => (
                 <div key={e} className="row" style={{ flexWrap: 'nowrap' }}>
                   <div style={{ width: 110 }}><Estado estado={e} /></div>
                   <div className="bar-track"><div className="bar" style={{ width: `${((kpi.porEstado[e] ?? 0) / total) * 100}%` }} /></div>

@@ -195,6 +195,53 @@ describe('Recepción y confirmación', () => {
     expect(rech.consecutivo.slice(8, 10)).toBe('07');
     expect(rech.validaciones.map((v) => v.campo)).toContain('detalleMensaje');
   });
+
+  it('rechaza XML sin FechaEmision válida en lugar de fallar al calcular el plazo', () => {
+    const xml = emitir().xml.replace(/<FechaEmision>[^<]+<\/FechaEmision>/, '');
+    expect(() => extraerDatosComprobante(xml)).toThrow(/FechaEmision/);
+  });
+
+  it('revierte las entidades XML del nombre del emisor', () => {
+    const proveedor = { ...PROVEEDOR_DEMO, nombre: 'Café & Té <Ficticio> S.A.' };
+    const xml = construirComprobante({
+      borrador: borrador({ contraparte: { nombre: EMISOR_DEMO.nombre, identificacion: EMISOR_DEMO.identificacion } }),
+      emisor: proveedor, numero: 6, ambiente: 'simulacion',
+    }).xml;
+    expect(extraerDatosComprobante(xml).nombreEmisor).toBe('Café & Té <Ficticio> S.A.');
+  });
+
+  it('cuenta el plazo con el día de Costa Rica, no el de UTC', () => {
+    // Factura del 15/03/2026: plazo hasta el 10/04/2026 (8 días hábiles desde el 1/4).
+    const r = { ...recibido(), fechaEmision: '2026-03-15T10:00:00-06:00' };
+    const base = { recibido: r, receptor: EMISOR_DEMO, sucursal: '001', terminal: '00001', numero: 1, mensaje: '1' as const };
+    // 10/04 a las 20:00 en Costa Rica ya es 11/04 en UTC, pero el plazo aún no vence.
+    const enPlazo = generarConfirmacion({ ...base, fecha: new Date('2026-04-10T20:00:00-06:00') });
+    expect(enPlazo.validaciones.map((v) => v.campo)).not.toContain('plazo');
+    const vencido = generarConfirmacion({ ...base, fecha: new Date('2026-04-11T08:00:00-06:00') });
+    expect(vencido.validaciones.map((v) => v.campo)).toContain('plazo');
+  });
+
+  it('no admite montos negativos ni gasto mayor que el total', () => {
+    const base = { recibido: recibido(), receptor: EMISOR_DEMO, sucursal: '001', terminal: '00001', numero: 1, mensaje: '1' as const };
+    expect(generarConfirmacion({ ...base, montoTotalImpuestoAcreditar: -1 }).validaciones.map((v) => v.campo)).toContain('montoTotalImpuestoAcreditar');
+    expect(generarConfirmacion({ ...base, montoTotalDeGastoAplicable: 999999999 }).validaciones.map((v) => v.campo)).toContain('montoTotalDeGastoAplicable');
+  });
+});
+
+describe('Descuentos y medios de pago', () => {
+  it('rechaza porcentajes de descuento fuera de 0-100', () => {
+    expect(errores(borrador({ lineas: [linea({ descuentos: [{ codigo: '07', porcentaje: 150 }] })] })).join()).toMatch(/entre 0 y 100/);
+  });
+
+  it('rechaza varios descuentos que juntos superan el monto de la línea', () => {
+    const b = borrador({ lineas: [linea({ precioUnitario: 1000, descuentos: [{ codigo: '07', monto: 700 }, { codigo: '07', monto: 700 }] })] });
+    expect(() => emitir(b)).toThrow(/suma de los descuentos/);
+  });
+
+  it('con un único medio de pago su monto es siempre el total', () => {
+    const c = emitir(borrador({ mediosPago: [{ tipo: '01', monto: 5 }] }));
+    expect(c.resumen.mediosPago[0].monto).toBe(c.resumen.totalComprobante);
+  });
 });
 
 describe('Separación de entornos', () => {

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ErrorConValidaciones } from '../backend/tipos';
 import { Alerta, ListaValidaciones } from '../components/ui';
 import { useApp } from '../estado';
+import { ETIQUETA_ESTADO } from '../lib/formato';
 import { contraparteDesde } from './NuevoComprobante';
 
 const rec = (id: string) => contraparteDesde(RECEPTORES_DEMO.find((r) => r.id === id)!);
@@ -41,7 +42,7 @@ const ESCENARIOS: Escenario[] = [
   { id: 'sin-internet', titulo: 'Comprobante «sin internet»', descripcion: 'Situación 3: se genera y firma en el acto y se envía dentro de los 2 días hábiles siguientes.', esperado: 'aceptado', fuente: 'Nota 3; Decreto 44739-H art. 21',
     armar: (b) => ({ ...b, situacion: '3', contraparte: rec('rec-persona'), lineas: [L({ codigoCabys: '9291900000300', detalle: 'Capacitación en computación', precioUnitario: 45000, codigoTarifaIva: '03' })] }) },
   { id: 'nc', titulo: 'Nota de crédito que anula la última factura aceptada', descripcion: 'Referencia tipo 01 con código 01 «Anula documento de referencia».', esperado: 'aceptado', fuente: 'RES-0027 art. 9; Nota 9',
-    armar: (b, { comprobantes }) => {
+    armar: (_base, { comprobantes }) => {
       const fe = comprobantes.find((c) => c.tipo === 'FE' && c.estado === 'aceptado');
       if (!fe) return 'Primero ejecute un escenario de factura aceptada.';
       return { ...fe.borrador, tipo: 'NC', situacion: '1', referencias: [{ tipoDoc: '01', numero: fe.clave, fechaEmision: fe.fechaEmision, codigo: '01', razon: 'Anula documento de referencia' }] };
@@ -61,16 +62,18 @@ export function Escenarios() {
   const [resultados, setResultados] = useState<Record<string, { clave?: string; validaciones?: Validacion[]; mensaje?: string }>>({});
   const [corriendo, setCorriendo] = useState<string | null>(null);
 
+  const faltante = emisor!.actividades.length === 0 ? 'Registre al menos una actividad económica en el emisor.' : emisor!.sucursales.length === 0 ? 'Registre al menos una sucursal con terminal en el emisor.' : null;
+
   const base = (): BorradorComprobante => ({
-    tipo: 'FE', emisorId: emisor!.id, sucursal: emisor!.sucursales[0].codigo, terminal: emisor!.sucursales[0].terminales[0], situacion: '1',
+    tipo: 'FE', emisorId: emisor!.id, sucursal: emisor!.sucursales[0]?.codigo ?? '001', terminal: emisor!.sucursales[0]?.terminales[0] ?? '00001', situacion: '1',
     codigoActividadEmisor: emisor!.actividades.find((a) => a.principal)?.codigo ?? emisor!.actividades[0]?.codigo,
     condicionVenta: '01', moneda: 'CRC', tipoCambio: 1, lineas: [], otrosCargos: [], mediosPago: [{ tipo: '01' }], referencias: [],
   });
 
   const ejecutar = async (e: Escenario) => {
     setCorriendo(e.id);
-    const b = e.armar(base(), { comprobantes, emisor: emisor! });
     try {
+      const b = e.armar(base(), { comprobantes, emisor: emisor! });
       if (typeof b === 'string') {
         setResultados((r) => ({ ...r, [e.id]: { mensaje: b } }));
         return;
@@ -91,7 +94,7 @@ export function Escenarios() {
           <h1>Escenarios de prueba</h1>
           <p>Casos predefinidos con datos ficticios para verificar cálculos, validaciones y respuestas del simulador.</p>
         </div>
-        {emisor!.actividades.length === 0 && <Alerta tipo="warn">Registre al menos una actividad económica en el emisor.</Alerta>}
+        {faltante && <Alerta tipo="warn">{faltante} <Link to="/emisor">Ir al emisor</Link></Alerta>}
       </div>
       <div className="grid grid-3">
         {ESCENARIOS.map((e) => {
@@ -106,10 +109,10 @@ export function Escenarios() {
                 </div>
                 <p className="small muted" style={{ margin: 0 }}>{e.descripcion}</p>
                 <p className="small" style={{ margin: 0 }}>Fuente: {e.fuente}</p>
-                <button className="btn btn-sm" disabled={corriendo !== null} onClick={() => ejecutar(e)}><Play /> {corriendo === e.id ? 'Ejecutando…' : 'Ejecutar'}</button>
+                <button className="btn btn-sm" disabled={corriendo !== null || !!faltante} onClick={() => ejecutar(e)}><Play /> {corriendo === e.id ? 'Ejecutando…' : 'Ejecutar'}</button>
                 {r?.clave && (
                   <Alerta tipo={c?.estado === 'aceptado' ? 'ok' : c?.estado === 'rechazado' ? 'err' : 'info'}>
-                    Resultado: <strong>{c?.estado ?? 'enviando…'}</strong> · <Link to={`/comprobantes/${r.clave}`}>ver comprobante</Link>
+                    Resultado: <strong>{c ? ETIQUETA_ESTADO[c.estado]?.texto.toLowerCase() ?? c.estado : 'enviando…'}</strong> · <Link to={`/comprobantes/${r.clave}`}>ver comprobante</Link>
                   </Alerta>
                 )}
                 {r?.validaciones && <ListaValidaciones validaciones={r.validaciones.filter((v) => v.nivel === 'error')} />}

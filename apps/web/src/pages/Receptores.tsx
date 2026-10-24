@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, Modal, Selector, Texto, Vacio } from '../components/ui';
 import { useApp } from '../estado';
+import { aRfc, deRfc } from '../lib/formato';
 
 const vacio = (): Receptor => ({ id: '', nombre: '', identificacion: { tipo: '01', numero: '' } });
 
@@ -26,8 +27,12 @@ export function Receptores() {
 
   const eliminar = async (r: Receptor) => {
     if (!confirm(`¿Eliminar a ${r.nombre}?`)) return;
-    await backend.eliminarReceptor(emisor!.id, r.id);
-    avisar('Receptor eliminado.', 'ok');
+    try {
+      await backend.eliminarReceptor(emisor!.id, r.id);
+      avisar('Receptor eliminado.', 'ok');
+    } catch (e) {
+      avisar((e as Error).message, 'err');
+    }
   };
 
   return (
@@ -59,8 +64,8 @@ export function Receptores() {
                     <td className="mono">{r.actividadEconomica ?? '—'}</td>
                     <td>{r.exoneracion ? <span className="badge info">{r.exoneracion.numeroDocumento} · {r.exoneracion.tarifaExonerada}%</span> : '—'}</td>
                     <td className="nowrap right">
-                      <button className="btn btn-ghost btn-icon" aria-label="Editar" onClick={() => setEditando(r)}><Pencil /></button>
-                      <button className="btn btn-ghost btn-icon btn-danger" aria-label="Eliminar" onClick={() => eliminar(r)}><Trash2 /></button>
+                      <button className="btn btn-ghost btn-icon" aria-label={`Editar ${r.nombre}`} onClick={() => setEditando(r)}><Pencil /></button>
+                      <button className="btn btn-ghost btn-icon btn-danger" aria-label={`Eliminar ${r.nombre}`} onClick={() => eliminar(r)}><Trash2 /></button>
                     </td>
                   </tr>
                 ))}
@@ -77,6 +82,7 @@ export function Receptores() {
 function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () => void }) {
   const { emisor, backend, avisar } = useApp();
   const [r, setR] = useState<Receptor>(inicial);
+  const [guardando, setGuardando] = useState(false);
   const set = (p: Partial<Receptor>) => setR((x) => ({ ...x, ...p }));
   const errores: string[] = [];
   if (r.nombre.trim().length < 3) errores.push('Nombre: mínimo 3 caracteres.');
@@ -85,10 +91,15 @@ function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () =
     if (e) errores.push(e);
   }
   if (r.correo && !REGEX_CORREO.test(r.correo)) errores.push('Correo con formato inválido.');
-  if (r.exoneracion && (!r.exoneracion.numeroDocumento || !(r.exoneracion.tarifaExonerada > 0))) errores.push('Complete el número y la tarifa de la exoneración.');
+  if (r.exoneracion) {
+    if (!r.exoneracion.numeroDocumento.trim()) errores.push('Indique el número de documento de la exoneración.');
+    if (!(r.exoneracion.tarifaExonerada > 0 && r.exoneracion.tarifaExonerada <= 13)) errores.push('La tarifa exonerada debe estar entre 0 y 13 %.');
+    if (!r.exoneracion.fechaEmision) errores.push('Indique la fecha de emisión de la exoneración.');
+  }
   const extranjero = r.identificacion?.tipo === '05';
 
   const guardar = async () => {
+    setGuardando(true);
     try {
       const datos: Receptor = { ...r, identificacion: r.identificacion?.numero ? r.identificacion : undefined };
       await backend.guardarReceptor(emisor!.id, datos);
@@ -96,6 +107,8 @@ function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () =
       onCerrar();
     } catch (e) {
       avisar((e as Error).message, 'err');
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -103,7 +116,7 @@ function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () =
     <Modal
       titulo={inicial.id ? 'Editar receptor' : 'Nuevo receptor'}
       onCerrar={onCerrar}
-      pie={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn btn-primary" disabled={errores.length > 0} onClick={guardar}>Guardar</button></>}
+      pie={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn btn-primary" disabled={errores.length > 0 || guardando} onClick={guardar}>{guardando ? 'Guardando…' : 'Guardar'}</button></>}
     >
       <div className="stack">
         {errores.length > 0 && <Alerta tipo="warn">{errores.join(' ')}</Alerta>}
@@ -143,7 +156,7 @@ function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () =
             <Texto etiqueta="Número de documento" valor={r.exoneracion.numeroDocumento} onCambio={(v) => set({ exoneracion: { ...r.exoneracion!, numeroDocumento: v } })} ayuda="Autorizaciones de Hacienda: AL-XXXXXXXX-XX (verificables en GET /fe/ex)." />
             <Selector etiqueta="Institución (nota 23)" valor={r.exoneracion.institucion} onCambio={(v) => set({ exoneracion: { ...r.exoneracion!, institucion: v } })} opciones={INSTITUCION_EXONERACION} />
             <Texto etiqueta="Tarifa exonerada (%)" tipo="number" valor={r.exoneracion.tarifaExonerada} onCambio={(v) => set({ exoneracion: { ...r.exoneracion!, tarifaExonerada: Number(v) } })} />
-            <Texto etiqueta="Fecha de emisión" tipo="datetime-local" valor={r.exoneracion.fechaEmision.slice(0, 16)} onCambio={(v) => set({ exoneracion: { ...r.exoneracion!, fechaEmision: `${v}:00-06:00` } })} />
+            <Texto etiqueta="Fecha de emisión" tipo="datetime-local" valor={deRfc(r.exoneracion.fechaEmision)} onCambio={(v) => set({ exoneracion: { ...r.exoneracion!, fechaEmision: aRfc(v) } })} />
             <Texto etiqueta="Artículo (códigos 02, 03, 08)" tipo="number" valor={r.exoneracion.articulo} onCambio={(v) => set({ exoneracion: { ...r.exoneracion!, articulo: v ? Number(v) : undefined } })} />
           </div>
         )}

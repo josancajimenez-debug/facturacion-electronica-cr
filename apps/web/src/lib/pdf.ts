@@ -28,13 +28,17 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
   let y = M;
   const mon = c.resumen.codigoMoneda;
   const $ = (v: number) => numero(v, 2);
+  const INICIO = 16;
+  const LIMITE = 272; // por debajo quedan el pie y el QR
 
-  // Marca de simulación
-  doc.setFillColor(255, 237, 213);
-  doc.rect(0, 0, 210, 9, 'F');
-  doc.setFontSize(8.5).setTextColor(124, 45, 18).setFont('helvetica', 'bold');
-  doc.text('ENTORNO DE SIMULACIÓN — DOCUMENTO SIN VALIDEZ TRIBUTARIA — NO ENVIADO AL MINISTERIO DE HACIENDA', 105, 6, { align: 'center' });
-  y = 16;
+  /** Salta de página si el bloque siguiente no cabe; devuelve true si saltó. */
+  const asegurar = (alto: number): boolean => {
+    if (y + alto <= LIMITE) return false;
+    doc.addPage();
+    y = INICIO;
+    return true;
+  };
+  y = INICIO;
 
   // Bloque del documento (Nota 1: tipo, clave y consecutivo juntos)
   const bx = 118;
@@ -125,9 +129,7 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
       .join(' · ');
     const detalle = doc.splitTextToSize(textoDetalle, cols[4].w - 2) as string[];
     const alto = Math.max(1, detalle.length) * 3.6 + 1.5;
-    if (y + alto > 250) {
-      doc.addPage();
-      y = M;
+    if (asegurar(alto)) {
       encabezado();
       doc.setFont('helvetica', 'normal').setTextColor(15, 23, 42);
     }
@@ -153,17 +155,14 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
     doc.setDrawColor(226, 232, 240).setLineWidth(0.2).line(M, y - 0.8, M + ancho, y - 0.8);
   }
   c.borrador.otrosCargos.forEach((o) => {
-    doc.setFontSize(7.5).text(`Otro cargo: ${o.detalle}`, M + 1, y + 3);
+    asegurar(5);
+    doc.setFont('helvetica', 'normal').setFontSize(7.5).setTextColor(15, 23, 42).text(`Otro cargo: ${o.detalle}`, M + 1, y + 3);
     doc.text($(o.monto), M + ancho - 1, y + 3, { align: 'right' });
     y += 5;
   });
 
-  // Totales
+  // Totales (el bloque completo va en una sola página)
   y += 3;
-  if (y > 215) {
-    doc.addPage();
-    y = M;
-  }
   const r = c.resumen;
   const filas: [string, number][] = [
     ['Total servicios gravados', r.totalServGravados],
@@ -182,8 +181,9 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
     ['IVA devuelto', r.totalIVADevuelto],
     ['Total otros cargos', r.totalOtrosCargos],
   ].filter(([k, v]) => v !== 0 || ['Total venta', 'Total venta neta', 'Total impuesto'].includes(k as string)) as [string, number][];
+  asegurar(Math.max(filas.length, r.totalDesgloseImpuesto.length + 1) * 4.4 + 12);
   const tx = 118;
-  doc.setFontSize(8).setTextColor(30, 41, 59);
+  doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(30, 41, 59);
   filas.forEach(([k, v]) => {
     doc.text(doc.splitTextToSize(k, 58), tx, y);
     doc.text($(v), M + ancho, y, { align: 'right' });
@@ -197,32 +197,53 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
   r.totalDesgloseImpuesto.forEach((d, i) => {
     doc.text(`${d.codigo === '01' ? 'Impuesto sobre el Valor Agregado' : `Impuesto ${d.codigo}`} ${d.codigoTarifaIva ? descripcion(TARIFA_IVA, d.codigoTarifaIva) : ''}: ${$(d.totalMontoImpuesto)}`, M, yDesglose + 4.4 * (i + 1));
   });
-  y += 10;
+  y = Math.max(y, yDesglose + 4.4 * (r.totalDesgloseImpuesto.length + 1)) + 10;
 
   // Referencias
   if (c.borrador.referencias.length) {
-    doc.setFont('helvetica', 'bold').setFontSize(8).text('Información de referencia', M, y);
+    asegurar(10);
+    doc.setFont('helvetica', 'bold').setFontSize(8).setTextColor(30, 41, 59).text('Información de referencia', M, y);
     doc.setFont('helvetica', 'normal');
     c.borrador.referencias.forEach((ref) => {
+      const texto = doc.splitTextToSize(`${descripcion(TIPO_DOC_REFERENCIA, ref.tipoDoc)} ${ref.numero ?? ''} — ${ref.razon ?? ''}`, ancho - 35) as string[];
+      asegurar(texto.length * 3.6 + 4.2);
       y += 4.2;
-      doc.text(doc.splitTextToSize(`${descripcion(TIPO_DOC_REFERENCIA, ref.tipoDoc)} ${ref.numero ?? ''} — ${ref.razon ?? ''}`, ancho - 35), M, y);
+      doc.text(texto, M, y);
+      y += (texto.length - 1) * 3.6;
     });
     y += 6;
   }
 
   // Estado de validación
+  asegurar(6);
   const resp = c.respuestaHacienda;
   doc.setFontSize(8).setFont('helvetica', 'bold');
   doc.setTextColor(resp?.estado === 'aceptado' ? 21 : resp?.estado === 'rechazado' ? 185 : 100, resp?.estado === 'aceptado' ? 128 : 28, resp?.estado === 'aceptado' ? 61 : 28);
-  doc.text(`Estado de validación (SIMULADO): ${resp ? resp.estado.toUpperCase() : c.estado.toUpperCase()}${resp ? ` · ${fechaHora(resp.fecha)}` : ''}`, M, Math.min(y, 268));
+  doc.text(`Estado de validación (SIMULADO): ${resp ? resp.estado.toUpperCase() : c.estado.toUpperCase()}${resp ? ` · ${fechaHora(resp.fecha)}` : ''}`, M, y);
+  y += 6;
 
-  // Pie y QR (inferior derecha, mínimo 2,5 × 2,5 cm)
-  doc.setTextColor(100, 116, 139).setFont('helvetica', 'normal').setFontSize(7);
-  doc.text('Versión del documento 4.4 · Representación gráfica de un comprobante electrónico generado en un simulador educativo.', M, 287);
+  // QR en la esquina inferior derecha de la última página (mínimo 2,5 × 2,5 cm, art. 5).
   if (opciones.incluirQr) {
+    const yQr = 297 - M - 30;
+    if (y > yQr - 2) {
+      doc.addPage();
+      y = INICIO;
+    }
     const QR = await import('qrcode');
     const dataUrl = await QR.toDataURL(c.clave, { margin: 0, width: 300 });
-    doc.addImage(dataUrl, 'PNG', 210 - M - 26, 297 - M - 30, 26, 26);
+    doc.addImage(dataUrl, 'PNG', 210 - M - 26, yQr, 26, 26);
+  }
+
+  // Franja de simulación y pie en TODAS las páginas: ninguna hoja suelta debe parecer un documento real.
+  const paginas = doc.getNumberOfPages();
+  for (let i = 1; i <= paginas; i++) {
+    doc.setPage(i);
+    doc.setFillColor(255, 237, 213).rect(0, 0, 210, 9, 'F');
+    doc.setFontSize(8.5).setTextColor(124, 45, 18).setFont('helvetica', 'bold');
+    doc.text('ENTORNO DE SIMULACIÓN — DOCUMENTO SIN VALIDEZ TRIBUTARIA — NO ENVIADO AL MINISTERIO DE HACIENDA', 105, 6, { align: 'center' });
+    doc.setTextColor(100, 116, 139).setFont('helvetica', 'normal').setFontSize(7);
+    doc.text('Versión del documento 4.4 · Representación gráfica de un comprobante electrónico generado en un simulador educativo.', M, 287);
+    doc.text(`${c.consecutivo} · Página ${i} de ${paginas}`, 210 - M, 291, { align: 'right' });
   }
 
   return doc.output('blob');

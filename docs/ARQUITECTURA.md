@@ -29,7 +29,7 @@
 ## Decisiones
 
 | Decisión | Motivo |
-|---|---|
+| --- | --- |
 | **Un único paquete `core`** con toda la lógica tributaria | Se ejecuta igual en el navegador (modo local) y en la función Edge (Supabase). Se prueba una sola vez. |
 | **Dos backends con la misma interfaz** | `local` permite practicar sin servicios externos; `supabase` aporta cuentas, base de datos compartida, tiempo real y operaciones seguras en servidor. |
 | **Escrituras sensibles solo en el servidor** | La seguridad por fila (RLS) solo da permisos de lectura sobre comprobantes, recibidos y bitácora; los escribe la función Edge con la llave de servicio. Los contadores son inaccesibles para el cliente. |
@@ -42,7 +42,7 @@
 ## Modelo de datos (PostgreSQL)
 
 | Tabla | Contenido | Cliente (RLS) | Función Edge |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `emisores` | `datos` (Emisor), `propietario`, `miembros[]` | Leer/crear/modificar si es miembro; la membresía no se puede cambiar (trigger) | Crea emisores demo |
 | `receptores`, `productos` | `datos` jsonb por emisor | Todo si es miembro; productos validados (CAByS 13 dígitos, precio > 0, tarifa) | Lee el padrón simulado |
 | `comprobantes` | clave, tipo, estado, `datos` (Comprobante completo con XML e historial) | Solo lectura | Inserta y actualiza estados |

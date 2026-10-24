@@ -17,6 +17,7 @@ import {
   UNIDAD_MEDIDA,
   fechaEmisionCR,
   previsualizar,
+  tarifaIva,
   type BorradorComprobante,
   type Contraparte,
   type LineaBorrador,
@@ -32,7 +33,7 @@ import { CabysBuscador } from '../components/CabysBuscador';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, ListaValidaciones, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
-import { dinero } from '../lib/formato';
+import { aRfc, deRfc, dinero } from '../lib/formato';
 
 const TIPOS: { codigo: TipoComprobante; corto: string }[] = [
   { codigo: 'FE', corto: 'Factura' },
@@ -53,10 +54,6 @@ export const contraparteDesde = (r: Receptor): Contraparte => ({
   telefono: r.telefono,
   correo: r.correo,
 });
-
-/** Convierte un valor de <input type="datetime-local"> a RFC 3339 en hora de Costa Rica. */
-const aRfc = (v: string) => (v ? `${v.length === 16 ? `${v}:00` : v}-06:00` : '');
-const deRfc = (v: string) => v.slice(0, 16);
 
 export function NuevoComprobante() {
   const { emisor, receptores, productos, comprobantes, backend, avisar } = useApp();
@@ -127,16 +124,47 @@ export function NuevoComprobante() {
   const errores = vista.validaciones.filter((v) => v.nivel === 'error');
   const r = vista.resumen;
 
+  // Los cargos definidos por porcentaje (p. ej. servicio 10 %) se recalculan cuando cambia la venta neta.
+  const ventaNeta = r?.totalVentaNeta;
+  useEffect(() => {
+    if (ventaNeta === undefined) return;
+    setB((x) => {
+      let cambio = false;
+      const otrosCargos = x.otrosCargos.map((o) => {
+        if (o.porcentaje === undefined) return o;
+        const monto = Math.round(ventaNeta * o.porcentaje) / 100;
+        if (monto === o.monto) return o;
+        cambio = true;
+        return { ...o, monto };
+      });
+      return cambio ? { ...x, otrosCargos } : x;
+    });
+  }, [ventaNeta]);
+
+  /** Precio del producto en la moneda del comprobante; null si no se puede convertir sin tipo de cambio. */
+  const precioEnMoneda = (precio: number, moneda: string): number | null => {
+    if (moneda === b.moneda) return precio;
+    // Solo se conoce el tipo de cambio de la moneda del comprobante respecto al colón.
+    if (moneda === 'CRC' && b.tipoCambio > 0) return Math.round((precio / b.tipoCambio) * 100000) / 100000;
+    return null;
+  };
+
   const agregarProducto = (id: string) => {
     const p = productos.find((x) => x.id === id);
     if (!p) return;
+    const convertido = precioEnMoneda(p.precioUnitario, p.moneda);
+    if (convertido === null) {
+      avisar(`«${p.descripcion}» tiene precio en ${p.moneda} y el comprobante es en ${b.moneda}: se copió el precio sin convertir; ajústelo antes de emitir.`, 'err');
+    } else if (p.moneda !== b.moneda) {
+      avisar(`Precio convertido de ${p.moneda} a ${b.moneda} con el tipo de cambio ${b.tipoCambio}.`, 'info');
+    }
     const linea: LineaBorrador = {
       codigoCabys: p.codigoCabys,
       detalle: p.descripcion,
       cantidad: 1,
       unidadMedida: p.unidadMedida,
       unidadMedidaComercial: p.unidadMedidaComercial,
-      precioUnitario: p.precioUnitario,
+      precioUnitario: convertido ?? p.precioUnitario,
       descuentos: [],
       codigoTarifaIva: p.codigoTarifaIva,
       impuestosAdicionales: p.impuestosAdicionales,
@@ -285,7 +313,7 @@ export function NuevoComprobante() {
                       <strong>Línea {i + 1}</strong>
                       <div className="row">
                         {calc && <span className="small muted">Subtotal {dinero(calc.subTotal, b.moneda)} · Impuesto {dinero(calc.impuestoNeto, b.moneda)} · <strong>Total {dinero(calc.montoTotalLinea, b.moneda)}</strong></span>}
-                        <button className="btn btn-ghost btn-icon btn-danger" aria-label={`Eliminar línea ${i + 1}`} onClick={() => set({ lineas: b.lineas.filter((_, j) => j !== i) })}><Trash2 /></button>
+                        <button className="btn btn-ghost btn-icon btn-danger" aria-label={`Eliminar línea ${i + 1}`} onClick={() => { set({ lineas: b.lineas.filter((_, j) => j !== i) }); setBuscarCabysEn(null); }}><Trash2 /></button>
                       </div>
                     </div>
                     {buscarCabysEn === i && <CabysBuscador onElegir={(c) => { setLinea(i, { codigoCabys: c.codigo, detalle: l.detalle || c.descripcion.slice(0, 200), codigoTarifaIva: c.codigoTarifaIva ?? l.codigoTarifaIva }); setBuscarCabysEn(null); }} />}
@@ -320,7 +348,7 @@ export function NuevoComprobante() {
                         )}
                         {b.tipo !== 'FEE' && (
                           <label className="check">
-                            <input type="checkbox" checked={!!l.exoneracion} onChange={(e) => setLinea(i, { exoneracion: e.target.checked ? receptor?.exoneracion ?? { tipoDocumento: '04', numeroDocumento: '', institucion: '01', fechaEmision: fechaEmisionCR(), tarifaExonerada: 13 } : undefined })} />
+                            <input type="checkbox" checked={!!l.exoneracion} onChange={(e) => setLinea(i, { exoneracion: e.target.checked ? receptor?.exoneracion ?? { tipoDocumento: '04', numeroDocumento: '', institucion: '01', fechaEmision: fechaEmisionCR(), tarifaExonerada: tarifaIva(l.codigoTarifaIva)?.tarifa || 13 } : undefined })} />
                             Aplicar exoneración
                           </label>
                         )}
@@ -373,7 +401,7 @@ export function NuevoComprobante() {
                         const pct = v ? Number(v) : undefined;
                         set({ otrosCargos: b.otrosCargos.map((x, j) => (j === i ? { ...x, porcentaje: pct, monto: pct !== undefined && r ? Math.round(r.totalVentaNeta * pct) / 100 : x.monto } : x)) });
                       }} /></div>
-                      <div style={{ width: 140 }}><Texto etiqueta="Monto" tipo="number" valor={o.monto} onCambio={(v) => set({ otrosCargos: b.otrosCargos.map((x, j) => (j === i ? { ...x, monto: Number(v) } : x)) })} /></div>
+                      <div style={{ width: 140 }}><Texto etiqueta="Monto" tipo="number" valor={o.monto} onCambio={(v) => set({ otrosCargos: b.otrosCargos.map((x, j) => (j === i ? { ...x, monto: Number(v), porcentaje: undefined } : x)) })} /></div>
                       <button className="btn btn-ghost btn-icon btn-danger" aria-label="Quitar cargo" onClick={() => set({ otrosCargos: b.otrosCargos.filter((_, j) => j !== i) })}><Trash2 /></button>
                       {o.tipoDocumento === '04' && (
                         <div className="grid grid-3" style={{ width: '100%' }}>

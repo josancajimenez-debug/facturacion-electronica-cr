@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Estado, Selector, Texto, Vacio } from '../components/ui';
 import { useApp } from '../estado';
-import { csv, descargar, dinero, fechaHora } from '../lib/formato';
+import { ETIQUETA_ESTADO, csv, descargar, dinero, fechaHora, hoyCR } from '../lib/formato';
 
 /** Criterios de búsqueda del art. 14 inc. 10 del Decreto 44739-H (consulta para la Administración Tributaria). */
 interface Filtros {
@@ -50,7 +50,7 @@ export function Comprobantes() {
 
   const exportar = () =>
     descargar(
-      `comprobantes-${new Date().toISOString().slice(0, 10)}.csv`,
+      `comprobantes-${hoyCR()}.csv`,
       csv([
         ['Clave', 'Consecutivo', 'Tipo', 'Fecha emisión', 'Identificación contraparte', 'Nombre contraparte', 'Condición venta', 'Medios de pago', 'Moneda', 'Total venta neta', 'Total impuesto', 'Total comprobante', 'Estado'],
         ...lista.map((c) => [
@@ -78,7 +78,7 @@ export function Comprobantes() {
         <div className="card-body grid grid-4">
           <Texto etiqueta="Clave, consecutivo, cédula o nombre" valor={f.texto} onCambio={(v) => set({ texto: v })} />
           <Selector etiqueta="Tipo" valor={f.tipo} vacio="Todos" mostrarCodigo={false} onCambio={(v) => set({ tipo: v })} opciones={Object.entries(NOMBRE_COMPROBANTE).map(([codigo, descripcion]) => ({ codigo, descripcion }))} />
-          <Selector etiqueta="Estado (Hacienda simulado)" valor={f.estado} vacio="Todos" mostrarCodigo={false} onCambio={(v) => set({ estado: v })} opciones={['aceptado', 'rechazado', 'procesando', 'recibido', 'enviado', 'generado', 'error'].map((e) => ({ codigo: e, descripcion: e }))} />
+          <Selector etiqueta="Estado (Hacienda simulado)" valor={f.estado} vacio="Todos" mostrarCodigo={false} onCambio={(v) => set({ estado: v })} opciones={['aceptado', 'rechazado', 'procesando', 'recibido', 'enviado', 'generado', 'error'].map((e) => ({ codigo: e, descripcion: ETIQUETA_ESTADO[e].texto }))} />
           <Selector etiqueta="Medio de pago" valor={f.medioPago} vacio="Todos" onCambio={(v) => set({ medioPago: v })} opciones={MEDIO_PAGO} />
           <Selector etiqueta="Condición de venta" valor={f.condicion} vacio="Todas" onCambio={(v) => set({ condicion: v })} opciones={CONDICION_VENTA} />
           <Selector etiqueta="Tarifa de IVA" valor={f.tarifa} vacio="Todas" onCambio={(v) => set({ tarifa: v })} opciones={TARIFA_IVA} />
@@ -98,7 +98,7 @@ export function Comprobantes() {
               <thead><tr><th>Fecha</th><th>Tipo</th><th>Consecutivo</th><th>Contraparte</th><th>Condición</th><th className="right">Total</th><th>Estado</th></tr></thead>
               <tbody>
                 {lista.map((c) => (
-                  <tr key={c.clave} className="clickable" onClick={() => navegar(`/comprobantes/${c.clave}`)}>
+                  <tr key={c.clave} className="clickable" onClick={() => navegar(`/comprobantes/${c.clave}`)} title="Ver el comprobante">
                     <td className="nowrap">{fechaHora(c.fechaEmision)}</td>
                     <td><span className="badge">{c.tipo}</span></td>
                     <td className="mono"><Link to={`/comprobantes/${c.clave}`} onClick={(e) => e.stopPropagation()}>{c.consecutivo}</Link></td>

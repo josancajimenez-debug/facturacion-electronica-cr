@@ -75,6 +75,41 @@ describe('LocalBackend', () => {
     expect(r.consecutivo.slice(8, 10)).toBe('05');
     await expect(b.confirmar(emisorId, { clave, mensaje: '1' })).rejects.toThrow(/ya fue confirmado/);
   });
+
+  it('retoma al cargar un comprobante que quedó a medio procesar', async () => {
+    const b = new LocalBackend();
+    await b.registrar('f@demo.test', 'secreto123');
+    const emisorId = await b.sembrarDemo();
+    const { clave } = await b.emitir(emisorId, {
+      tipo: 'FE', emisorId, sucursal: '001', terminal: '00001', situacion: '1', codigoActividadEmisor: '6920.0',
+      contraparte: { nombre: 'Distribuidora Ficticia del Valle S.A.', identificacion: { tipo: '02', numero: '3109999002' } },
+      condicionVenta: '01', moneda: 'CRC', tipoCambio: 1, otrosCargos: [], referencias: [], mediosPago: [{ tipo: '01' }],
+      lineas: [{ codigoCabys: '8222100000000', detalle: 'Servicios de contabilidad', cantidad: 1, unidadMedida: 'Sp', precioUnitario: 1000, descuentos: [], codigoTarifaIva: '08' }],
+    });
+    await esperarEstado(b, emisorId, clave);
+    // Simula una recarga a mitad del proceso: el comprobante guardado quedó en «recibido» hace un minuto.
+    const guardado = JSON.parse(localStorage.getItem('fe-cr:local:v1')!);
+    const c = guardado.comprobantes[emisorId][clave];
+    c.estado = 'recibido';
+    c.historial = c.historial.slice(0, 3).map((h: { fecha: string }) => ({ ...h, fecha: '2026-01-01T08:00:00-06:00' }));
+    delete c.respuestaHacienda;
+    localStorage.setItem('fe-cr:local:v1', JSON.stringify(guardado));
+
+    const recargado = new LocalBackend();
+    const final = await esperarEstado(recargado, emisorId, clave);
+    expect(final.estado).toBe('aceptado');
+    expect(final.historial.map((h) => h.estado)).toEqual(['generado', 'enviado', 'recibido', 'procesando', 'aceptado']);
+  }, 20000);
+
+  it('recarga los datos cuando otra pestaña los modifica', async () => {
+    const b = new LocalBackend();
+    await b.registrar('g@demo.test', 'secreto123');
+    const otraPestana = new LocalBackend();
+    const emisorId = await otraPestana.sembrarDemo();
+    window.dispatchEvent(new StorageEvent('storage', { key: 'fe-cr:local:v1' }));
+    const emisores = await ultimo<Emisor[]>((cb) => b.onEmisores(cb));
+    expect(emisores.map((e) => e.id)).toContain(emisorId);
+  });
 });
 
 describe('formato CSV', () => {

@@ -1,8 +1,8 @@
 // Función Edge "api" (Supabase, Deno). Autentica al usuario con su JWT y opera con la llave de
 // servicio, que es la única que puede escribir comprobantes, recibidos, contadores y bitácora.
-import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.47.10';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.118.0';
 import codigosCabys from '../_shared/cabys-codigos.json' with { type: 'json' };
-import type { Emisor, Producto, Receptor } from '@fe-cr/core';
+import { fechaEmisionCR, type Emisor, type Producto, type Receptor } from '@fe-cr/core';
 import { ejecutar, type ComprobanteGuardado, type Recibido, type Repo } from './logica.ts';
 
 const CORS = {
@@ -48,18 +48,25 @@ function crearRepo(db: SupabaseClient): Repo {
     async insertarRecibido(emisorId, r) {
       ok(await db.from('recibidos').insert({ emisor_id: emisorId, clave: r.clave, estado: r.estado, fecha_emision: r.fechaEmision, datos: r }));
     },
-    async guardarRecibido(emisorId, r) {
-      ok(await db.from('recibidos').update({ estado: r.estado, datos: r }).eq('emisor_id', emisorId).eq('clave', r.clave));
+    async confirmarRecibido(emisorId, r) {
+      // Actualización condicional: si otra solicitud ya lo confirmó, no se modifica ninguna fila.
+      const filas = ok(await db.from('recibidos').update({ estado: r.estado, datos: r }).eq('emisor_id', emisorId).eq('clave', r.clave).eq('estado', 'pendiente').select('clave'));
+      return filas.length === 1;
     },
     async crearEmisor(uid, e: Emisor, receptores: Receptor[], productos: Producto[]) {
       const fila = ok(await db.from('emisores').insert({ propietario: uid, miembros: [uid], datos: { ...e, id: undefined } }).select('id').single());
-      ok(await db.from('receptores').insert(receptores.map((r) => ({ emisor_id: fila.id, id: r.id, datos: r }))));
-      ok(await db.from('productos').insert(productos.map((p) => ({ emisor_id: fila.id, id: p.id, datos: p }))));
+      try {
+        ok(await db.from('receptores').insert(receptores.map((r) => ({ emisor_id: fila.id, id: r.id, datos: r }))));
+        ok(await db.from('productos').insert(productos.map((p) => ({ emisor_id: fila.id, id: p.id, datos: p }))));
+      } catch (err) {
+        // Sin transacciones en PostgREST: se elimina el emisor incompleto (cascada) para no dejar datos a medias.
+        await db.from('emisores').delete().eq('id', fila.id);
+        throw err;
+      }
       return fila.id as string;
     },
     async bitacora(emisorId, e) {
-      const fecha = new Date(Date.now() - 6 * 3600_000).toISOString().slice(0, 19) + '-06:00';
-      ok(await db.from('bitacora').insert({ emisor_id: emisorId, fecha, ...e }));
+      ok(await db.from('bitacora').insert({ emisor_id: emisorId, fecha: fechaEmisionCR(), ...e }));
     },
   };
 }

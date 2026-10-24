@@ -1,6 +1,6 @@
 import type { Codigo, Validacion } from '@fe-cr/core';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
-import { useId, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { ETIQUETA_ESTADO } from '../lib/formato';
 
 export function Campo({ etiqueta, ayuda, error, children }: { etiqueta: string; ayuda?: ReactNode; error?: string; children: (id: string) => ReactNode }) {
@@ -81,9 +81,23 @@ export function ListaValidaciones({ validaciones }: { validaciones: Validacion[]
 }
 
 export function Modal({ titulo, onCerrar, children, pie }: { titulo: string; onCerrar: () => void; children: ReactNode; pie?: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const cerrar = useRef(onCerrar);
+  cerrar.current = onCerrar;
+  // Escape cierra; el foco entra al diálogo y vuelve al elemento que lo abrió.
+  useEffect(() => {
+    const previo = document.activeElement as HTMLElement | null;
+    ref.current?.focus();
+    const tecla = (e: KeyboardEvent) => e.key === 'Escape' && cerrar.current();
+    document.addEventListener('keydown', tecla);
+    return () => {
+      document.removeEventListener('keydown', tecla);
+      previo?.focus?.();
+    };
+  }, []);
   return (
     <div className="modal-back" onMouseDown={(e) => e.target === e.currentTarget && onCerrar()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={titulo}>
+      <div className="modal" role="dialog" aria-modal="true" aria-label={titulo} ref={ref} tabIndex={-1}>
         <div className="modal-head">
           <h2>{titulo}</h2>
           <button className="btn btn-ghost btn-icon" onClick={onCerrar} aria-label="Cerrar">
@@ -93,6 +107,15 @@ export function Modal({ titulo, onCerrar, children, pie }: { titulo: string; onC
         <div className="modal-body">{children}</div>
         {pie && <div className="modal-foot">{pie}</div>}
       </div>
+    </div>
+  );
+}
+
+export function Cargando({ texto = 'Cargando…' }: { texto?: string }) {
+  return (
+    <div className="cargando" role="status" aria-live="polite">
+      <span className="spinner" aria-hidden />
+      {texto}
     </div>
   );
 }

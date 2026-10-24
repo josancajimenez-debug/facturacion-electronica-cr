@@ -1,6 +1,5 @@
-/// <reference types="vitest" />
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   // En GitHub Pages el sitio vive en /<repositorio>/; VITE_BASE lo fija el flujo de despliegue.

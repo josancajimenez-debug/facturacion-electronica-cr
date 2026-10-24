@@ -12,7 +12,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.2.15",
     "@fe-cr/core": "0.1.0",
-    "esbuild": "0.24.0",
-    "vitest": "2.1.8"
+    "esbuild": "0.25.12",
+    "vitest": "4.1.12"
   }
 }

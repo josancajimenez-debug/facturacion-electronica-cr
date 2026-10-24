@@ -6,9 +6,28 @@
 import type { BorradorComprobante, Comprobante, Emisor, Producto, Receptor, Validacion } from '@fe-cr/core';
 import { createClient, type RealtimeChannel } from '@supabase/supabase-js';
 import { config } from '../config';
-import { ErrorConValidaciones, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type TipoCambio, type Usuario } from './tipos';
+import { ErrorConValidaciones, LIMITE_BITACORA, consultarTipoCambio, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type TipoCambio, type Usuario } from './tipos';
 
 const limpiar = <T>(o: T): T => JSON.parse(JSON.stringify(o)) as T;
+
+/** Mensajes de Supabase Auth (en inglés) más frecuentes, en español. */
+const ERRORES_AUTH: [RegExp, string][] = [
+  [/invalid login credentials/i, 'Correo o contraseña incorrectos.'],
+  [/already registered/i, 'Ya existe una cuenta con ese correo.'],
+  [/password should be at least (\d+)/i, 'La contraseña debe tener al menos $1 caracteres.'],
+  [/invalid format|validate email/i, 'El correo electrónico no tiene un formato válido.'],
+  [/rate limit|only request this after/i, 'Demasiados intentos seguidos; espere un momento e intente de nuevo.'],
+  [/email not confirmed/i, 'Debe confirmar el correo antes de ingresar.'],
+  [/signups not allowed/i, 'El registro de cuentas nuevas está deshabilitado.'],
+  [/failed to fetch|network/i, 'No hay conexión con el servidor. Revise su conexión a internet.'],
+];
+const traducirErrorAuth = (mensaje: string) => {
+  for (const [re, texto] of ERRORES_AUTH) {
+    const m = re.exec(mensaje);
+    if (m) return texto.replace('$1', m[1] ?? '');
+  }
+  return mensaje;
+};
 const nuevoId = () => crypto.randomUUID();
 
 export class SupabaseBackend implements Backend {
@@ -59,7 +78,8 @@ export class SupabaseBackend implements Backend {
         /* sin cuerpo JSON */
       }
       if (detalle?.validaciones) throw new ErrorConValidaciones(detalle.error ?? error.message, detalle.validaciones);
-      throw new Error(detalle?.error ?? error.message);
+      if (detalle?.error) throw new Error(detalle.error);
+      throw new Error(/failed to send/i.test(error.message) ? 'No se pudo contactar al servidor. Revise su conexión e intente de nuevo.' : error.message);
     }
     return data as T;
   }
@@ -74,12 +94,12 @@ export class SupabaseBackend implements Backend {
 
   async ingresar(email: string, clave: string) {
     const { error } = await this.sb.auth.signInWithPassword({ email, password: clave });
-    if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Correo o contraseña incorrectos.' : error.message);
+    if (error) throw new Error(traducirErrorAuth(error.message));
   }
 
   async registrar(email: string, clave: string) {
     const { data, error } = await this.sb.auth.signUp({ email, password: clave });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(traducirErrorAuth(error.message));
     if (!data.session) throw new Error('Cuenta creada. Revise su correo para confirmarla y luego ingrese.');
   }
 
@@ -195,16 +215,12 @@ export class SupabaseBackend implements Backend {
     return this.vivo(
       'bitacora',
       `emisor_id=eq.${emisorId}`,
-      async () => (await this.datos(this.sb.from('bitacora').select('*').eq('emisor_id', emisorId).order('id', { ascending: false }).limit(500))).map((f) => ({ ...f, id: String(f.id) }) as EntradaBitacora),
+      async () => (await this.datos(this.sb.from('bitacora').select('*').eq('emisor_id', emisorId).order('id', { ascending: false }).limit(LIMITE_BITACORA))).map((f) => ({ ...f, id: String(f.id) }) as EntradaBitacora),
       cb,
     );
   }
 
-  /** Tipo de cambio de referencia desde el API público de Hacienda (permite CORS). */
-  async tipoCambio(): Promise<TipoCambio> {
-    const resp = await fetch('https://api.hacienda.go.cr/indicadores/tc/dolar');
-    if (!resp.ok) throw new Error(`El API de Hacienda respondió ${resp.status}.`);
-    const j = (await resp.json()) as { venta: { fecha: string; valor: number }; compra: { valor: number } };
-    return { venta: j.venta.valor, compra: j.compra.valor, fecha: j.venta.fecha, fuente: 'api.hacienda.go.cr/indicadores/tc/dolar' };
+  tipoCambio(): Promise<TipoCambio> {
+    return consultarTipoCambio();
   }
 }

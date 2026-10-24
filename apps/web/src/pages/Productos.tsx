@@ -16,6 +16,16 @@ export function Productos() {
     .filter((p) => `${p.descripcion} ${p.codigoCabys}`.toLowerCase().includes(filtro.toLowerCase()))
     .sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
+  const eliminar = async (p: Producto) => {
+    if (!confirm(`¿Eliminar «${p.descripcion}»?`)) return;
+    try {
+      await backend.eliminarProducto(emisor!.id, p.id);
+      avisar('Producto eliminado.', 'ok');
+    } catch (e) {
+      avisar((e as Error).message, 'err');
+    }
+  };
+
   return (
     <>
       <div className="page-head">
@@ -46,8 +56,8 @@ export function Productos() {
                     <td>{descripcion(TARIFA_IVA, p.codigoTarifaIva)}</td>
                     <td className="num">{dinero(p.precioUnitario, p.moneda)}</td>
                     <td className="nowrap right">
-                      <button className="btn btn-ghost btn-icon" aria-label="Editar" onClick={() => setEditando(p)}><Pencil /></button>
-                      <button className="btn btn-ghost btn-icon btn-danger" aria-label="Eliminar" onClick={async () => { if (confirm('¿Eliminar producto?')) { await backend.eliminarProducto(emisor!.id, p.id); avisar('Producto eliminado.', 'ok'); } }}><Trash2 /></button>
+                      <button className="btn btn-ghost btn-icon" aria-label={`Editar ${p.descripcion}`} onClick={() => setEditando(p)}><Pencil /></button>
+                      <button className="btn btn-ghost btn-icon btn-danger" aria-label={`Eliminar ${p.descripcion}`} onClick={() => eliminar(p)}><Trash2 /></button>
                     </td>
                   </tr>
                 ))}
@@ -65,26 +75,32 @@ function FormProducto({ inicial, onCerrar }: { inicial: Producto; onCerrar: () =
   const { emisor, backend, avisar } = useApp();
   const [p, setP] = useState<Producto>(inicial);
   const [impuestoCabys, setImpuestoCabys] = useState('');
+  const [guardando, setGuardando] = useState(false);
   const set = (x: Partial<Producto>) => setP((v) => ({ ...v, ...x }));
   const errores: string[] = [];
   if (!/^\d{13}$/.test(p.codigoCabys)) errores.push('CAByS de 13 dígitos.');
   if (p.descripcion.trim().length < 3) errores.push('Descripción: mínimo 3 caracteres.');
   if (!(p.precioUnitario > 0)) errores.push('Precio mayor que cero.');
+  if (p.codigoComercial && !p.codigoComercial.codigo.trim()) errores.push('Indique el código comercial o quite su tipo.');
   const isc = p.impuestosAdicionales?.find((i) => i.codigo === '02');
+  if (isc && !(isc.tarifa > 0 && isc.tarifa <= 100)) errores.push('El impuesto selectivo debe estar entre 0 y 100 %.');
 
   const guardar = async () => {
+    setGuardando(true);
     try {
       await backend.guardarProducto(emisor!.id, p);
       avisar('Producto guardado.', 'ok');
       onCerrar();
     } catch (e) {
       avisar((e as Error).message, 'err');
+    } finally {
+      setGuardando(false);
     }
   };
 
   return (
     <Modal titulo={inicial.id ? 'Editar producto o servicio' : 'Nuevo producto o servicio'} onCerrar={onCerrar}
-      pie={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn btn-primary" disabled={errores.length > 0} onClick={guardar}>Guardar</button></>}>
+      pie={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn btn-primary" disabled={errores.length > 0 || guardando} onClick={guardar}>{guardando ? 'Guardando…' : 'Guardar'}</button></>}>
       <div className="stack">
         <CabysBuscador onElegir={(i) => { set({ codigoCabys: i.codigo, descripcion: p.descripcion || i.descripcion.slice(0, 200), codigoTarifaIva: i.codigoTarifaIva ?? p.codigoTarifaIva, unidadMedida: esCabysServicio(i.codigo) ? 'Sp' : p.unidadMedida }); setImpuestoCabys(i.impuesto); }} />
         {impuestoCabys && (
@@ -101,7 +117,8 @@ function FormProducto({ inicial, onCerrar }: { inicial: Producto; onCerrar: () =
           <Selector etiqueta="Tarifa IVA (nota 8.1)" valor={p.codigoTarifaIva} onCambio={(v) => set({ codigoTarifaIva: v })} opciones={TARIFA_IVA.filter((t) => !t.soloAjustes)} />
           <Texto etiqueta="Impuesto selectivo de consumo (%)" tipo="number" valor={isc?.tarifa ?? ''} onCambio={(v) => set({ impuestosAdicionales: v ? [{ codigo: '02', tarifa: Number(v) }] : undefined })} ayuda="Código 02; integra la base imponible del IVA." />
           <Selector etiqueta="Tipo de código comercial (nota 12)" valor={p.codigoComercial?.tipo} vacio="— Sin código comercial —" onCambio={(v) => set({ codigoComercial: v ? { tipo: v, codigo: p.codigoComercial?.codigo ?? '' } : undefined })} opciones={TIPO_CODIGO_COMERCIAL} />
-          <Texto etiqueta="Código comercial" valor={p.codigoComercial?.codigo} onCambio={(v) => p.codigoComercial && set({ codigoComercial: { ...p.codigoComercial, codigo: v } })} max={20} />
+          <Texto etiqueta="Código comercial" valor={p.codigoComercial?.codigo} onCambio={(v) => p.codigoComercial && set({ codigoComercial: { ...p.codigoComercial, codigo: v } })} max={20}
+            deshabilitado={!p.codigoComercial} ayuda={p.codigoComercial ? undefined : 'Elija primero el tipo de código.'} />
           <Texto etiqueta="Registro de medicamento" valor={p.registroMedicamento} onCambio={(v) => set({ registroMedicamento: v || undefined })} max={100} />
           <Selector etiqueta="Forma farmacéutica (catálogo Ministerio de Salud)" valor={p.formaFarmaceuticaMinsa} vacio="— No aplica —" mostrarCodigo={false}
             onCambio={(v) => set({ formaFarmaceuticaMinsa: v || undefined })} opciones={FORMAS_FARMACEUTICAS_MINSA}

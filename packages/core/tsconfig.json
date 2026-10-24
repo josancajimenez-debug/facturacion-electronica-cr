@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // El core usa APIs web estándar (crypto.getRandomValues, TextEncoder, btoa) disponibles en
+    // navegadores, Deno (función Edge) y Node 20+; se declaran explícitamente en lugar de depender
+    // de tipos que arrastre otra dependencia.
+    "lib": ["ES2022", "DOM"],
     "types": []
   },
   "include": ["src", "test"]

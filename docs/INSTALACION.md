@@ -3,7 +3,7 @@
 ## Requisitos
 
 | Herramienta | Versión probada | Para qué |
-|---|---|---|
+| --- | --- | --- |
 | Node.js | 24.18 (mínimo 20) | Todo |
 | npm | 11 | Dependencias |
 | Git | 2.55 | Control de versiones |
@@ -81,7 +81,7 @@ El flujo `.github/workflows/pages.yml` compila y publica la web en cada *push* a
 ## Variables
 
 | Variable | Dónde | Descripción |
-|---|---|---|
+| --- | --- | --- |
 | `VITE_BACKEND` | web | `local` o `supabase` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | web / variables de Actions | Conexión pública al proyecto |
 | `VITE_BASE` | flujo de Pages | Ruta base del sitio (`/<repositorio>/`) |

@@ -26,7 +26,7 @@ import {
   type Receptor,
 } from '@fe-cr/core';
 import { verificadorCabys } from '../lib/cabys';
-import { ErrorConValidaciones, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type TipoCambio, type Usuario } from './tipos';
+import { ErrorConValidaciones, consultarTipoCambio, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type TipoCambio, type Usuario } from './tipos';
 
 const CLAVE_STORAGE = 'fe-cr:local:v1';
 const PAUSA_MS = 900;
@@ -73,11 +73,39 @@ export function borrarDatosLocales(): void {
   }
 }
 
+const ESTADOS_FINALES: EstadoComprobante[] = ['aceptado', 'rechazado', 'error'];
+/** Un comprobante sin avances en este lapso se considera interrumpido (p. ej. por recargar la página). */
+const INACTIVIDAD_MS = 10_000;
+
 export class LocalBackend implements Backend {
   modo = 'local' as const;
   descripcion = 'Modo local: datos en este navegador (localStorage).';
   private estado = cargar();
   private oyentes = new Set<() => void>();
+  private enCurso = new Set<string>();
+
+  constructor() {
+    // Otra pestaña guardó: se recarga el estado para no sobrescribir sus cambios con una copia vieja.
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key !== CLAVE_STORAGE) return;
+        this.estado = cargar();
+        this.oyentes.forEach((f) => f());
+      });
+    }
+    this.reanudarPendientes();
+  }
+
+  /** Retoma los comprobantes que quedaron a medio procesar (la simulación vive en memoria). */
+  private reanudarPendientes(): void {
+    const ahora = Date.now();
+    for (const [emisorId, lista] of Object.entries(this.estado.comprobantes)) {
+      for (const c of Object.values(lista)) {
+        const ultimo = new Date(c.historial.at(-1)?.fecha ?? c.fechaEmision).getTime();
+        if (!ESTADOS_FINALES.includes(c.estado) && ahora - ultimo > INACTIVIDAD_MS) void this.procesar(emisorId, c.clave);
+      }
+    }
+  }
 
   private guardar(): void {
     try {
@@ -247,41 +275,59 @@ export class LocalBackend implements Backend {
     return { clave: c.clave };
   }
 
-  /** Mismo flujo que la Cloud Function procesarEnvio: envío, acuse, procesamiento y respuesta simulados. */
+  /**
+   * Mismo flujo que procesarEnvio de la función Edge: envío, acuse, procesamiento y respuesta simulados.
+   * Retoma desde el estado actual (si se interrumpió) y deja el comprobante en "error" si algo falla.
+   * El comprobante se vuelve a leer en cada paso porque otra pestaña puede haber recargado el estado.
+   */
   private async procesar(emisorId: string, clave: string) {
-    const evento = (estado: EstadoComprobante, detalle?: string) => {
-      const c = this.estado.comprobantes[emisorId]?.[clave];
+    if (this.enCurso.has(clave)) return;
+    this.enCurso.add(clave);
+    const actual = () => this.estado.comprobantes[emisorId]?.[clave];
+    const evento = (estado: EstadoComprobante, detalle?: string, extra?: Partial<ComprobanteGuardado>) => {
+      const c = actual();
       if (!c) return;
-      c.estado = estado;
+      Object.assign(c, extra, { estado });
       c.historial.push({ estado, fecha: fechaEmisionCR(), detalle });
       this.guardar();
     };
-    await esperar(PAUSA_MS / 2);
-    evento('enviado', 'Envío al API de recepción SIMULADO (POST /recepcion).');
-    await esperar(PAUSA_MS / 2);
-    evento('recibido', 'Acuse de recibo simulado (art. 21 Decreto 44739-H).');
-    await esperar(PAUSA_MS / 2);
-    evento('procesando');
-
-    const c = this.estado.comprobantes[emisorId][clave];
-    const ctx = contextoSimuladorDemo([c.emisor]);
-    for (const r of Object.values(this.estado.receptores[emisorId] ?? {})) {
-      if (r.identificacion && r.identificacion.tipo !== '05') {
-        ctx.padron![r.identificacion.numero] = { nombre: r.nombre, estado: 'Inscrito', actividades: r.actividadEconomica ? [r.actividadEconomica] : [] };
-      }
-    }
-    let cabysValido: ((codigo: string) => boolean) | undefined;
+    const pasos: [EstadoComprobante, string | undefined][] = [
+      ['enviado', 'Envío al API de recepción SIMULADO (POST /recepcion).'],
+      ['recibido', 'Acuse de recibo simulado (art. 21 Decreto 44739-H).'],
+      ['procesando', undefined],
+    ];
     try {
-      cabysValido = await verificadorCabys();
-    } catch {
-      cabysValido = undefined; // sin catálogo disponible se omite esa verificación
+      const inicio = pasos.findIndex(([e]) => e === actual()?.estado) + 1;
+      for (const [estado, detalle] of pasos.slice(inicio)) {
+        await esperar(PAUSA_MS / 2);
+        evento(estado, detalle);
+      }
+
+      const c = actual();
+      if (!c) return;
+      const ctx = contextoSimuladorDemo([c.emisor]);
+      for (const r of Object.values(this.estado.receptores[emisorId] ?? {})) {
+        if (r.identificacion && r.identificacion.tipo !== '05') {
+          ctx.padron![r.identificacion.numero] = { nombre: r.nombre, estado: 'Inscrito', actividades: r.actividadEconomica ? [r.actividadEconomica] : [] };
+        }
+      }
+      let cabysValido: ((codigo: string) => boolean) | undefined;
+      try {
+        cabysValido = await verificadorCabys();
+      } catch {
+        cabysValido = undefined; // sin catálogo disponible se omite esa verificación
+      }
+      const respuesta = validarComoHacienda(c, { ...ctx, cabysValido, forzarRechazo: c.escenarioPrueba ?? undefined });
+      await esperar(PAUSA_MS);
+      this.bitacora(emisorId, { accion: `respuesta-${respuesta.estado}`, clave, detalle: respuesta.detalle.join(' | ') });
+      evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones', { respuestaHacienda: respuesta });
+    } catch (e) {
+      const motivo = `Falla del simulador: ${(e as Error).message}`;
+      this.bitacora(emisorId, { accion: 'respuesta-error', clave, detalle: motivo });
+      evento('error', motivo);
+    } finally {
+      this.enCurso.delete(clave);
     }
-    const respuesta = validarComoHacienda(c, { ...ctx, cabysValido, forzarRechazo: c.escenarioPrueba ?? undefined });
-    await esperar(PAUSA_MS);
-    c.respuestaHacienda = respuesta;
-    evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones');
-    this.bitacora(emisorId, { accion: `respuesta-${respuesta.estado}`, clave, detalle: respuesta.detalle.join(' | ') });
-    this.guardar();
   }
 
   // ---------------- Recepción ----------------
@@ -362,10 +408,7 @@ export class LocalBackend implements Backend {
     return this.suscribir(() => cb(copia(this.estado.bitacora[emisorId] ?? [])));
   }
 
-  async tipoCambio(): Promise<TipoCambio> {
-    const resp = await fetch('https://api.hacienda.go.cr/indicadores/tc/dolar');
-    if (!resp.ok) throw new Error(`El API de Hacienda respondió ${resp.status}.`);
-    const j = (await resp.json()) as { venta: { fecha: string; valor: number }; compra: { valor: number } };
-    return { venta: j.venta.valor, compra: j.compra.valor, fecha: j.venta.fecha, fuente: 'api.hacienda.go.cr/indicadores/tc/dolar' };
+  tipoCambio(): Promise<TipoCambio> {
+    return consultarTipoCambio();
   }
 }

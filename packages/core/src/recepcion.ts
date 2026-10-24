@@ -1,6 +1,6 @@
 import { CONDICION_IMPUESTO, type TipoMensajeReceptor } from './catalogos';
 import { generarConsecutivo } from './clave';
-import { fechaEmisionCR, limiteConfirmacionReceptor } from './fechas';
+import { REGEX_FECHA_RFC3339, diaCR, fechaEmisionCR, limiteConfirmacionReceptor } from './fechas';
 import type { Emisor, Validacion } from './tipos';
 import { generarXmlMensajeReceptor } from './xml';
 
@@ -18,9 +18,24 @@ export interface ComprobanteRecibido {
   xml?: string;
 }
 
+const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+
+/** Revierte el escapado XML (entidades predefinidas y referencias numéricas). */
+function desescapar(texto: string): string {
+  return texto.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (_, e: string) =>
+    e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : ENTIDADES[e.toLowerCase()],
+  );
+}
+
 function valorTag(xml: string, tag: string, desde = 0): string | undefined {
   const m = new RegExp(`<${tag}>([^<]*)</${tag}>`).exec(xml.slice(desde));
-  return m?.[1];
+  return m ? desescapar(m[1].trim()) : undefined;
+}
+
+function montoTag(xml: string, tag: string): number {
+  const n = Number(valorTag(xml, tag) ?? 0);
+  if (!Number.isFinite(n) || n < 0) throw new Error(`El campo ${tag} del XML no es un monto válido.`);
+  return n;
 }
 
 /** Extrae los datos básicos de un XML de comprobante recibido (lectura tolerante, sin validar esquema). */
@@ -30,10 +45,15 @@ export function extraerDatosComprobante(xml: string): ComprobanteRecibido {
   const posReceptor = xml.indexOf('<Receptor>');
   const clave = valorTag(xml, 'Clave');
   if (!clave || !/^\d{50}$/.test(clave)) throw new Error('El XML no contiene una clave numérica válida de 50 dígitos.');
+  // La fecha determina el plazo de confirmación: sin ella no se puede registrar el comprobante.
+  const fechaEmision = valorTag(xml, 'FechaEmision') ?? '';
+  if (!REGEX_FECHA_RFC3339.test(fechaEmision) || Number.isNaN(new Date(fechaEmision).getTime())) {
+    throw new Error('El XML no contiene una FechaEmision válida (formato RFC 3339).');
+  }
   return {
     clave,
     tipoDocumento: raiz,
-    fechaEmision: valorTag(xml, 'FechaEmision') ?? '',
+    fechaEmision,
     nombreEmisor: posEmisor >= 0 ? valorTag(xml, 'Nombre', posEmisor) ?? '' : '',
     identificacionEmisor: {
       tipo: posEmisor >= 0 ? valorTag(xml, 'Tipo', posEmisor) ?? '' : '',
@@ -43,8 +63,8 @@ export function extraerDatosComprobante(xml: string): ComprobanteRecibido {
       posReceptor >= 0
         ? { tipo: valorTag(xml, 'Tipo', posReceptor) ?? '', numero: valorTag(xml, 'Numero', posReceptor) ?? '' }
         : undefined,
-    totalImpuesto: Number(valorTag(xml, 'TotalImpuesto') ?? 0),
-    totalComprobante: Number(valorTag(xml, 'TotalComprobante') ?? 0),
+    totalImpuesto: montoTag(xml, 'TotalImpuesto'),
+    totalComprobante: montoTag(xml, 'TotalComprobante'),
     moneda: valorTag(xml, 'CodigoMoneda'),
     xml,
   };
@@ -83,11 +103,19 @@ export function validarConfirmacion(s: SolicitudConfirmacion): Validacion[] {
   if (s.mensaje === '3' && (s.montoTotalImpuestoAcreditar !== undefined || s.montoTotalDeGastoAplicable !== undefined)) {
     err('montos', 'En un rechazo no se indican montos a acreditar ni gasto aplicable.');
   }
-  if (s.montoTotalImpuestoAcreditar !== undefined && s.montoTotalImpuestoAcreditar > s.recibido.totalImpuesto) {
+  if (s.montoTotalImpuestoAcreditar !== undefined && !(s.montoTotalImpuestoAcreditar >= 0)) {
+    err('montoTotalImpuestoAcreditar', 'El impuesto a acreditar no puede ser negativo.');
+  } else if (s.montoTotalImpuestoAcreditar !== undefined && s.montoTotalImpuestoAcreditar > s.recibido.totalImpuesto) {
     err('montoTotalImpuestoAcreditar', 'El impuesto a acreditar no puede superar el impuesto del comprobante.');
   }
+  if (s.montoTotalDeGastoAplicable !== undefined && !(s.montoTotalDeGastoAplicable >= 0)) {
+    err('montoTotalDeGastoAplicable', 'El gasto aplicable no puede ser negativo.');
+  } else if (s.montoTotalDeGastoAplicable !== undefined && s.montoTotalDeGastoAplicable > s.recibido.totalComprobante) {
+    err('montoTotalDeGastoAplicable', 'El gasto aplicable no puede superar el total del comprobante.');
+  }
   const limite = limiteConfirmacionReceptor(new Date(s.recibido.fechaEmision), s.feriados ?? []);
-  const hoy = (s.fecha ?? new Date()).toISOString().slice(0, 10);
+  // El plazo se cuenta en días de calendario de Costa Rica, no en UTC.
+  const hoy = diaCR(s.fecha ?? new Date());
   if (hoy > limite) {
     v.push({
       campo: 'plazo',

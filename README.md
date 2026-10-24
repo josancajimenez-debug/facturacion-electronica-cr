@@ -27,7 +27,7 @@ Supabase (Auth, PostgreSQL con RLS, Realtime y función Edge) y publicación en 
 ## Documentación
 
 | Documento | Contenido |
-|---|---|
+| --- | --- |
 | [docs/MATRIZ_NORMATIVA.md](docs/MATRIZ_NORMATIVA.md) | Normas vigentes, reformas, contradicciones y referencias APA 7 |
 | [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Componentes, modelo de datos, separación de entornos y estructura del repositorio |
 | [docs/INSTALACION.md](docs/INSTALACION.md) | Instalación, Supabase y GitHub Pages |

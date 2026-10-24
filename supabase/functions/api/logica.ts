@@ -52,7 +52,8 @@ export interface Repo {
   clavesValidadas(emisorId: string): Promise<Set<string>>;
   recibido(emisorId: string, clave: string): Promise<Recibido | null>;
   insertarRecibido(emisorId: string, r: Recibido): Promise<void>;
-  guardarRecibido(emisorId: string, r: Recibido): Promise<void>;
+  /** Guarda la confirmación solo si el recibido sigue pendiente; devuelve false si otra solicitud se adelantó. */
+  confirmarRecibido(emisorId: string, r: Recibido): Promise<boolean>;
   crearEmisor(uid: string, e: Emisor, receptores: Receptor[], productos: Producto[]): Promise<string>;
   bitacora(emisorId: string, e: EntradaBitacora): Promise<void>;
 }
@@ -90,13 +91,33 @@ async function exigirMiembro(repo: Repo, emisorId: unknown, u: Usuario) {
   return e;
 }
 
-/** Envío, acuse, procesamiento y respuesta simulados (mismo flujo que el modo local). */
+/**
+ * Envío, acuse, procesamiento y respuesta simulados (mismo flujo que el modo local). Si algo falla
+ * a mitad del proceso, el comprobante queda en estado "error" con el motivo, en lugar de quedar
+ * indefinidamente en "procesando".
+ */
 export async function procesarEnvio(repo: Repo, c: ComprobanteGuardado, op: Opciones): Promise<void> {
   const evento = async (estado: EstadoComprobante, detalle?: string) => {
     c.estado = estado;
     c.historial = [...c.historial, { estado, fecha: fechaEmisionCR(), detalle }];
     await repo.guardarComprobante(c);
   };
+  try {
+    await simularRespuesta(repo, c, op, evento);
+  } catch (e) {
+    const motivo = `Falla del simulador: ${(e as Error).message}`;
+    await evento('error', motivo).catch(() => undefined);
+    await repo.bitacora(c.emisorId, { accion: 'respuesta-error', clave: c.clave, detalle: motivo }).catch(() => undefined);
+    throw e;
+  }
+}
+
+async function simularRespuesta(
+  repo: Repo,
+  c: ComprobanteGuardado,
+  op: Opciones,
+  evento: (estado: EstadoComprobante, detalle?: string) => Promise<void>,
+): Promise<void> {
   await evento('enviado', 'Envío al API de recepción SIMULADO (POST /recepcion).');
   await esperar(op.pausaMs / 2);
   await evento('recibido', 'Acuse de recibo simulado (art. 21 Decreto 44739-H).');
@@ -120,8 +141,8 @@ export async function procesarEnvio(repo: Repo, c: ComprobanteGuardado, op: Opci
 
 async function emitir(repo: Repo, d: Record<string, unknown>, u: Usuario, op: Opciones): Promise<Respuesta> {
   const emisor = await exigirMiembro(repo, d.emisorId, u);
-  const borrador = { ...(d.borrador as BorradorComprobante), emisorId: emisor.id };
-  if (!borrador || typeof borrador !== 'object' || !borrador.tipo) throw new ErrorApi(400, 'Borrador requerido.');
+  if (!d.borrador || typeof d.borrador !== 'object' || !(d.borrador as BorradorComprobante).tipo) throw new ErrorApi(400, 'Borrador requerido.');
+  const borrador: BorradorComprobante = { ...(d.borrador as BorradorComprobante), emisorId: emisor.id };
   // Se valida antes de pedir el consecutivo para no consumir numeración con comprobantes inválidos.
   const vista = previsualizar(borrador, emisor);
   if (vista.validaciones.some((v) => v.nivel === 'error')) throw new ErrorApi(400, 'El comprobante tiene errores de validación.', vista.validaciones);
@@ -196,6 +217,7 @@ async function confirmar(repo: Repo, d: Record<string, unknown>, u: Usuario): Pr
     codigoActividad: d.codigoActividad as string | undefined,
     montoTotalImpuestoAcreditar: d.montoTotalImpuestoAcreditar as number | undefined,
     montoTotalDeGastoAplicable: d.montoTotalDeGastoAplicable as number | undefined,
+    feriados: Array.isArray(d.feriados) ? d.feriados.filter((f): f is string => typeof f === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(f)) : [],
     sucursal: '001',
     terminal: '00001',
   };
@@ -204,7 +226,7 @@ async function confirmar(repo: Repo, d: Record<string, unknown>, u: Usuario): Pr
   if (prueba.validaciones.some((v) => v.nivel === 'error')) throw new ErrorApi(400, 'La confirmación tiene errores.', prueba.validaciones);
   const numero = await repo.siguienteNumero(emisor.id, claveContador(emisor.id, '001', '00001', tipo));
   const conf = generarConfirmacion({ ...solicitud, numero });
-  await repo.guardarRecibido(emisor.id, {
+  const guardado = await repo.confirmarRecibido(emisor.id, {
     ...recibido,
     estado: { '1': 'aceptado', '2': 'aceptado-parcial', '3': 'rechazado' }[mensaje],
     confirmacion: {
@@ -212,6 +234,7 @@ async function confirmar(repo: Repo, d: Record<string, unknown>, u: Usuario): Pr
       advertencias: conf.validaciones.filter((v) => v.nivel === 'advertencia').map((v) => v.mensaje),
     },
   });
+  if (!guardado) throw new ErrorApi(409, 'El comprobante ya fue confirmado.');
   await repo.bitacora(emisor.id, { accion: `confirmacion-${conf.tipo}`, clave, consecutivo: conf.consecutivo, usuario: u.email ?? u.id });
   return { status: 200, cuerpo: { consecutivo: conf.consecutivo } };
 }

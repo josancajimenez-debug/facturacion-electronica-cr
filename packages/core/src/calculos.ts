@@ -191,9 +191,12 @@ export function calcularResumen(borrador: BorradorComprobante, lineas: LineaCalc
       ? totalVenta
       : totalVentaNeta.plus(totalImpuesto).plus(totalOtrosCargos).minus(totalIVADevuelto);
 
+  // Con un único medio de pago su monto es siempre el total (un monto parcial que quedó de una
+  // edición previa con varios medios produciría un TotalMedioPago inconsistente).
+  const unico = borrador.mediosPago.length === 1;
   const mediosPago = borrador.mediosPago.map((m) => ({
     ...m,
-    monto: m.monto !== undefined ? r5(m.monto) : borrador.mediosPago.length === 1 ? r5(totalComprobante) : undefined,
+    monto: unico ? r5(totalComprobante) : m.monto !== undefined ? r5(m.monto) : undefined,
   }));
 
   return {

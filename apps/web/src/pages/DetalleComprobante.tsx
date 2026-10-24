@@ -12,9 +12,9 @@ import {
   type Comprobante,
 } from '@fe-cr/core';
 import { ArrowLeft, Download, FileMinus, FilePlus, FileText, RefreshCcw, Wallet } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Alerta, Estado, VisorXml } from '../components/ui';
+import { Alerta, Cargando, Estado, VisorXml } from '../components/ui';
 import { useApp } from '../estado';
 import { descargar, dinero, fechaHora } from '../lib/formato';
 import { generarPdf } from '../lib/pdf';
@@ -27,12 +27,26 @@ function tipoDocRef(c: Comprobante, para: 'NC' | 'ND' | 'REP' | 'sustituir'): st
 
 export function DetalleComprobante() {
   const { clave } = useParams();
-  const { comprobantes, preferencias, avisar } = useApp();
+  const { comprobantes, comprobantesListos, preferencias, avisar } = useApp();
   const navegar = useNavigate();
   const [pestana, setPestana] = useState<'resumen' | 'xml' | 'respuesta' | 'api' | 'pdf'>('resumen');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [generandoPdf, setGenerandoPdf] = useState(false);
+
+  // Al cambiar de comprobante (p. ej. desde una referencia) se vuelve al resumen y se libera el PDF anterior.
+  useEffect(() => {
+    setPestana('resumen');
+    setPdfUrl(null);
+  }, [clave]);
+  useEffect(() => () => {
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+  }, [pdfUrl]);
+
   const c = comprobantes.find((x) => x.clave === clave);
-  if (!c) return <Alerta tipo="warn">Comprobante no encontrado. <Link to="/comprobantes">Volver</Link></Alerta>;
+  if (!c) {
+    if (!comprobantesListos) return <Cargando texto="Cargando comprobante…" />;
+    return <Alerta tipo="warn">Comprobante no encontrado. <Link to="/comprobantes">Volver</Link></Alerta>;
+  }
   const partes = descomponerClave(c.clave)!;
   const m = c.resumen.codigoMoneda;
 
@@ -84,16 +98,28 @@ export function DetalleComprobante() {
     });
 
   const verPdf = async () => {
+    setPestana('pdf');
+    setGenerandoPdf(true);
     try {
       const blob = await generarPdf(c, { incluirQr: preferencias.incluirQr });
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
       setPdfUrl(URL.createObjectURL(blob));
-      setPestana('pdf');
     } catch (e) {
       avisar(`No se pudo generar el PDF: ${(e as Error).message}`, 'err');
+      setPestana('resumen');
+    } finally {
+      setGenerandoPdf(false);
     }
   };
-  const bajarPdf = async () => descargar(nombresArchivo.pdf(c.clave), await generarPdf(c, { incluirQr: preferencias.incluirQr }));
+  const bajarPdf = async () => {
+    setGenerandoPdf(true);
+    try {
+      descargar(nombresArchivo.pdf(c.clave), await generarPdf(c, { incluirQr: preferencias.incluirQr }));
+    } catch (e) {
+      avisar(`No se pudo generar el PDF: ${(e as Error).message}`, 'err');
+    } finally {
+      setGenerandoPdf(false);
+    }
+  };
 
   const aceptado = c.estado === 'aceptado';
   const esCreditoIva = ['08', '10'].includes(c.borrador.condicionVenta) && c.tipo === 'FE';
@@ -109,7 +135,7 @@ export function DetalleComprobante() {
         <div className="row">
           <button className="btn" onClick={() => descargar(nombresArchivo.xml(c.clave), c.xml)}><Download /> XML</button>
           {c.respuestaHacienda && <button className="btn" onClick={() => descargar(nombresArchivo.respuesta(c.clave), c.respuestaHacienda!.xml)}><Download /> Respuesta</button>}
-          <button className="btn" onClick={bajarPdf}><Download /> PDF</button>
+          <button className="btn" onClick={bajarPdf} disabled={generandoPdf}><Download /> PDF</button>
         </div>
       </div>
 
@@ -117,6 +143,13 @@ export function DetalleComprobante() {
         <Alerta tipo="err">
           <strong>Rechazado por el validador (simulado).</strong> Según el art. 9 de la RES-0027 y el art. 19 del Decreto 44739-H, un comprobante rechazado carece de validez:
           no se anula con nota de crédito; se emite uno nuevo que indique cuál sustituye.
+          <div style={{ marginTop: 8 }}><button className="btn btn-sm" onClick={sustituir}><RefreshCcw /> Emitir comprobante sustituto</button></div>
+        </Alerta>
+      )}
+      {c.estado === 'error' && (
+        <Alerta tipo="err">
+          <strong>El simulador no pudo completar la validación.</strong> {c.historial.at(-1)?.detalle} El comprobante no tiene respuesta de Hacienda (simulada);
+          puede emitir uno nuevo que lo sustituya.
           <div style={{ marginTop: 8 }}><button className="btn btn-sm" onClick={sustituir}><RefreshCcw /> Emitir comprobante sustituto</button></div>
         </Alerta>
       )}
@@ -199,7 +232,7 @@ export function DetalleComprobante() {
             )}
             {pestana === 'pdf' && (pdfUrl ? (
               <iframe title="Representación gráfica" src={pdfUrl} style={{ width: '100%', height: 640, border: '1px solid var(--border)', borderRadius: 8 }} />
-            ) : <p className="muted">Generando…</p>)}
+            ) : <Cargando texto="Generando la representación gráfica…" />)}
           </div>
         </div>
 

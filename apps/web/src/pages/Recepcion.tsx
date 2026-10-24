@@ -1,34 +1,51 @@
-import { CONDICION_IMPUESTO, MENSAJE, limiteConfirmacionReceptor, nombresArchivo } from '@fe-cr/core';
+import { CONDICION_IMPUESTO, MENSAJE, limiteConfirmacionReceptor, nombresArchivo, type Validacion } from '@fe-cr/core';
 import { Download, Inbox, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { ErrorConValidaciones, type DatosConfirmacion, type Recibido } from '../backend/tipos';
 import { Alerta, Estado, ListaValidaciones, Modal, Selector, Texto, Vacio, VisorXml } from '../components/ui';
 import { useApp } from '../estado';
-import { descargar, dinero, fecha, fechaHora } from '../lib/formato';
+import { descargar, dinero, fecha, fechaHora, hoyCR } from '../lib/formato';
+
+const TAMANO_MAXIMO_XML = 1_000_000;
 
 export function Recepcion() {
   const { recibidos, emisor, backend, avisar, preferencias } = useApp();
-  const limite = (r: Recibido) => limiteConfirmacionReceptor(new Date(r.fechaEmision), preferencias.feriados);
+  // Un registro con fecha inválida no debe romper toda la página: se usa el límite guardado.
+  const limite = (r: Recibido) => {
+    const d = new Date(r.fechaEmision);
+    return Number.isNaN(d.getTime()) ? r.limiteConfirmacion : limiteConfirmacionReceptor(d, preferencias.feriados);
+  };
   const [confirmando, setConfirmando] = useState<Recibido | null>(null);
   const [viendo, setViendo] = useState<Recibido | null>(null);
-  const hoy = new Date().toISOString().slice(0, 10);
+  const [ocupado, setOcupado] = useState(false);
+  const hoy = hoyCR();
 
   const simular = async () => {
+    setOcupado(true);
     try {
       await backend.simularRecepcion(emisor!.id);
       avisar('Se recibió un comprobante simulado de un proveedor ficticio.', 'ok');
     } catch (e) {
       avisar((e as Error).message, 'err');
+    } finally {
+      setOcupado(false);
     }
   };
 
   const cargarXml = async (archivo: File | undefined) => {
     if (!archivo) return;
+    if (archivo.size > TAMANO_MAXIMO_XML) {
+      avisar('El archivo supera 1 MB; no parece un comprobante electrónico.', 'err');
+      return;
+    }
+    setOcupado(true);
     try {
       await backend.registrarRecibidoXml(emisor!.id, await archivo.text());
       avisar('XML registrado para confirmación.', 'ok');
     } catch (e) {
       avisar((e as Error).message, 'err');
+    } finally {
+      setOcupado(false);
     }
   };
 
@@ -40,11 +57,11 @@ export function Recepcion() {
           <p>Mensaje de confirmación del receptor: aceptación total (05), parcial (06) o rechazo (07) — art. 10 MH-DGT-RES-0027-2024.</p>
         </div>
         <div className="row">
-          <label className="btn">
+          <label className={`btn ${ocupado ? 'disabled' : ''}`}>
             <Upload /> Cargar XML
-            <input type="file" accept=".xml,text/xml,application/xml" hidden onChange={(e) => { void cargarXml(e.target.files?.[0]); e.target.value = ''; }} />
+            <input type="file" accept=".xml,text/xml,application/xml" hidden disabled={ocupado} onChange={(e) => { void cargarXml(e.target.files?.[0]); e.target.value = ''; }} />
           </label>
-          <button className="btn btn-primary" onClick={simular}><Inbox /> Simular comprobante de proveedor</button>
+          <button className="btn btn-primary" onClick={simular} disabled={ocupado}><Inbox /> Simular comprobante de proveedor</button>
         </div>
       </div>
       <Alerta tipo="info">
@@ -98,15 +115,20 @@ export function Recepcion() {
 }
 
 function FormConfirmacion({ recibido, onCerrar }: { recibido: Recibido; onCerrar: () => void }) {
-  const { emisor, backend, avisar } = useApp();
-  const [d, setD] = useState<DatosConfirmacion>({ clave: recibido.clave, mensaje: '1', condicionImpuesto: '01', codigoActividad: emisor!.actividades.find((a) => a.principal)?.codigo, montoTotalImpuestoAcreditar: recibido.totalImpuesto });
-  const [validaciones, setValidaciones] = useState<import('@fe-cr/core').Validacion[]>([]);
+  const { emisor, backend, avisar, preferencias } = useApp();
+  const principal = emisor!.actividades.find((a) => a.principal)?.codigo ?? emisor!.actividades[0]?.codigo;
+  const [d, setD] = useState<DatosConfirmacion>({ clave: recibido.clave, mensaje: '1', condicionImpuesto: '01', codigoActividad: principal, montoTotalImpuestoAcreditar: recibido.totalImpuesto });
+  const [validaciones, setValidaciones] = useState<Validacion[]>([]);
+  const [enviando, setEnviando] = useState(false);
   const set = (p: Partial<DatosConfirmacion>) => setD((x) => ({ ...x, ...p }));
 
   const enviar = async () => {
+    setEnviando(true);
+    setValidaciones([]);
     try {
       const r = await backend.confirmar(emisor!.id, {
         ...d,
+        feriados: preferencias.feriados,
         codigoActividad: d.condicionImpuesto === '05' ? undefined : d.codigoActividad,
         montoTotalImpuestoAcreditar: d.mensaje === '3' ? undefined : d.montoTotalImpuestoAcreditar,
         montoTotalDeGastoAplicable: d.mensaje === '3' ? undefined : d.montoTotalDeGastoAplicable,
@@ -116,12 +138,14 @@ function FormConfirmacion({ recibido, onCerrar }: { recibido: Recibido; onCerrar
     } catch (e) {
       if (e instanceof ErrorConValidaciones) setValidaciones(e.validaciones);
       avisar((e as Error).message, 'err');
+    } finally {
+      setEnviando(false);
     }
   };
 
   return (
     <Modal titulo="Confirmar comprobante recibido" onCerrar={onCerrar}
-      pie={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn btn-primary" onClick={enviar}>Generar mensaje</button></>}>
+      pie={<><button className="btn" onClick={onCerrar}>Cancelar</button><button className="btn btn-primary" onClick={enviar} disabled={enviando}>{enviando ? 'Generando…' : 'Generar mensaje'}</button></>}>
       <div className="stack">
         <p className="small muted" style={{ margin: 0 }}>{recibido.nombreEmisor} · Total {dinero(recibido.totalComprobante, recibido.moneda ?? 'CRC')} · Impuesto {dinero(recibido.totalImpuesto, recibido.moneda ?? 'CRC')}</p>
         <div className="grid grid-2">

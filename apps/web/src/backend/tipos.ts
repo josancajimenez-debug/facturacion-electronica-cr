@@ -39,6 +39,8 @@ export interface DatosConfirmacion {
   codigoActividad?: string;
   montoTotalImpuestoAcreditar?: number;
   montoTotalDeGastoAplicable?: number;
+  /** Feriados configurados por el usuario, para calcular el plazo en días hábiles. */
+  feriados?: string[];
 }
 
 export interface TipoCambio {
@@ -46,6 +48,17 @@ export interface TipoCambio {
   compra: number;
   fecha: string;
   fuente: string;
+}
+
+/** Filas de bitácora que trae el backend Supabase (las más recientes). */
+export const LIMITE_BITACORA = 500;
+
+/** Tipo de cambio de referencia desde el API público de Hacienda (permite CORS). */
+export async function consultarTipoCambio(): Promise<TipoCambio> {
+  const resp = await fetch('https://api.hacienda.go.cr/indicadores/tc/dolar');
+  if (!resp.ok) throw new Error(`El API de Hacienda respondió ${resp.status}.`);
+  const j = (await resp.json()) as { venta: { fecha: string; valor: number }; compra: { valor: number } };
+  return { venta: j.venta.valor, compra: j.compra.valor, fecha: j.venta.fecha, fuente: 'api.hacienda.go.cr/indicadores/tc/dolar' };
 }
 
 /** Error con el detalle de validaciones devuelto al emitir o confirmar. */

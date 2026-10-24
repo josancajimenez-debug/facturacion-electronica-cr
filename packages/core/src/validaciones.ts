@@ -13,7 +13,7 @@ import {
 } from './catalogos';
 import { REGEX_FECHA_RFC3339 } from './fechas';
 import { verificarUbicacion } from './ubicacion';
-import type { BorradorComprobante, Emisor, Identificacion, Resumen, Validacion } from './tipos';
+import type { BorradorComprobante, Emisor, Identificacion, LineaCalculada, Resumen, Validacion } from './tipos';
 
 const ANEXO = 'Anexos y Estructuras v4.4';
 const FUENTE_DTA = 'División Territorial Administrativa 2022 (Registro Nacional – IGN); nota 14';
@@ -59,7 +59,7 @@ const esAjuste = (tipo: string) => tipo === 'NC' || tipo === 'ND';
  * Valida un borrador antes de emitirlo. No sustituye la validación del Ministerio de Hacienda;
  * reproduce las reglas de condicionalidad y formato documentadas en el Anexo 1 v4.4.
  */
-export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?: Resumen): Validacion[] {
+export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?: Resumen, lineas?: LineaCalculada[]): Validacion[] {
   const v: Validacion[] = [];
   const err = (campo: string, mensaje: string, fuente = ANEXO) => v.push({ campo, mensaje, nivel: 'error', fuente });
   const adv = (campo: string, mensaje: string, fuente = ANEXO) => v.push({ campo, mensaje, nivel: 'advertencia', fuente });
@@ -154,11 +154,14 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
     l.descuentos.forEach((d, j) => {
       if (!enCatalogo(CODIGO_DESCUENTO, d.codigo)) err(`${p}.descuentos.${j}`, `Línea ${n}: código de descuento no válido (nota 20).`);
       if (d.monto !== undefined && (d.monto < 0 || d.monto > montoTotal)) err(`${p}.descuentos.${j}`, `Línea ${n}: el descuento no puede superar el monto total.`);
+      if (d.porcentaje !== undefined && !(d.porcentaje >= 0 && d.porcentaje <= 100)) err(`${p}.descuentos.${j}`, `Línea ${n}: el porcentaje de descuento debe estar entre 0 y 100.`);
       if (d.codigo === '99') {
         if (!largo(d.codigoOtro, 5, 100)) err(`${p}.descuentos.${j}`, `Línea ${n}: describa el código de descuento OTRO (5-100).`);
         if (!largo(d.naturaleza, 3, 80)) err(`${p}.descuentos.${j}`, `Línea ${n}: indique la naturaleza del descuento (3-80).`);
       }
     });
+    // SubTotal = MontoTotal − descuentos: la suma de varios descuentos tampoco puede superar el monto.
+    if (lineas?.[i] && lineas[i].subTotal < 0) err(`${p}.descuentos`, `Línea ${n}: la suma de los descuentos supera el monto total de la línea.`);
     const tarifa = TARIFA_IVA.find((t) => t.codigo === l.codigoTarifaIva);
     if (!tarifa) err(`${p}.codigoTarifaIva`, `Línea ${n}: código de tarifa IVA no válido (nota 8.1).`);
     else if (tarifa.soloAjustes && !esAjuste(b.tipo)) err(`${p}.codigoTarifaIva`, `Línea ${n}: la tarifa "${tarifa.descripcion}" solo se usa en notas de crédito o débito.`);

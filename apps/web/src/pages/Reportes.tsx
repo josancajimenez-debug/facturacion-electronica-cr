@@ -1,18 +1,15 @@
-import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion, type TipoComprobante } from '@fe-cr/core';
+import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion } from '@fe-cr/core';
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Alerta, Texto } from '../components/ui';
 import { useApp } from '../estado';
-import { csv, descargar, dinero } from '../lib/formato';
+import { csv, descargar, dinero, mesCR, signoVenta } from '../lib/formato';
 
 type Fila = { clave: string; etiqueta: string; base: number; impuesto: number; cantidad: number };
 
-/** Signo de cada comprobante en las ventas: las NC restan; FEC (compras) y REP (pagos) no son ventas nuevas. */
-const signoVenta = (t: TipoComprobante) => (t === 'NC' ? -1 : t === 'FEC' || t === 'REP' ? 0 : 1);
-
 export function Reportes() {
   const { comprobantes, recibidos } = useApp();
-  const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
+  const [mes, setMes] = useState(mesCR);
 
   const datos = useMemo(() => {
     const delMes = comprobantes.filter((c) => c.fechaEmision.startsWith(mes) && c.estado === 'aceptado');
@@ -92,7 +89,7 @@ export function Reportes() {
           <p>Resumen del período a partir de comprobantes aceptados por el simulador. Útil como apoyo, no sustituye la declaración de IVA (D-104) en TRIBU-CR.</p>
         </div>
         <div className="row" style={{ alignItems: 'flex-end' }}>
-          <div style={{ width: 170 }}><Texto etiqueta="Período" tipo="month" valor={mes} onCambio={setMes} /></div>
+          <div style={{ width: 170 }}><Texto etiqueta="Período" tipo="month" valor={mes} onCambio={(v) => setMes(v || mesCR())} /></div>
           <button className="btn" onClick={exportar}><Download /> CSV</button>
         </div>
       </div>

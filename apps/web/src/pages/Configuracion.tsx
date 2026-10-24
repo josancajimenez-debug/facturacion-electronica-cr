@@ -25,8 +25,8 @@ export function Configuracion() {
             <table className="small"><tbody>
               <tr><td>Backend</td><td>{backend.descripcion}</td></tr>
               <tr><td>Ambiente tributario</td><td>{config.ambiente}{config.ambienteSolicitado !== 'simulacion' && ` (se ignoró «${config.ambienteSolicitado}»)`}</td></tr>
-              <tr><td>API real de recepción (referencia)</td><td className="mono">{URLS_HACIENDA.recepcionProduccion}</td></tr>
-              <tr><td>Sandbox oficial (referencia)</td><td className="mono">{URLS_HACIENDA.recepcionSandbox}</td></tr>
+              <tr><td>API real de recepción (referencia)</td><td className="mono quiebre">{URLS_HACIENDA.recepcionProduccion}</td></tr>
+              <tr><td>Sandbox oficial (referencia)</td><td className="mono quiebre">{URLS_HACIENDA.recepcionSandbox}</td></tr>
             </tbody></table>
             <Alerta tipo="warn">
               <strong>El envío real está bloqueado.</strong>
@@ -48,9 +48,13 @@ export function Configuracion() {
               ayuda="Se excluyen sábados y domingos. La bibliografía no fija el calendario de feriados: regístrelos según la legislación laboral vigente." />
             <div>
               <button className="btn" onClick={() => {
-                const lista = feriados.split(',').map((f) => f.trim()).filter((f) => /^\d{4}-\d{2}-\d{2}$/.test(f));
+                const entradas = feriados.split(',').map((f) => f.trim()).filter(Boolean);
+                const validas = (f: string) => /^\d{4}-\d{2}-\d{2}$/.test(f) && !Number.isNaN(new Date(`${f}T12:00:00Z`).getTime());
+                const lista = [...new Set(entradas.filter(validas))].sort();
+                const ignoradas = entradas.filter((f) => !validas(f));
                 guardarPreferencias({ ...preferencias, feriados: lista });
-                avisar(`${lista.length} feriado(s) guardados.`, 'ok');
+                setFeriados(lista.join(', '));
+                avisar(`${lista.length} feriado(s) guardados.${ignoradas.length ? ` Se ignoraron por formato inválido: ${ignoradas.join(', ')}.` : ''}`, ignoradas.length ? 'err' : 'ok');
               }}>Guardar feriados</button>
             </div>
           </div>

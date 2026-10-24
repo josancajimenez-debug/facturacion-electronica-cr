@@ -1,3 +1,5 @@
+import { diaCR, type TipoComprobante } from '@fe-cr/core';
+
 export function dinero(valor: number, moneda = 'CRC'): string {
   try {
     return new Intl.NumberFormat('es-CR', { style: 'currency', currency: moneda, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
@@ -21,8 +23,21 @@ export function fechaHora(iso: string): string {
 export function fecha(iso: string): string {
   if (!iso) return '';
   const d = new Date(iso.length === 10 ? `${iso}T12:00:00-06:00` : iso);
+  if (Number.isNaN(d.getTime())) return iso;
   return new Intl.DateTimeFormat('es-CR', { dateStyle: 'medium', timeZone: 'America/Costa_Rica' }).format(d);
 }
+
+/** Día (AAAA-MM-DD) y mes (AAAA-MM) actuales en Costa Rica; toISOString() daría la fecha UTC. */
+export const hoyCR = (): string => diaCR(new Date());
+export const mesCR = (): string => hoyCR().slice(0, 7);
+
+/** Signo de cada comprobante en las ventas: las NC restan; FEC (compras) y REP (pagos) no son ventas nuevas. */
+export const signoVenta = (tipo: TipoComprobante): number => (tipo === 'NC' ? -1 : tipo === 'FEC' || tipo === 'REP' ? 0 : 1);
+export const aColones = (monto: number, tipoCambio: number): number => monto * (tipoCambio || 1);
+
+/** <input type="datetime-local"> ↔ RFC 3339 en hora de Costa Rica (-06:00). */
+export const aRfc = (v: string): string => (v ? `${v.length === 16 ? `${v}:00` : v}-06:00` : '');
+export const deRfc = (v: string | undefined): string => (v ?? '').slice(0, 16);
 
 export function descargar(nombre: string, contenido: string | Blob, tipo = 'application/xml'): void {
   const blob = typeof contenido === 'string' ? new Blob([contenido], { type: `${tipo};charset=utf-8` }) : contenido;

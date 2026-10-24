@@ -15,9 +15,10 @@ export function Login() {
     e.preventDefault();
     setError('');
     setEnviando(true);
+    const correo = email.trim();
     try {
-      if (modo === 'ingresar') await backend.ingresar(email, clave);
-      else await backend.registrar(email, clave);
+      if (modo === 'ingresar') await backend.ingresar(correo, clave);
+      else await backend.registrar(correo, clave);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -43,11 +44,11 @@ export function Login() {
             <Texto etiqueta="Correo electrónico" tipo="email" valor={email} onCambio={setEmail} requerido />
             <Texto etiqueta="Contraseña" tipo="password" valor={clave} onCambio={setClave} requerido ayuda={modo === 'registrar' ? 'Mínimo 6 caracteres.' : undefined} />
             {error && <Alerta tipo="err">{error}</Alerta>}
-            <button className="btn btn-primary" disabled={enviando || !email || !clave}>
-              {modo === 'ingresar' ? 'Ingresar' : 'Crear cuenta'}
+            <button className="btn btn-primary" disabled={enviando || !email.trim() || !clave}>
+              {enviando ? 'Un momento…' : modo === 'ingresar' ? 'Ingresar' : 'Crear cuenta'}
             </button>
           </form>
-          <button className="btn btn-ghost" onClick={() => setModo(modo === 'ingresar' ? 'registrar' : 'ingresar')}>
+          <button className="btn btn-ghost" onClick={() => { setModo(modo === 'ingresar' ? 'registrar' : 'ingresar'); setError(''); }}>
             {modo === 'ingresar' ? '¿No tiene cuenta? Crear una' : 'Ya tengo cuenta'}
           </button>
           <p className="small muted" style={{ margin: 0, display: 'flex', gap: 6 }}>

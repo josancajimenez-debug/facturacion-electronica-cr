@@ -1,7 +1,7 @@
 import { REGEX_CORREO, TIPO_IDENTIFICACION, validarIdentificacion, type Emisor } from '@fe-cr/core';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Plus, Search, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 import { Alerta, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 
@@ -23,9 +23,11 @@ export function EmisorPagina() {
   const [form, setForm] = useState<Emisor>(() => emisor ?? nuevoEmisor());
   const [creando, setCreando] = useState(!emisor);
   const [consultando, setConsultando] = useState(false);
+  // Solo se recarga el formulario al cambiar de emisor: cada guardado del backend entrega una copia
+  // nueva del mismo emisor y, si dependiera del objeto, borraría lo que el usuario está editando.
   useEffect(() => {
     if (emisor && !creando) setForm(emisor);
-  }, [emisor, creando]);
+  }, [emisor?.id, creando]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (p: Partial<Emisor>) => setForm((f) => ({ ...f, ...p }));
   const errores: string[] = [];
@@ -36,14 +38,29 @@ export function EmisorPagina() {
   if (form.correos.filter(Boolean).length === 0) errores.push('Registre al menos un correo.');
   form.correos.filter(Boolean).forEach((c) => !REGEX_CORREO.test(c) && errores.push(`Correo inválido: ${c}`));
   if (form.actividades.length === 0) errores.push('Registre al menos una actividad económica.');
+  form.actividades.forEach((a, i) => {
+    if (!a.codigo.trim()) errores.push(`Actividad ${i + 1}: indique el código.`);
+    if (!a.descripcion.trim()) errores.push(`Actividad ${i + 1}: indique la descripción.`);
+  });
+  const repetidas = (lista: string[]) => [...new Set(lista.filter((x, i) => x && lista.indexOf(x) !== i))];
+  repetidas(form.actividades.map((a) => a.codigo.trim())).forEach((c) => errores.push(`La actividad ${c} está repetida.`));
   if (!form.proveedorSistemas) errores.push('Indique el proveedor de sistemas (su propia identificación si es desarrollo propio).');
+  if (form.telefono && !/^\d{8,20}$/.test(form.telefono.numero)) errores.push('El teléfono debe tener entre 8 y 20 dígitos.');
+  if (form.sucursales.length === 0) errores.push('Registre al menos una sucursal.');
   form.sucursales.forEach((s) => {
     if (!/^\d{3}$/.test(s.codigo)) errores.push(`Sucursal "${s.nombre}": código de 3 dígitos.`);
+    if (s.terminales.length === 0) errores.push(`Sucursal ${s.codigo}: registre al menos una terminal.`);
     s.terminales.forEach((t) => !/^\d{5}$/.test(t) && errores.push(`Sucursal ${s.codigo}: la terminal ${t} debe tener 5 dígitos.`));
+    repetidas(s.terminales).forEach((t) => errores.push(`Sucursal ${s.codigo}: la terminal ${t} está repetida.`));
   });
-  form.telefonosSinpe.forEach((t) => !/^\d{8}$/.test(t) && errores.push(`Número SINPE ${t}: 8 dígitos.`));
+  // Dos sucursales con el mismo código compartirían la numeración consecutiva (Nota 3).
+  repetidas(form.sucursales.map((s) => s.codigo)).forEach((c) => errores.push(`El código de sucursal ${c} está repetido.`));
+  form.telefonosSinpe.forEach((t) => !/^\d{8}$/.test(t) && errores.push(`Número SINPE ${t || '(vacío)'}: 8 dígitos.`));
+  repetidas(form.telefonosSinpe).forEach((t) => errores.push(`El número SINPE ${t} está repetido.`));
 
+  const [guardando, setGuardando] = useState(false);
   const guardar = async () => {
+    setGuardando(true);
     try {
       const id = await backend.guardarEmisor({ ...form, correos: form.correos.filter(Boolean) });
       seleccionarEmisor(id);
@@ -51,6 +68,8 @@ export function EmisorPagina() {
       avisar('Emisor guardado.', 'ok');
     } catch (e) {
       avisar((e as Error).message, 'err');
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -88,14 +107,26 @@ export function EmisorPagina() {
               <Plus /> Nuevo emisor
             </button>
           )}
-          <button className="btn btn-primary" disabled={errores.length > 0} onClick={guardar}>
-            Guardar
+          {emisor && creando && (
+            <button className="btn" onClick={() => { setCreando(false); setForm(emisor); }}>
+              Cancelar
+            </button>
+          )}
+          <button className="btn btn-primary" disabled={errores.length > 0 || guardando} onClick={guardar}>
+            {guardando ? 'Guardando…' : creando ? 'Crear emisor' : 'Guardar'}
           </button>
         </div>
       </div>
 
       {errores.length > 0 && (
-        <div className="card"><div className="card-body"><Alerta tipo="warn"><strong>Pendiente:</strong> {errores.join(' ')}</Alerta></div></div>
+        <div className="card">
+          <div className="card-body">
+            <Alerta tipo="warn">
+              <strong>Pendiente antes de guardar:</strong>
+              <ul className="lista-errores">{errores.map((e) => <li key={e}>{e}</li>)}</ul>
+            </Alerta>
+          </div>
+        </div>
       )}
 
       <div className="card">
@@ -111,7 +142,7 @@ export function EmisorPagina() {
             ]}
             ayuda="Art. 2 incisos 9, 10 y 21 del Decreto 44739-H." />
           <Selector etiqueta="Tipo de identificación" valor={form.identificacion.tipo} onCambio={(v) => set({ identificacion: { ...form.identificacion, tipo: v } })} opciones={TIPO_IDENTIFICACION.slice(0, 4)} requerido />
-          <Campo2 etiqueta="Número de identificación" valor={form.identificacion.numero} onCambio={(v) => set({ identificacion: { ...form.identificacion, numero: v.replace(/\D/g, '') } })} accion={
+          <CampoConAccion etiqueta="Número de identificación" valor={form.identificacion.numero} onCambio={(v) => set({ identificacion: { ...form.identificacion, numero: v.replace(/\D/g, '') } })} accion={
             <button className="btn btn-sm" onClick={consultarHacienda} disabled={consultando || !!eId} title="Consulta pública GET /fe/ae">
               <Search /> Consultar
             </button>
@@ -140,7 +171,7 @@ export function EmisorPagina() {
       <div className="card">
         <div className="card-head">
           <h2>Actividades económicas</h2>
-          <button className="btn btn-sm" onClick={() => set({ actividades: [...form.actividades, { codigo: '', descripcion: '' }] })}><Plus /> Agregar</button>
+          <button className="btn btn-sm" onClick={() => set({ actividades: [...form.actividades, { codigo: '', descripcion: '', principal: form.actividades.length === 0 }] })}><Plus /> Agregar</button>
         </div>
         <div className="card-body stack">
           <p className="small muted" style={{ margin: 0 }}>
@@ -148,7 +179,7 @@ export function EmisorPagina() {
           </p>
           {form.actividades.map((a, i) => (
             <div key={i} className="row" style={{ alignItems: 'flex-end' }}>
-              <div style={{ width: 140 }}><Texto etiqueta="Código" valor={a.codigo} onCambio={(v) => set({ actividades: form.actividades.map((x, j) => (j === i ? { ...x, codigo: v.trim() } : x)) })} max={6} /></div>
+              <div style={{ width: 140 }}><Texto etiqueta="Código" valor={a.codigo} placeholder="6920.0" onCambio={(v) => set({ actividades: form.actividades.map((x, j) => (j === i ? { ...x, codigo: v.trim() } : x)) })} max={6} /></div>
               <div style={{ flex: 1, minWidth: 200 }}><Texto etiqueta="Descripción" valor={a.descripcion} onCambio={(v) => set({ actividades: form.actividades.map((x, j) => (j === i ? { ...x, descripcion: v } : x)) })} /></div>
               <label className="check" style={{ marginBottom: 8 }}>
                 <input type="radio" name="principal" checked={!!a.principal} onChange={() => set({ actividades: form.actividades.map((x, j) => ({ ...x, principal: j === i })) })} /> Principal
@@ -202,12 +233,14 @@ export function EmisorPagina() {
   );
 }
 
-function Campo2({ etiqueta, valor, onCambio, accion, ayuda }: { etiqueta: string; valor: string; onCambio: (v: string) => void; accion: React.ReactNode; ayuda?: string }) {
+/** Campo de texto con un botón de acción al lado (consulta al API de Hacienda). */
+function CampoConAccion({ etiqueta, valor, onCambio, accion, ayuda }: { etiqueta: string; valor: string; onCambio: (v: string) => void; accion: ReactNode; ayuda?: string }) {
+  const id = useId();
   return (
     <div className="field">
-      <label>{etiqueta} *</label>
+      <label htmlFor={id}>{etiqueta} *</label>
       <div className="row" style={{ flexWrap: 'nowrap' }}>
-        <input aria-label={etiqueta} value={valor} onChange={(e) => onCambio(e.target.value)} maxLength={12} />
+        <input id={id} inputMode="numeric" value={valor} onChange={(e) => onCambio(e.target.value)} maxLength={12} />
         {accion}
       </div>
       {ayuda && <span className="hint">{ayuda}</span>}

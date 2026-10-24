@@ -27,7 +27,7 @@ export interface ParametrosEmision {
 export function previsualizar(borrador: BorradorComprobante, emisor: Emisor) {
   try {
     const { lineas, resumen } = calcularComprobante(borrador);
-    return { lineas, resumen, validaciones: validarBorrador(borrador, emisor, resumen) };
+    return { lineas, resumen, validaciones: validarBorrador(borrador, emisor, resumen, lineas) };
   } catch (e) {
     return {
       lineas: [],
@@ -45,7 +45,7 @@ export function construirComprobante(p: ParametrosEmision): Comprobante {
   const { borrador, emisor, numero, ambiente } = p;
   const fecha = p.fecha ?? new Date();
   const { lineas, resumen } = calcularComprobante(borrador);
-  const validaciones = validarBorrador(borrador, emisor, resumen);
+  const validaciones = validarBorrador(borrador, emisor, resumen, lineas);
   if (hayErrores(validaciones)) throw new ErrorValidacion(validaciones);
 
   const consecutivo = generarConsecutivo(borrador.sucursal, borrador.terminal, borrador.tipo, numero);

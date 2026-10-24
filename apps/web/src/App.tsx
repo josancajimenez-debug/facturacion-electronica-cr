@@ -1,26 +1,36 @@
+import { lazy, type ComponentType } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { Cargando } from './components/ui';
 import { useApp } from './estado';
-import { Bienvenida } from './pages/Bienvenida';
-import { Bitacora } from './pages/Bitacora';
-import { Comprobantes } from './pages/Comprobantes';
-import { Configuracion } from './pages/Configuracion';
-import { Dashboard } from './pages/Dashboard';
-import { DetalleComprobante } from './pages/DetalleComprobante';
-import { EmisorPagina } from './pages/Emisor';
-import { Escenarios } from './pages/Escenarios';
 import { Login } from './pages/Login';
-import { NuevoComprobante } from './pages/NuevoComprobante';
-import { Normativa } from './pages/Normativa';
-import { Productos } from './pages/Productos';
-import { Receptores } from './pages/Receptores';
-import { Recepcion } from './pages/Recepcion';
-import { Reportes } from './pages/Reportes';
+
+/** Carga diferida de cada página: el paquete inicial solo incluye el armazón y la pantalla de ingreso. */
+const pagina = <K extends string>(cargar: () => Promise<Record<K, ComponentType>>, nombre: K) =>
+  lazy(() => cargar().then((m) => ({ default: m[nombre] })));
+
+const Bienvenida = pagina(() => import('./pages/Bienvenida'), 'Bienvenida');
+const Bitacora = pagina(() => import('./pages/Bitacora'), 'Bitacora');
+const Comprobantes = pagina(() => import('./pages/Comprobantes'), 'Comprobantes');
+const Configuracion = pagina(() => import('./pages/Configuracion'), 'Configuracion');
+const Dashboard = pagina(() => import('./pages/Dashboard'), 'Dashboard');
+const DetalleComprobante = pagina(() => import('./pages/DetalleComprobante'), 'DetalleComprobante');
+const EmisorPagina = pagina(() => import('./pages/Emisor'), 'EmisorPagina');
+const Escenarios = pagina(() => import('./pages/Escenarios'), 'Escenarios');
+const NuevoComprobante = pagina(() => import('./pages/NuevoComprobante'), 'NuevoComprobante');
+const Normativa = pagina(() => import('./pages/Normativa'), 'Normativa');
+const Productos = pagina(() => import('./pages/Productos'), 'Productos');
+const Receptores = pagina(() => import('./pages/Receptores'), 'Receptores');
+const Recepcion = pagina(() => import('./pages/Recepcion'), 'Recepcion');
+const Reportes = pagina(() => import('./pages/Reportes'), 'Reportes');
 
 export function App() {
-  const { usuario, cargandoAuth, emisores } = useApp();
-  if (cargandoAuth) return <div className="content muted">Cargando…</div>;
+  const { usuario, cargandoAuth, emisores, emisoresListos } = useApp();
+  if (cargandoAuth) return <Cargando />;
   if (!usuario) return <Login />;
+  // Mientras llega la lista de emisores no se decide entre «Bienvenida» y el panel: así no se ofrece
+  // cargar datos demo (y duplicar el emisor) a quien ya tiene uno.
+  if (!emisoresListos) return <Cargando />;
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Routes>

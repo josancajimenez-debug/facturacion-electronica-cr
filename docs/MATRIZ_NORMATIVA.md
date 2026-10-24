@@ -9,7 +9,7 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 ## 1. Normas vigentes y su aplicación
 
 | # | Norma | Publicación | Estado (SINALEVI) | Disposiciones relevantes | Dónde se aplica en el proyecto |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | 1 | **Resolución MH-DGT-RES-0027-2024**, disposiciones técnicas de los comprobantes electrónicos | 13/11/2024; Alcance 186, La Gaceta 217 (19/11/2024). Fe de erratas: La Gaceta 226 (2/12/2024) | Vigente desde 19/11/2024. Versión 3 de 3 (27/08/2025) | Art. 1 formatos según *Anexos y Estructuras*; art. 2 consecutivo; art. 3 clave de 50 dígitos; art. 4-5 QR y representación gráfica en PDF entregada en el acto; art. 6 controles y bitácoras; art. 7 proveedores de sistemas; art. 9 NC/ND y comprobantes rechazados; art. 10 confirmación del receptor en 8 días hábiles desde el 1.er día del mes siguiente; art. 11 validación de Hacienda en máximo 3 horas; art. 12 deroga DGT-R-12-2018, DGT-R-39-2018 y DGT-R-033-2019; Transitorio I: v4.4 obligatoria nueve meses después del 1/12/2024, uso voluntario desde 1/4/2025 (RES-0001-2025), prórroga excepcional no posterior al 6/10/2025 (RES-0043-2025); Transitorio III: QR suspendido | `core/clave.ts`, `core/xml.ts`, `core/simulador.ts`, `web/lib/pdf.ts` (QR opcional y apagado por defecto), bitácora, módulo de Recepción |
 | 2 | ***Anexos y Estructuras para la Emisión de Comprobantes Electrónicos* v4.4** (DGT, nov. 2024) + comunicado de actualización | Documento técnico (Anexo 1 estructuras y notas 1-23; Anexo 2 firma XAdES-EPES; Anexo 3 API de recepción) | Obligatorio desde 1/09/2025 (Transitorio I reformado; lo confirma el considerando IV del Decreto 45953-H) | Siete tipos de comprobante (FE, FEE, FEC, TE, NC, ND, REP); condición de cada campo por tipo (1 obligatorio, 2 condicional, 3 opcional, 4 inexistente); validación en tres niveles; reglas de cálculo; redondeo a 5 decimales; medios de pago con SINPE Móvil (06) y plataforma digital (07); `MedioPago` dentro del resumen; notas 20-23 nuevas | `core/catalogos.ts` (todas las notas), `core/calculos.ts`, `core/validaciones.ts`, `core/xml.ts` (matriz de condición por tipo) |
 | 3 | **Decreto Ejecutivo N.° 44739-H**, Reglamento de comprobantes electrónicos para efectos tributarios | Dado el 2/10/2024; publicado el 8/11/2024 | Vigente; derogó el Decreto 41820-H | Art. 2 definiciones (FEC, REP, receptor manual, contingencia); art. 4 obligaciones; art. 7-8 excepciones; art. 9 comprobantes autorizados; art. 10 anulación solo por NC/ND; art. 13 requisitos; art. 14 requisitos del sistema (numeración automática, fecha inaccesible al usuario, consulta por criterios); art. 18-21 entrega, rechazo, confirmación, envío inmediato (sin internet: 2 días hábiles); art. 22 conservación por 5 años; art. 23 contingencia; art. 24 infracciones (arts. 83, 85 y 86 CNPT) | Flujo de emisión, sustitución de rechazados, situación 2 y 3, filtros de consulta, descargas |
@@ -31,7 +31,7 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 ## 2. Requisitos técnicos implementados
 
 | Requisito | Fuente | Implementación |
-|---|---|---|
+| --- | --- | --- |
 | Consecutivo de 20 dígitos: sucursal (3) + terminal (5) + tipo (2) + número (10); reinicio en 1 al tope | Anexo 1, nota 3 | `generarConsecutivo`, `siguienteNumero` |
 | Clave de 50 dígitos: 506 + día + mes + año + cédula (12) + consecutivo + situación + seguridad (8) | RES-0027 art. 3; nota 3 y 4.1 | `generarClave`, `validarClave` |
 | Fecha RFC 3339 en hora de Costa Rica, asignada por el sistema | Anexo p. 19; Decreto 44739-H art. 14 inc. 7 | `fechaEmisionCR` |
@@ -50,7 +50,7 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 ## 3. Contradicciones y decisiones de interpretación
 
 | Tema | Hallazgo | Decisión |
-|---|---|---|
+| --- | --- | --- |
 | Vigencia de la v4.4 | El control de cambios del Anexo dice «rige a partir del 01 de junio del 2025»; el Transitorio I reformado de la RES-0027 lleva la obligatoriedad al 1/09/2025, con prórroga excepcional hasta el 6/10/2025 | Prevalece la resolución publicada en La Gaceta (art. 1 RES-0027; art. 12 Decreto 44739-H). El Decreto 45953-H confirma el 1/09/2025 |
 | Fecha del Decreto 44739-H | La RES-0027 citaba «8 de noviembre de 2024»; la fe de erratas lo corrige a «2 de octubre de 2024» | Se cita como dado el 2/10/2024 y publicado el 8/11/2024 |
 | Nota 6, «Recaudado por terceros» | La tabla asigna 05 a terceros y 06 a SINPE Móvil; la nota al pie 26 habla de «código 06, Recaudado por terceros» | Se sigue la tabla, que coincide con la presentación de setiembre de 2025 |
