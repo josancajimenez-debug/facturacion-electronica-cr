@@ -15,7 +15,7 @@
     "build": "npm run build -w packages/core && npm run build -w supabase && npm run build -w apps/web",
     "test": "npm run test -w packages/core && npm run test -w apps/web && npm run test -w supabase",
     "typecheck": "npm run typecheck -w packages/core && npm run typecheck -w apps/web && npm run typecheck -w supabase",
-    "supabase:desplegar": "npm run build -w supabase && npx supabase@latest db push && npx supabase@latest functions deploy api"
+    "supabase:desplegar": "npm run build -w supabase && npx supabase@latest db push && npx supabase@latest functions deploy api --use-api"
   },
   "engines": {
     "node": ">=20"
