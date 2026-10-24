@@ -149,10 +149,17 @@ export const TARIFA_IVA: TarifaIva[] = [
 ];
 
 /**
- * Nota 9 – códigos de referencia (Anexo v4.4, nov. 2024).
- * El comunicado DGT "Actualización de los Anexos y Estructuras versión 4.4" agrega los
- * códigos 13 a 17, pero la copia analizada no transcribe sus descripciones; por eso no se
- * incluyen aquí hasta contar con el Anexo actualizado (ver docs/MATRIZ_NORMATIVA.md).
+ * Fecha (día de Costa Rica) desde la que es obligatorio usar los códigos 13-17 de la nota 9 y
+ * 19-20 de la nota 10. Antes de esa fecha su uso es voluntario. Comunicado DGT "Actualización de
+ * los Anexos y Estructuras versión 4.4 y validación de comprobantes electrónicos" (2026).
+ */
+export const VIGENCIA_CODIGOS_ACTUALIZACION = '2026-11-01';
+
+/**
+ * Nota 9 – códigos de referencia (Anexo v4.4, nov. 2024, y comunicado de actualización 2026).
+ * El comunicado agrega los códigos 13 a 17 y ajusta el 12, pero no transcribe sus
+ * descripciones; se toman de publicaciones que citan el Anexo actualizado (Alegra y Siempre al
+ * Día, 2026) y deben confirmarse con el documento oficial (ver docs/MATRIZ_NORMATIVA.md).
  */
 export const CODIGO_REFERENCIA: Codigo[] = [
   { codigo: '01', descripcion: 'Anula Documento de Referencia' },
@@ -165,7 +172,12 @@ export const CODIGO_REFERENCIA: Codigo[] = [
   { codigo: '09', descripcion: 'Nota de crédito financiera' },
   { codigo: '10', descripcion: 'Nota de débito financiera' },
   { codigo: '11', descripcion: 'Proveedor No Domiciliado' },
-  { codigo: '12', descripcion: 'Crédito por exoneración posterior a la facturación' },
+  { codigo: '12', descripcion: 'Nota de crédito financiera por exoneración posterior a la facturación' },
+  { codigo: '13', descripcion: 'Anula documento de referencia por error material', nota: 'Solo en nota de crédito. Se encadena con el código 15 en el comprobante sustituto.' },
+  { codigo: '14', descripcion: 'Corrige monto por error material', nota: 'Solo en notas de crédito o débito.' },
+  { codigo: '15', descripcion: 'Sustituye comprobante electrónico por error material', nota: 'En el comprobante que reemplaza al anulado con el código 13.' },
+  { codigo: '16', descripcion: 'Sustituye comprobante electrónico rechazado', nota: 'Con el tipo de documento 10; no requiere nota de crédito.' },
+  { codigo: '17', descripcion: 'Pago a comprobante electrónico', nota: 'Solo en Recibo Electrónico de Pago.' },
   { codigo: '99', descripcion: 'Otros' },
 ];
 

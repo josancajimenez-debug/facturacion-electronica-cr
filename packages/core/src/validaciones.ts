@@ -9,11 +9,12 @@ import {
   TIPO_EXONERACION,
   TIPO_OTROS_CARGOS,
   UNIDAD_MEDIDA,
+  VIGENCIA_CODIGOS_ACTUALIZACION,
   type Codigo,
 } from './catalogos';
-import { REGEX_FECHA_RFC3339 } from './fechas';
+import { REGEX_FECHA_RFC3339, diaCR } from './fechas';
 import { verificarUbicacion } from './ubicacion';
-import type { BorradorComprobante, Emisor, Identificacion, LineaCalculada, Resumen, Validacion } from './tipos';
+import type { BorradorComprobante, Emisor, Identificacion, LineaCalculada, Referencia, Resumen, Validacion } from './tipos';
 
 const ANEXO = 'Anexos y Estructuras v4.4';
 const FUENTE_DTA = 'División Territorial Administrativa 2022 (Registro Nacional – IGN); nota 14';
@@ -253,6 +254,8 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
       if (!largo(r.razon, 3, 180)) err(`referencias.${i}`, 'La razón de la referencia debe tener entre 3 y 180 caracteres.');
     }
     if (r.codigo === '99' && !largo(r.codigoOtro, 5, 100)) err(`referencias.${i}`, 'Describa el código de referencia OTRO.');
+    validarCodigosActualizacion(b.tipo, r, (m) => err(`referencias.${i}`, m, FUENTE_ACTUALIZACION), (m, obligatorio) =>
+      (obligatorio ? err : adv)(`referencias.${i}`, m, FUENTE_ACTUALIZACION));
     if (!REGEX_FECHA_RFC3339.test(r.fechaEmision)) err(`referencias.${i}`, 'Fecha del documento de referencia en formato RFC 3339.');
     else if (Date.now() - new Date(r.fechaEmision).getTime() > 10 * 365.25 * 86400000) {
       err(`referencias.${i}`, 'La fecha de referencia no puede superar 10 años de antigüedad.');
@@ -269,6 +272,33 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   if (!/^\d{5}$/.test(b.terminal)) err('terminal', 'La terminal debe tener 5 dígitos.');
 
   return v;
+}
+
+const FUENTE_ACTUALIZACION = 'Nota 9; comunicado DGT de actualización de Anexos y Estructuras v4.4';
+
+/**
+ * Códigos de referencia 13-17. Las reglas de uso exclusivo son errores siempre; las que exigen el
+ * código nuevo en lugar del anterior son advertencias antes de VIGENCIA_CODIGOS_ACTUALIZACION y
+ * errores desde ese día.
+ */
+function validarCodigosActualizacion(
+  tipo: BorradorComprobante['tipo'],
+  r: Referencia,
+  err: (mensaje: string) => void,
+  exigir: (mensaje: string, obligatorio: boolean) => void,
+): void {
+  const obligatorio = diaCR(new Date()) >= VIGENCIA_CODIGOS_ACTUALIZACION;
+  const desde = 'a partir del 1.º de noviembre de 2026';
+  const ajuste = tipo === 'NC' || tipo === 'ND';
+  if (r.codigo === '13' && tipo !== 'NC') err('El código 13 «Anula documento de referencia por error material» solo se usa en notas de crédito.');
+  if (r.codigo === '14' && !ajuste) err('El código 14 «Corrige monto por error material» solo se usa en notas de crédito o débito.');
+  if ((r.codigo === '15' || r.codigo === '16') && (ajuste || tipo === 'REP')) {
+    err(`El código ${r.codigo} se usa en el comprobante que sustituye, no en notas de crédito, débito ni en el REP.`);
+  }
+  if (r.codigo === '16' && r.tipoDoc !== '10') err('El código 16 «Sustituye comprobante electrónico rechazado» se usa con el tipo de documento 10.');
+  if (r.codigo === '17' && tipo !== 'REP') err('El código 17 «Pago a comprobante electrónico» es exclusivo del Recibo Electrónico de Pago.');
+  if (tipo === 'REP' && r.codigo !== '17') exigir(`El REP debe referenciar el comprobante pagado con el código 17 «Pago a comprobante electrónico» (obligatorio ${desde}).`, obligatorio);
+  if (r.tipoDoc === '10' && r.codigo !== '16') exigir(`Para sustituir un comprobante rechazado por Hacienda use el código 16 (obligatorio ${desde}).`, obligatorio);
 }
 
 export function hayErrores(v: Validacion[]): boolean {

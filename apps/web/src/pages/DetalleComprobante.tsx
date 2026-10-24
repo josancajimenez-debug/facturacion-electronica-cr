@@ -58,11 +58,13 @@ export function DetalleComprobante() {
     ...extra,
   });
 
-  const notaCredito = () =>
+  const notaCredito = (errorMaterial = false) =>
     navegar('/emitir', {
       state: {
         borrador: base('NC', {
-          referencias: [{ tipoDoc: tipoDocRef(c, 'NC'), numero: c.clave, fechaEmision: c.fechaEmision, codigo: '01', razon: 'Anula documento de referencia' }],
+          referencias: [errorMaterial
+            ? { tipoDoc: tipoDocRef(c, 'NC'), numero: c.clave, fechaEmision: c.fechaEmision, codigo: '13', razon: 'Anula documento de referencia por error material' }
+            : { tipoDoc: tipoDocRef(c, 'NC'), numero: c.clave, fechaEmision: c.fechaEmision, codigo: '01', razon: 'Anula documento de referencia' }],
         }),
       },
     });
@@ -76,11 +78,12 @@ export function DetalleComprobante() {
       },
     });
   // Art. 19 Decreto 44739-H: el comprobante rechazado carece de validez; se emite uno nuevo que lo sustituye, sin nota de crédito.
+  // Código 16 de la nota 9 (obligatorio desde el 1/11/2026).
   const sustituir = () =>
     navegar('/emitir', {
       state: {
         borrador: base(c.tipo, {
-          referencias: [{ tipoDoc: '10', numero: c.clave, fechaEmision: c.fechaEmision, codigo: '07', razon: 'Sustituye comprobante rechazado por el Ministerio de Hacienda' }],
+          referencias: [{ tipoDoc: '10', numero: c.clave, fechaEmision: c.fechaEmision, codigo: '16', razon: 'Sustituye comprobante electrónico rechazado' }],
         }),
       },
     });
@@ -92,7 +95,7 @@ export function DetalleComprobante() {
           mediosPago: [{ tipo: '04' }],
           otrosCargos: [],
           lineas: c.lineas.map((l) => ({ codigoCabys: l.codigoCabys, detalle: `Pago cuota 1 – ${l.detalle}`.slice(0, 200), cantidad: 1, unidadMedida: l.unidadMedida, precioUnitario: l.subTotal, descuentos: [], codigoTarifaIva: l.impuestos[0]?.codigoTarifaIva ?? '08' })),
-          referencias: [{ tipoDoc: '01', numero: c.clave, fechaEmision: c.fechaEmision, codigo: '04', razon: 'Pago de factura a crédito' }],
+          referencias: [{ tipoDoc: '01', numero: c.clave, fechaEmision: c.fechaEmision, codigo: '17', razon: 'Pago a comprobante electrónico' }],
         }),
       },
     });
@@ -155,7 +158,8 @@ export function DetalleComprobante() {
       )}
       {aceptado && c.tipo !== 'NC' && c.tipo !== 'REP' && (
         <div className="row" style={{ margin: '0 0 16px' }}>
-          <button className="btn" onClick={notaCredito}><FileMinus /> Nota de crédito</button>
+          <button className="btn" onClick={() => notaCredito()}><FileMinus /> Nota de crédito</button>
+          <button className="btn" onClick={() => notaCredito(true)} title="Código 13: anula por error material; luego emita el sustituto con el código 15"><FileMinus /> Anular por error material</button>
           <button className="btn" onClick={notaDebito}><FilePlus /> Nota de débito</button>
           {esCreditoIva && <button className="btn" onClick={reciboPago}><Wallet /> Registrar pago (REP)</button>}
         </div>
