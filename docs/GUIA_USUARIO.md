@@ -41,8 +41,15 @@ Menú **Emitir comprobante**.
 - **Clave numérica** desglosada y **trazabilidad** con fecha de cada estado.
 - Acciones:
   - **Nota de crédito / débito** (comprobantes aceptados): abre el formulario con la referencia ya llena.
-  - **Emitir comprobante sustituto** (rechazados): un comprobante rechazado no tiene validez y **no** se anula con nota de crédito; se emite uno nuevo que lo referencia.
-  - **Registrar pago (REP)**: para facturas con condición 08 o 10.
+  - **Anular por error material**: nota de crédito con el código 13. Una vez aceptada, el detalle del original y el de la nota ofrecen **Emitir sustituto (código 15)**.
+  - **Emitir comprobante sustituto** (rechazados): un comprobante rechazado no tiene validez y **no** se anula con nota de crédito; se emite uno nuevo que lo referencia con el código 16.
+  - **Registrar pago (REP)**: para facturas con condición 08 o 10; referencia la factura con el código 17.
+
+### Actualización v4.4 obligatoria desde el 1/11/2026
+
+- Hasta el 31/10/2026 la herramienta **advierte** lo que pasará a ser obligatorio; desde el 1/11/2026 lo **rechaza**: código 16 al sustituir un rechazado, código 17 en el REP, REP sin referencias a notas de débito o crédito (02/03), clave obligatoria al referenciar los tipos 17-20 y notas de crédito que superen lo facturado más las notas de débito.
+- Las notas con los códigos 13 y 14 se reflejan en el **período del comprobante que modifican**; el detalle lo indica y **Reportes** las suma en ese mes.
+- Se aceptan cédulas jurídicas de **10 caracteres alfanuméricos** (la clave puede contener letras) y teléfonos de menos de 8 dígitos.
 
 ## 6. Recepción de comprobantes de proveedores
 
@@ -55,12 +62,12 @@ Menú **Recepción**.
 ## 7. Consultas, reportes y auditoría
 
 - **Comprobantes emitidos**: filtros por cédula, número, tipo, estado, medio de pago, condición, tarifa de IVA, fechas y montos; exportación a CSV.
-- **Reportes**: ventas por tarifa de IVA, cobros por medio de pago (SINPE destacado), totales por tipo y crédito fiscal de compras confirmadas. Es material de apoyo; no reemplaza la declaración D-104.
+- **Reportes**: ventas por tarifa de IVA, cobros por medio de pago (SINPE destacado), totales por tipo, crédito fiscal de compras confirmadas y ajustes por error material imputados al período. Es material de apoyo; no reemplaza la declaración D-104.
 - **Auditoría**: cada creación, modificación, emisión, respuesta, recepción y confirmación con fecha y usuario; exportable a CSV.
 
 ## 8. Escenarios de prueba
 
-Trece casos listos para ejecutar con un clic, con el resultado esperado y la fuente normativa de cada uno.
+Quince casos listos para ejecutar con un clic, con el resultado esperado y la fuente normativa de cada uno.
 
 ## 9. Configuración
 

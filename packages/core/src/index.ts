@@ -11,3 +11,4 @@ export * from './recepcion';
 export * from './entorno';
 export * from './datos-demo';
 export * from './ubicacion';
+export * from './actualizacion';

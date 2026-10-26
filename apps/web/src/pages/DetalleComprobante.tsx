@@ -7,6 +7,8 @@ import {
   descomponerClave,
   descripcion,
   nombresArchivo,
+  periodoContable,
+  referenciaErrorMaterial as refErrorMaterial,
   respuestaApiSimulada,
   type BorradorComprobante,
   type Comprobante,
@@ -22,6 +24,7 @@ import { generarPdf } from '../lib/pdf';
 /** Tipo de documento de referencia (nota 10) que corresponde a un comprobante emitido. */
 function tipoDocRef(c: Comprobante, para: 'NC' | 'ND' | 'REP' | 'sustituir'): string {
   if (c.tipo === 'FEC') return para === 'NC' ? '17' : para === 'ND' ? '18' : '15';
+  if (c.tipo === 'FEE' && para === 'sustituir') return '12';
   return { FE: '01', ND: '02', NC: '03', TE: '04', FEE: '19', REP: '20' }[c.tipo] ?? '99';
 }
 
@@ -87,6 +90,18 @@ export function DetalleComprobante() {
         }),
       },
     });
+  // Código 13 → 15: anulado el comprobante por error material, el nuevo indica con el código 15 cuál sustituye
+  // (Decreto 44739-H art. 20, por analogía; nota 9 actualizada).
+  const sustituirErrorMaterial = (original: Comprobante) =>
+    navegar('/emitir', {
+      state: {
+        borrador: {
+          ...original.borrador,
+          situacion: '1',
+          referencias: [{ tipoDoc: tipoDocRef(original, 'sustituir'), numero: original.clave, fechaEmision: original.fechaEmision, codigo: '15', razon: 'Sustituye comprobante electrónico por error material' }],
+        },
+      },
+    });
   const reciboPago = () =>
     navegar('/emitir', {
       state: {
@@ -126,6 +141,15 @@ export function DetalleComprobante() {
 
   const aceptado = c.estado === 'aceptado';
   const esCreditoIva = ['08', '10'].includes(c.borrador.condicionVenta) && c.tipo === 'FE';
+  // Anulación por error material: desde la NC (código 13) se llega al original, y desde el original a su NC.
+  const refAnulacion = c.tipo === 'NC' ? c.borrador.referencias.find((r) => r.codigo === '13') : undefined;
+  const anulado = refAnulacion ? comprobantes.find((x) => x.clave === refAnulacion.numero) : undefined;
+  const ncAnulacion = c.tipo !== 'NC'
+    ? comprobantes.find((x) => x.tipo === 'NC' && x.estado === 'aceptado' && x.borrador.referencias.some((r) => r.codigo === '13' && r.numero === c.clave))
+    : undefined;
+  const original = aceptado && anulado ? anulado : ncAnulacion ? c : undefined;
+  const sustituto = original && comprobantes.find((x) => x.estado !== 'rechazado' && x.borrador.referencias.some((r) => r.codigo === '15' && r.numero === original.clave));
+  const periodoAjuste = refErrorMaterial(c);
 
   return (
     <>
@@ -156,7 +180,21 @@ export function DetalleComprobante() {
           <div style={{ marginTop: 8 }}><button className="btn btn-sm" onClick={sustituir}><RefreshCcw /> Emitir comprobante sustituto</button></div>
         </Alerta>
       )}
-      {aceptado && c.tipo !== 'NC' && c.tipo !== 'REP' && (
+      {original && (
+        <Alerta tipo={sustituto ? 'info' : 'warn'}>
+          <strong>Anulado por error material (código 13).</strong>{' '}
+          {sustituto
+            ? <>El comprobante sustituto ya fue emitido: <Link to={`/comprobantes/${sustituto.clave}`}>ver</Link>.</>
+            : <>Si corresponde emitir un comprobante nuevo, debe referenciar al anulado con el código 15 «Sustituye comprobante electrónico por error material».</>}
+          {!sustituto && <div style={{ marginTop: 8 }}><button className="btn btn-sm" onClick={() => sustituirErrorMaterial(original)}><RefreshCcw /> Emitir sustituto (código 15)</button></div>}
+        </Alerta>
+      )}
+      {periodoAjuste && (
+        <Alerta tipo="info">
+          Ajuste con código {periodoAjuste.codigo}: su efecto contable se refleja en el período <strong>{periodoContable(c)}</strong> del comprobante que modifica, no en el de emisión de la nota.
+        </Alerta>
+      )}
+      {aceptado && c.tipo !== 'NC' && c.tipo !== 'REP' && !ncAnulacion && (
         <div className="row" style={{ margin: '0 0 16px' }}>
           <button className="btn" onClick={() => notaCredito()}><FileMinus /> Nota de crédito</button>
           <button className="btn" onClick={() => notaCredito(true)} title="Código 13: anula por error material; luego emita el sustituto con el código 15"><FileMinus /> Anular por error material</button>

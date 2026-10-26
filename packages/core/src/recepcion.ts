@@ -1,5 +1,5 @@
 import { CONDICION_IMPUESTO, type TipoMensajeReceptor } from './catalogos';
-import { generarConsecutivo } from './clave';
+import { REGEX_CLAVE, generarConsecutivo } from './clave';
 import { REGEX_FECHA_RFC3339, diaCR, fechaEmisionCR, limiteConfirmacionReceptor } from './fechas';
 import type { Emisor, Validacion } from './tipos';
 import { generarXmlMensajeReceptor } from './xml';
@@ -44,7 +44,7 @@ export function extraerDatosComprobante(xml: string): ComprobanteRecibido {
   const posEmisor = xml.indexOf('<Emisor>');
   const posReceptor = xml.indexOf('<Receptor>');
   const clave = valorTag(xml, 'Clave');
-  if (!clave || !/^\d{50}$/.test(clave)) throw new Error('El XML no contiene una clave numérica válida de 50 dígitos.');
+  if (!clave || !REGEX_CLAVE.test(clave)) throw new Error('El XML no contiene una clave válida de 50 posiciones.');
   // La fecha determina el plazo de confirmación: sin ella no se puede registrar el comprobante.
   const fechaEmision = valorTag(xml, 'FechaEmision') ?? '';
   if (!REGEX_FECHA_RFC3339.test(fechaEmision) || Number.isNaN(new Date(fechaEmision).getTime())) {

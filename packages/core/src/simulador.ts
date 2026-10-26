@@ -9,6 +9,7 @@
  *
  * No se conecta con el Ministerio de Hacienda ni pretende replicar todas sus reglas.
  */
+import { actualizacionVigente, excesosNotaCredito, resumenDocumento, type DocumentoResumen } from './actualizacion';
 import { calcularComprobante } from './calculos';
 import { CODIGO_TIPO_DOCUMENTO, ESQUEMA_XML } from './catalogos';
 import { descomponerConsecutivo, validarClave } from './clave';
@@ -32,6 +33,8 @@ export interface ContextoSimulador {
   exoneraciones?: Record<string, { tarifaMaxima: number; vigente: boolean }>;
   /** Claves ya recibidas, para detectar duplicados. */
   clavesRecibidas?: Set<string>;
+  /** Comprobantes del emisor ya aceptados, para verificar el saldo de las notas de crédito. */
+  documentosAceptados?: DocumentoResumen[];
   /** Escenario de prueba: fuerza un rechazo con el motivo indicado. */
   forzarRechazo?: string;
   ahora?: Date;
@@ -127,6 +130,16 @@ export function validarComoHacienda(c: Comprobante, ctx: ContextoSimulador = {})
         detalle.push(`Nivel 3: línea ${l.numeroLinea}, MontoTotalLinea no coincide con la fórmula.`);
       }
     });
+
+    // Actualización v4.4: la NC no puede superar lo facturado más las ND aplicadas al documento.
+    if (c.tipo === 'NC' && ctx.documentosAceptados) {
+      const vigente = actualizacionVigente(ahora);
+      for (const e of excesosNotaCredito(resumenDocumento(c), ctx.documentosAceptados)) {
+        const texto = `la nota de crédito supera el saldo acreditable del documento ${e.clave} (disponible ₡${e.disponible.toFixed(2)}: monto facturado más notas de débito, menos notas de crédito previas)`;
+        if (vigente) detalle.push(`Nivel 3: ${texto}.`);
+        else advertencias.push(`${texto[0].toUpperCase()}${texto.slice(1)}. Desde el 1/11/2026 se rechaza (advertencia).`);
+      }
+    }
 
     if (ctx.forzarRechazo) detalle.push(`Nivel 3: ${ctx.forzarRechazo}`);
     if (detalle.length) nivelFallido = 3;

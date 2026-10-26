@@ -1,6 +1,6 @@
 // Lógica de la función Edge "api" contra PostgreSQL (PGlite) con el esquema real.
 // El repositorio replica en SQL lo que index.ts hace con supabase-js y la llave de servicio.
-import type { Emisor, Receptor } from '@fe-cr/core';
+import { resumenDocumento, type Comprobante, type Emisor, type Receptor } from '@fe-cr/core';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ejecutar, procesarEnvio, type ComprobanteGuardado, type Opciones, type Recibido, type Repo } from '../functions/api/logica';
 import { crearBase } from './pg';
@@ -30,6 +30,9 @@ const repo: Repo = {
   },
   async clavesValidadas(e) {
     return new Set((await como<{ clave: string }>(null, "select clave from comprobantes where emisor_id = $1 and estado in ('aceptado','rechazado')", [e])).map((r) => r.clave));
+  },
+  async documentosAceptados(e) {
+    return (await como<{ datos: Comprobante }>(null, "select datos from comprobantes where emisor_id = $1 and estado = 'aceptado'", [e])).map((r) => resumenDocumento(r.datos));
   },
   async recibido(e, k) {
     return (await como<{ datos: Recibido }>(null, 'select datos from recibidos where emisor_id = $1 and clave = $2', [e, k]))[0]?.datos ?? null;

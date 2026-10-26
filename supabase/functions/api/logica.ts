@@ -18,6 +18,7 @@ import {
   validarComoHacienda,
   type BorradorComprobante,
   type Comprobante,
+  type DocumentoResumen,
   type Emisor,
   type EstadoComprobante,
   type Producto,
@@ -50,6 +51,8 @@ export interface Repo {
   insertarComprobante(c: ComprobanteGuardado): Promise<void>;
   guardarComprobante(c: ComprobanteGuardado): Promise<void>;
   clavesValidadas(emisorId: string): Promise<Set<string>>;
+  /** Comprobantes aceptados del emisor (saldo de las notas de crédito, actualización v4.4). */
+  documentosAceptados(emisorId: string): Promise<DocumentoResumen[]>;
   recibido(emisorId: string, clave: string): Promise<Recibido | null>;
   insertarRecibido(emisorId: string, r: Recibido): Promise<void>;
   /** Guarda la confirmación solo si el recibido sigue pendiente; devuelve false si otra solicitud se adelantó. */
@@ -132,7 +135,8 @@ async function simularRespuesta(
   }
   const previas = await repo.clavesValidadas(c.emisorId);
   previas.delete(c.clave);
-  const respuesta = validarComoHacienda(c, { ...ctx, cabysValido: op.cabysValido, clavesRecibidas: previas, forzarRechazo: c.escenarioPrueba ?? undefined });
+  const documentosAceptados = c.tipo === 'NC' ? await repo.documentosAceptados(c.emisorId) : undefined;
+  const respuesta = validarComoHacienda(c, { ...ctx, cabysValido: op.cabysValido, clavesRecibidas: previas, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
   await esperar(op.pausaMs);
   c.respuestaHacienda = respuesta;
   await evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones');

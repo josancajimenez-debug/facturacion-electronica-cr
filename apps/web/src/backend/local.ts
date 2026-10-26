@@ -16,6 +16,7 @@ import {
   fechaEmisionCR,
   generarConfirmacion,
   limiteConfirmacionReceptor,
+  resumenDocumento,
   siguienteNumero,
   validarComoHacienda,
   type BorradorComprobante,
@@ -317,7 +318,10 @@ export class LocalBackend implements Backend {
       } catch {
         cabysValido = undefined; // sin catálogo disponible se omite esa verificación
       }
-      const respuesta = validarComoHacienda(c, { ...ctx, cabysValido, forzarRechazo: c.escenarioPrueba ?? undefined });
+      const documentosAceptados = Object.values(this.estado.comprobantes[emisorId] ?? {})
+        .filter((x) => x.estado === 'aceptado')
+        .map(resumenDocumento);
+      const respuesta = validarComoHacienda(c, { ...ctx, cabysValido, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
       await esperar(PAUSA_MS);
       this.bitacora(emisorId, { accion: `respuesta-${respuesta.estado}`, clave, detalle: respuesta.detalle.join(' | ') });
       evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones', { respuestaHacienda: respuesta });

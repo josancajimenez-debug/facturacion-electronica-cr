@@ -2,7 +2,7 @@
 // servicio, que es la única que puede escribir comprobantes, recibidos, contadores y bitácora.
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.118.0';
 import codigosCabys from '../_shared/cabys-codigos.json' with { type: 'json' };
-import { fechaEmisionCR, type Emisor, type Producto, type Receptor } from '@fe-cr/core';
+import { fechaEmisionCR, resumenDocumento, type Comprobante, type Emisor, type Producto, type Receptor } from '@fe-cr/core';
 import { ejecutar, type ComprobanteGuardado, type Recibido, type Repo } from './logica.ts';
 
 const CORS = {
@@ -40,6 +40,10 @@ function crearRepo(db: SupabaseClient): Repo {
     async clavesValidadas(emisorId) {
       const rows = ok(await db.from('comprobantes').select('clave').eq('emisor_id', emisorId).in('estado', ['aceptado', 'rechazado']));
       return new Set(rows.map((r) => r.clave as string));
+    },
+    async documentosAceptados(emisorId) {
+      const rows = ok(await db.from('comprobantes').select('clave, tipo, resumen:datos->resumen, borrador:datos->borrador').eq('emisor_id', emisorId).eq('estado', 'aceptado'));
+      return rows.map((r) => resumenDocumento(r as unknown as Pick<Comprobante, 'clave' | 'tipo' | 'resumen' | 'borrador'>));
     },
     async recibido(emisorId, clave) {
       const { data } = await db.from('recibidos').select('datos').eq('emisor_id', emisorId).eq('clave', clave).maybeSingle();

@@ -4,7 +4,9 @@ Fecha de consulta de todas las fuentes: **23 de octubre de 2026**.
 
 Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la norma, versión vigente, normas afectantes y observaciones) y la documentación del API público de Hacienda; luego se contrastaron con los documentos de la carpeta `Bibliogafía`. Se priorizó la norma vigente. Donde las fuentes no coinciden se deja constancia en la sección 3.
 
-> El enlace de SINALEVI de la Resolución 27 que se recibió apunta a la **versión 1 de 3**. La versión vigente es la **3 de 3 (27/08/2025)**, que ya incorpora las reformas de las resoluciones MH-DGT-RES-0001-2025 y MH-DGT-RES-0043-2025. Esta matriz usa la versión vigente.
+> El enlace de SINALEVI de la Resolución 27 que se recibió apunta a la **versión 1 de 3**. La versión vigente es la **3 de 3 (27/08/2025)**, que ya incorpora las reformas de las resoluciones MH-DGT-RES-0001-2025 y MH-DGT-RES-0043-2025. Esta matriz usa la versión vigente. La copia de la carpeta `Bibliogafía` es la versión original (Transitorio I de «seis meses») y conviene reemplazarla por la vigente.
+
+> **Actualización v4.4 («4.4 v2»), revisada el 26/10/2026.** Contraste del comunicado DGT con el Decreto 44739-H (arts. 8, 10, 12, 19 y 20), la RES-0027-2024 (arts. 1, 9 y 10) y cuatro fuentes secundarias coincidentes (KPMG, FACBOX, Factura Profesional y Delfino/Cámara de Pymes). SINALEVI bloquea la descarga automatizada, por lo que el texto de las normas se tomó de las copias de SINALEVI incluidas en la bibliografía. Ninguna norma publicada transcribe los códigos 13-17: están en el Anexo técnico, que debe descargarse de la OVi para la verificación final.
 
 ## 1. Normas vigentes y su aplicación
 
@@ -45,6 +47,26 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | Consulta por cédula, número, medio de pago, condición, fecha, montos, impuestos y estados | Decreto 44739-H art. 14 inc. 10 | Página «Comprobantes emitidos» |
 | Separación de entornos y bloqueo del envío real | Requisito del encargo | `core/entorno.ts`; la función Edge fija el ambiente «simulacion» y no contiene código de envío real |
 
+### 2.1 Actualización v4.4 vigente desde el 1/11/2026
+
+Disponible en STAG y producción desde el 22/04/2026 con uso voluntario; obligatoria desde el **1/11/2026** (día de Costa Rica, `actualizacionVigente()` en `core/actualizacion.ts`). Criterio: lo que la actualización **permite** se acepta desde ya; lo que **exige** advierte hasta el 31/10/2026 y se rechaza desde el 1/11/2026.
+
+| Cambio | Fuente | Antes del 1/11/2026 | Desde el 1/11/2026 | Implementación |
+| --- | --- | --- | --- | --- |
+| Códigos 13-17 de la nota 9 y ajuste del 12 | Comunicado DGT; KPMG, FACBOX, Factura Profesional, Delfino | Uso voluntario | 16 obligatorio al sustituir un rechazado (tipo 10) y 17 en el REP | `CODIGO_REFERENCIA`, `validarCodigosActualizacion` |
+| 13 solo en NC; 14 en NC o ND; 15 y 16 solo en el comprobante sustituto | Decreto 44739-H arts. 10, 19 y 20; RES-0027 art. 9 | Error | Error | Reglas de uso exclusivo con su fuente normativa |
+| 13 → 15: el sustituto de un comprobante anulado por error material lleva el código 15 | Comunicado; Delfino; Decreto 44739-H art. 20 (por analogía) | — | — | Botón «Emitir sustituto (código 15)» en el detalle del original y de la NC |
+| 13 y 14 reflejan su efecto contable en el período del comprobante modificado | Comunicado; Delfino; KPMG | — | — | `periodoContable()`; Reportes imputa la nota al período original y lo detalla |
+| Códigos 19 (FEE) y 20 (REP) de la nota 10 | Comunicado | Uso voluntario | Disponibles | `TIPO_DOC_REFERENCIA`; NC/ND sobre FEE o REP |
+| Clave obligatoria del documento referenciado para los tipos 17, 18, 19 y 20 | FACBOX | Advertencia | Error | `TIPOS_DOC_CON_CLAVE_V2` |
+| El REP admite los tipos 01, 04, 07, 08, 10 y 20 (ya no 02 ni 03) | FACBOX | Advertencia (02/03) y uso voluntario (07, 10, 20) | Error con 02 o 03 | `REP_TIPOS_DOC_V2` |
+| La NC no puede superar lo facturado más las ND aplicadas | FACBOX | Aceptado con advertencia | Rechazo del simulador (nivel 3) | `excesosNotaCredito()`; la función Edge y el modo local pasan los comprobantes aceptados |
+| Cédula jurídica de 10 caracteres alfanuméricos; la clave puede contener letras | Comunicado; FACBOX | Se acepta | Se acepta | `validarIdentificacion`, `REGEX_CLAVE`, migración `20261026000000_clave_alfanumerica.sql` |
+| Teléfono sin mínimo de 8 dígitos (p. ej. 911) | FACBOX | Se acepta | Se acepta | Formulario del emisor (3-20 dígitos) |
+| Tipo de cambio igual al de referencia de venta del BCCR | FACBOX | Advertencia | Advertencia (el simulador no consulta el BCCR) | `validarBorrador` |
+
+**Cambios de la actualización sin efecto en el simulador:** hasta 5 firmas digitales por documento (no se firma); proporción de impuestos específicos con 5 decimales, surtidos con impuestos específicos e IVA cobrado en fábrica (fuera de alcance); impuesto en el REP = tarifa × subtotal y exentos asociados a la tarifa 10 (ya se calculaban así); código de actividad del receptor (ya incluido).
+
 **Fuera de alcance (no implementado):** firma XAdES-EPES (Anexo 2) y firmas de receptor o endoso; envío real al API de recepción; impuestos específicos no tarifarios (códigos 03-06), IVA cobrado en fábrica (nota 21), IVA de bienes usados por factor (08) y surtidos; el documento oficial de Hacienda «Código de forma farmacéutica» (nota 19) y la tabla «Codigodemoneda_V4.4» (nota 13.1), que no forman parte de la bibliografía.
 
 ## 3. Contradicciones y decisiones de interpretación
@@ -56,9 +78,9 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | Nota 6, «Recaudado por terceros» | La tabla asigna 05 a terceros y 06 a SINPE Móvil; la nota al pie 26 habla de «código 06, Recaudado por terceros» | Se sigue la tabla, que coincide con la presentación de setiembre de 2025 |
 | Etiqueta de exoneración | La bitácora dice que la etiqueta pasa a «TipoDocumentoEX»; la tabla muestra «TipoDocumentoEX1» | Se usa la de la tabla; debe confirmarse con el XSD oficial |
 | Impuesto en el REP | El REP solo admite condiciones 09 y 11, pero el nodo Impuesto es obligatorio «cuando la condición sea 08 y 10» | Se interpreta como la condición de la factura original; el REP siempre lleva impuesto |
-| Referencia 08 en el REP | Para el REP se admiten referencias 01-04 y 08 descrita como «Factura Electrónica de Compras»; en la nota 10 el 08 es «Comprobante emitido en contingencia» | Se permite el 08 con la descripción de la nota 10; queda pendiente de aclaración oficial |
+| Referencia 08 en el REP | Para el REP se admiten referencias 01-04 y 08 descrita como «Factura Electrónica de Compras»; en la nota 10 el 08 es «Comprobante emitido en contingencia». Según FACBOX, la actualización deja 01, 04, 07, 08, 10 y 20 | Se permite el 08 con la descripción de la nota 10 y se aplica la lista nueva desde el 1/11/2026; queda pendiente de aclaración oficial |
 | Total del REP | El TotalComprobante del REP «se obtiene de la suma de los campos Total de la venta», sin el impuesto | Se aplica literalmente y se señala para verificación |
-| Códigos nuevos (notas 9 y 10) | El comunicado de actualización agrega 13-17 (nota 9) y 19-20 (nota 10), obligatorios desde el **1.º de noviembre de 2026** (uso voluntario antes), y ajusta el 12, sin transcribir las descripciones de la nota 9 | Se incorporan con las descripciones de Alegra y Siempre al Día (2026), que coinciden: 12 NC financiera por exoneración posterior; 13 anula por error material (solo NC); 14 corrige monto por error material (NC/ND); 15 sustituye por error material; 16 sustituye rechazado (con tipo 10); 17 pago a comprobante (solo REP). Antes del 1/11/2026 el uso de 01-07/04 en lugar de 16/17 genera advertencia; desde esa fecha, error (`VIGENCIA_CODIGOS_ACTUALIZACION`). Confirmar con el Anexo actualizado |
+| Códigos nuevos (notas 9 y 10) | El comunicado de actualización agrega 13-17 (nota 9) y 19-20 (nota 10), obligatorios desde el **1.º de noviembre de 2026** (uso voluntario antes), y ajusta el 12, sin transcribir las descripciones de la nota 9 | Se incorporan con las descripciones en que coinciden KPMG, FACBOX, Factura Profesional y Delfino (2026): 12 NC financiera por exoneración posterior; 13 anula por error material; 14 corrige monto por error material; 15 sustituye por error material; 16 sustituye rechazado; 17 pago a comprobante (solo REP). Las reglas de uso de 13-16 se fundamentan en el Decreto 44739-H (arts. 10, 19 y 20) y la RES-0027 (art. 9). El comunicado es vehículo válido: el art. 12 del Decreto 44739-H permite comunicar por aviso los cambios de parametrización que no alteran la estructura. Ver la sección 2.1. Confirmar con el Anexo actualizado |
 | Código de actividad | `CodigoActividadEmisor` es String(6); TRIBU-CR publica códigos CIIU 4 con punto («6920.0») y ATV usaba 6 dígitos | Se usa el formato del API público; validar con el XSD vigente |
 | Espacios de nombres de los mensajes | La nota 2 no enumera los de MensajeReceptor y MensajeHacienda | Se usa el mismo patrón del CDN; verificar con los XSD |
 | Forma farmacéutica (nota 19) | El campo FormaFarmaceutica del XML es String(3) y remite al documento «Código de forma farmacéutica» de Hacienda; el catálogo del Ministerio de Salud usa códigos SNOMED CT de hasta 14 dígitos (solo 5 de 91 caben en 3 caracteres) y está en estado borrador | El catálogo del Ministerio de Salud se usa como referencia descriptiva (producto, línea y PDF). En el XML solo se acepta un código de hasta 3 caracteres digitado por el usuario según la tabla de Hacienda; códigos más largos se rechazan |
@@ -90,21 +112,29 @@ Dirección General de Tributación. (2024b, 13 de noviembre). *Resolución gener
 
 Dirección General de Tributación. (2024c, 10 de junio). *Resolución general sobre el deber formal de declarar que les asiste a los obligados tributarios exentos en el impuesto sobre el valor agregado* (Resolución MH-DGT-RES-0013-2024).
 
-Dirección General de Tributación. (2025a). *Actualización de los Anexos y Estructuras versión 4.4 y validación de comprobantes electrónicos* [Comunicado]. Ministerio de Hacienda.
+Delfino.cr. (2026, octubre). *Cámara de Pymes recuerda que cambios para corregir facturas electrónicas inician el 1 de noviembre*. https://delfino.cr/2026/10/camara-de-pymes-recuerda-que-cambios-para-corregir-facturas-electronicas-inician-el-1-de-noviembre
 
-Dirección General de Tributación. (2025b). *Comprobantes electrónicos y versión 4.4* [Presentación]. Ministerio de Hacienda.
+Dirección General de Tributación. (2025a). *Comprobantes electrónicos y versión 4.4* [Presentación]. Ministerio de Hacienda.
 
-Dirección General de Tributación. (2025c, 22 de julio). *Formularios y medio para la presentación de declaraciones del impuesto al valor agregado* (Resolución MH-DGT-RES-0033-2025).
+Dirección General de Tributación. (2025b, 22 de julio). *Formularios y medio para la presentación de declaraciones del impuesto al valor agregado* (Resolución MH-DGT-RES-0033-2025).
 
-Dirección General de Tributación. (2025d, 27 de agosto). *Modificaciones a las resoluciones generales que implementan las distintas funcionalidades y formularios dentro del Sistema Integrado de Gestión Tributaria denominado «TRIBU-CR»* (Resolución MH-DGT-RES-0043-2025). *La Gaceta*, Alcance 114, N.° 166.
+Dirección General de Tributación. (2025c, 27 de agosto). *Modificaciones a las resoluciones generales que implementan las distintas funcionalidades y formularios dentro del Sistema Integrado de Gestión Tributaria denominado «TRIBU-CR»* (Resolución MH-DGT-RES-0043-2025). *La Gaceta*, Alcance 114, N.° 166.
+
+Dirección General de Tributación. (2026). *Actualización de los Anexos y Estructuras versión 4.4 y validación de comprobantes electrónicos* [Comunicado]. Ministerio de Hacienda.
 
 Dirección General de Tributación. (s. f.). *Correspondencia de actividades económicas ATV (CIIU 3) – TRIBU-CR (CIIU 4)* [Tabla].
+
+FACBOX. (2026). *Hacienda 4.4 v2: cambios obligatorios en noviembre 2026* [Entrada de blog]. https://facbox.com/blog/hacienda-4-4-v2-cambios-obligatorios-noviembre-2026
+
+Factura Profesional. (2026). *Lo que necesita saber sobre la nueva actualización de la versión 4.4 v2* [Entrada de blog]. https://www.facturaprofesional.com/index.php/blog/lo-que-necesita-saber-sobre-la-nueva-actualizacion-de-la-version-44-v2
 
 Grant Thornton Costa Rica. (2025, setiembre). *Factura electrónica: prepárese para los cambios de la versión 4.4* [Presentación]. CAMTIC.
 
 Instituto Geográfico Nacional y Registro Nacional. (2022). *Tabla por provincias, cantones y distritos de Costa Rica: División territorial administrativa 2022* (v3) [Tabla].
 
 KPMG Costa Rica. (2024, noviembre). *NewsFlash: Reglamento de Comprobantes Electrónicos para efectos tributarios*. https://kpmg.com/cr/es/home/tendencias/2024/11/newsflash-noviembre-2024-2.html
+
+KPMG. (2026, 11 de mayo). *Costa Rica: Changes to annexes and structures of electronic receipts* (Tax News Flash). https://kpmg.com/kpmg-us/content/dam/kpmg/taxnewsflash/pdf/2026/05/tnf-costa-rica-may-11-2026.pdf
 
 Ministerio de Hacienda de Costa Rica. (s. f.). *API Hacienda* [Documentación de API]. Recuperado el 23 de octubre de 2026, de https://api.hacienda.go.cr/docs
 

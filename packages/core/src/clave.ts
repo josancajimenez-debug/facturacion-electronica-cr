@@ -26,13 +26,19 @@ export function siguienteNumero(ultimo: number): number {
 }
 
 /**
- * Identificación de 12 dígitos para la clave (Nota 4.1): se completa con ceros a la izquierda
+ * Clave de 50 posiciones. La actualización v4.4 admite letras en la identificación (cédulas
+ * jurídicas alfanuméricas del Registro Nacional), por lo que la clave puede contenerlas.
+ */
+export const REGEX_CLAVE = /^[0-9A-Z]{50}$/;
+
+/**
+ * Identificación de 12 posiciones para la clave (Nota 4.1): se completa con ceros a la izquierda
  * (3 ceros cédula física, 2 jurídica y NITE, 1 DIMEX de 11 dígitos).
  */
 export function identificacionParaClave(id: Identificacion): string {
-  const limpio = id.numero.replace(/\D/g, '');
+  const limpio = id.numero.toUpperCase().replace(/[^0-9A-Z]/g, '');
   if (limpio.length === 0 || limpio.length > 12) {
-    throw new Error('La identificación del emisor no puede representarse en 12 dígitos para la clave.');
+    throw new Error('La identificación del emisor no puede representarse en 12 posiciones para la clave.');
   }
   return limpio.padStart(12, '0');
 }
@@ -79,12 +85,12 @@ export function generarClave(params: {
     consecutivo +
     situacion +
     codigoSeguridad;
-  if (clave.length !== 50) throw new Error(`Clave inválida (${clave.length} dígitos).`);
+  if (!REGEX_CLAVE.test(clave)) throw new Error(`Clave inválida (${clave.length} posiciones).`);
   return clave;
 }
 
 export function descomponerClave(clave: string): PartesClave | null {
-  if (!/^\d{50}$/.test(clave)) return null;
+  if (!REGEX_CLAVE.test(clave)) return null;
   return {
     pais: clave.slice(0, 3),
     dia: clave.slice(3, 5),
@@ -111,7 +117,7 @@ export function descomponerConsecutivo(consecutivo: string) {
 export function validarClave(clave: string, esperado?: { fechaEmision?: string; consecutivo?: string }): string[] {
   const errores: string[] = [];
   const p = descomponerClave(clave);
-  if (!p) return ['La clave debe tener exactamente 50 dígitos numéricos.'];
+  if (!p) return ['La clave debe tener exactamente 50 posiciones (dígitos, o letras de una cédula jurídica alfanumérica).'];
   if (p.pais !== '506') errores.push('Los tres primeros dígitos de la clave deben ser 506.');
   const dia = Number(p.dia);
   const mes = Number(p.mes);

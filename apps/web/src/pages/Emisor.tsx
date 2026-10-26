@@ -45,7 +45,8 @@ export function EmisorPagina() {
   const repetidas = (lista: string[]) => [...new Set(lista.filter((x, i) => x && lista.indexOf(x) !== i))];
   repetidas(form.actividades.map((a) => a.codigo.trim())).forEach((c) => errores.push(`La actividad ${c} está repetida.`));
   if (!form.proveedorSistemas) errores.push('Indique el proveedor de sistemas (su propia identificación si es desarrollo propio).');
-  if (form.telefono && !/^\d{8,20}$/.test(form.telefono.numero)) errores.push('El teléfono debe tener entre 8 y 20 dígitos.');
+  // Actualización v4.4: el teléfono ya no exige un mínimo de 8 dígitos (se admiten números cortos como 911).
+  if (form.telefono && !/^\d{3,20}$/.test(form.telefono.numero)) errores.push('El teléfono debe tener entre 3 y 20 dígitos.');
   if (form.sucursales.length === 0) errores.push('Registre al menos una sucursal.');
   form.sucursales.forEach((s) => {
     if (!/^\d{3}$/.test(s.codigo)) errores.push(`Sucursal "${s.nombre}": código de 3 dígitos.`);

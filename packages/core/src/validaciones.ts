@@ -9,10 +9,19 @@ import {
   TIPO_EXONERACION,
   TIPO_OTROS_CARGOS,
   UNIDAD_MEDIDA,
-  VIGENCIA_CODIGOS_ACTUALIZACION,
   type Codigo,
 } from './catalogos';
-import { REGEX_FECHA_RFC3339, diaCR } from './fechas';
+import {
+  FUENTE_COMUNICADO,
+  FUENTE_V2,
+  REP_TIPOS_DOC_ANTES,
+  REP_TIPOS_DOC_V2,
+  TIPOS_DOC_CON_CLAVE,
+  TIPOS_DOC_CON_CLAVE_V2,
+  actualizacionVigente,
+} from './actualizacion';
+import { REGEX_CLAVE } from './clave';
+import { REGEX_FECHA_RFC3339 } from './fechas';
 import { verificarUbicacion } from './ubicacion';
 import type { BorradorComprobante, Emisor, Identificacion, LineaCalculada, Referencia, Resumen, Validacion } from './tipos';
 
@@ -31,8 +40,9 @@ export function validarIdentificacion(id: Identificacion | undefined): string | 
     case '01':
       return /^[1-9]\d{8}$/.test(n) ? null : 'La cédula física debe tener 9 dígitos, sin cero al inicio ni guiones.';
     case '02':
-      // El comunicado de actualización v4.4 anuncia cédulas jurídicas alfanuméricas cuando el Registro Nacional lo comunique.
-      return /^\d{10}$/.test(n) ? null : 'La cédula jurídica debe tener 10 dígitos, sin guiones.';
+      // Actualización v4.4: el campo pasa de 10 dígitos a 10 caracteres para admitir las cédulas
+      // jurídicas alfanuméricas que comunique el Registro Nacional.
+      return /^[0-9A-Z]{10}$/.test(n) ? null : 'La cédula jurídica debe tener 10 caracteres (dígitos o letras mayúsculas), sin guiones.';
     case '03':
       return /^[1-9]\d{10,11}$/.test(n) ? null : 'El DIMEX debe tener 11 o 12 dígitos, sin cero al inicio ni guiones.';
     case '04':
@@ -135,6 +145,9 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   if (!/^[A-Z]{3}$/.test(b.moneda)) err('moneda', 'Código de moneda inválido.');
   if (b.moneda === 'CRC' && b.tipoCambio !== 1) err('tipoCambio', 'Para colones (CRC) el tipo de cambio debe ser 1.');
   if (!(b.tipoCambio > 0)) err('tipoCambio', 'El tipo de cambio debe ser mayor que cero.');
+  if (b.moneda !== 'CRC') {
+    adv('tipoCambio', 'Hacienda verifica que el tipo de cambio coincida con el de referencia de venta del BCCR del día; el simulador no puede consultarlo.', FUENTE_V2);
+  }
 
   // ---- Líneas ----
   const soloCargosSinLineas = ['FE', 'TE', 'NC', 'ND'].includes(b.tipo) && b.otrosCargos.some((o) => ['04', '08', '09', '10'].includes(o.tipoDocumento));
@@ -239,23 +252,37 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   if (b.referencias.length > 10) err('referencias', 'Máximo 10 referencias.');
   const requiereRef = ['NC', 'ND', 'FEC', 'REP'].includes(b.tipo) || b.lineas.some((l) => l.exoneracion?.tipoDocumento === '11');
   if (requiereRef && b.referencias.length === 0) err('referencias', 'Este comprobante requiere información de referencia.');
+  const vigente = actualizacionVigente();
+  const exigirV2 = (campo: string, mensaje: string, fuente = FUENTE_V2) =>
+    (vigente ? err : adv)(campo, `${mensaje}${vigente ? '' : ` (obligatorio ${DESDE_VIGENCIA})`}`, fuente);
   b.referencias.forEach((r, i) => {
     const td = enCatalogo(TIPO_DOC_REFERENCIA, r.tipoDoc);
     if (!td) err(`referencias.${i}`, 'Tipo de documento de referencia no válido (nota 10).');
     if (r.tipoDoc === '16' && b.tipo !== 'FEC') err(`referencias.${i}`, 'El tipo de documento 16 solo se permite en la FEC.');
-    if (b.tipo === 'REP' && !['01', '02', '03', '04', '08'].includes(r.tipoDoc)) err(`referencias.${i}`, 'En el REP solo se permiten las referencias 01, 02, 03, 04 y 08.');
+    if (b.tipo === 'REP') {
+      if (!REP_TIPOS_DOC_ANTES.includes(r.tipoDoc) && !REP_TIPOS_DOC_V2.includes(r.tipoDoc)) {
+        err(`referencias.${i}`, `En el REP solo se permiten las referencias ${REP_TIPOS_DOC_V2.join(', ')} (antes de la actualización: ${REP_TIPOS_DOC_ANTES.join(', ')}).`);
+      } else if (!REP_TIPOS_DOC_V2.includes(r.tipoDoc)) {
+        exigirV2(`referencias.${i}`, `Con la actualización v4.4 el REP ya no puede referenciar notas de débito (02) ni de crédito (03); se admiten ${REP_TIPOS_DOC_V2.join(', ')}`);
+      } else if (!vigente && !REP_TIPOS_DOC_ANTES.includes(r.tipoDoc)) {
+        adv(`referencias.${i}`, `El tipo ${r.tipoDoc} en el REP es de uso voluntario hasta el 31/10/2026 y obligatorio ${DESDE_VIGENCIA}.`, FUENTE_V2);
+      }
+    }
     if (r.tipoDoc === '99' && !largo(r.tipoDocOtro, 5, 100)) err(`referencias.${i}`, 'Describa el tipo de documento de referencia OTRO.');
     if (r.tipoDoc !== '13') {
       if (!r.numero) err(`referencias.${i}`, 'Indique la clave o número del documento de referencia.');
-      if (['01', '02', '03', '04', '09', '11', '12', '15'].includes(r.tipoDoc) && r.numero && !/^\d{50}$/.test(r.numero)) {
-        err(`referencias.${i}`, 'El documento referenciado debe identificarse con su clave numérica de 50 dígitos.');
+      const conClave = r.numero && !REGEX_CLAVE.test(r.numero);
+      if (TIPOS_DOC_CON_CLAVE.includes(r.tipoDoc) && conClave) {
+        err(`referencias.${i}`, 'El documento referenciado debe identificarse con su clave de 50 posiciones.');
+      }
+      if (TIPOS_DOC_CON_CLAVE_V2.includes(r.tipoDoc) && conClave) {
+        exigirV2(`referencias.${i}`, `Para el tipo de documento ${r.tipoDoc} la clave de 50 posiciones del documento referenciado es obligatoria`);
       }
       if (!r.codigo || !enCatalogo(CODIGO_REFERENCIA, r.codigo)) err(`referencias.${i}`, 'Código de referencia no válido (nota 9).');
       if (!largo(r.razon, 3, 180)) err(`referencias.${i}`, 'La razón de la referencia debe tener entre 3 y 180 caracteres.');
     }
     if (r.codigo === '99' && !largo(r.codigoOtro, 5, 100)) err(`referencias.${i}`, 'Describa el código de referencia OTRO.');
-    validarCodigosActualizacion(b.tipo, r, (m) => err(`referencias.${i}`, m, FUENTE_ACTUALIZACION), (m, obligatorio) =>
-      (obligatorio ? err : adv)(`referencias.${i}`, m, FUENTE_ACTUALIZACION));
+    validarCodigosActualizacion(b.tipo, r, vigente, (nivel, m, fuente) => (nivel === 'error' ? err : adv)(`referencias.${i}`, m, fuente));
     if (!REGEX_FECHA_RFC3339.test(r.fechaEmision)) err(`referencias.${i}`, 'Fecha del documento de referencia en formato RFC 3339.');
     else if (Date.now() - new Date(r.fechaEmision).getTime() > 10 * 365.25 * 86400000) {
       err(`referencias.${i}`, 'La fecha de referencia no puede superar 10 años de antigüedad.');
@@ -274,31 +301,38 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   return v;
 }
 
-const FUENTE_ACTUALIZACION = 'Nota 9; comunicado DGT de actualización de Anexos y Estructuras v4.4';
+const DESDE_VIGENCIA = 'a partir del 1.º de noviembre de 2026';
+const FUENTE_AJUSTES = 'Decreto 44739-H art. 10; RES-0027-2024 art. 9; nota 9 códigos 13-14';
+const FUENTE_SUSTITUCION = 'Decreto 44739-H arts. 19-20; nota 9 códigos 15-16';
+const FUENTE_RECHAZADO = 'Decreto 44739-H art. 19; nota 10 código 10; nota 9 código 16';
 
 /**
- * Códigos de referencia 13-17. Las reglas de uso exclusivo son errores siempre; las que exigen el
- * código nuevo en lugar del anterior son advertencias antes de VIGENCIA_CODIGOS_ACTUALIZACION y
- * errores desde ese día.
+ * Códigos de referencia 13-17. Las reglas de uso exclusivo son errores siempre (se derivan del
+ * Reglamento y de la RES-0027); las que exigen el código nuevo en lugar del anterior son
+ * advertencias antes de VIGENCIA_CODIGOS_ACTUALIZACION y errores desde ese día.
  */
 function validarCodigosActualizacion(
   tipo: BorradorComprobante['tipo'],
   r: Referencia,
-  err: (mensaje: string) => void,
-  exigir: (mensaje: string, obligatorio: boolean) => void,
+  vigente: boolean,
+  reportar: (nivel: Validacion['nivel'], mensaje: string, fuente: string) => void,
 ): void {
-  const obligatorio = diaCR(new Date()) >= VIGENCIA_CODIGOS_ACTUALIZACION;
-  const desde = 'a partir del 1.º de noviembre de 2026';
+  const err = (m: string, fuente: string) => reportar('error', m, fuente);
+  const exigir = (m: string, fuente: string) => reportar(vigente ? 'error' : 'advertencia', `${m} (obligatorio ${DESDE_VIGENCIA}).`, fuente);
   const ajuste = tipo === 'NC' || tipo === 'ND';
-  if (r.codigo === '13' && tipo !== 'NC') err('El código 13 «Anula documento de referencia por error material» solo se usa en notas de crédito.');
-  if (r.codigo === '14' && !ajuste) err('El código 14 «Corrige monto por error material» solo se usa en notas de crédito o débito.');
-  if ((r.codigo === '15' || r.codigo === '16') && (ajuste || tipo === 'REP')) {
-    err(`El código ${r.codigo} se usa en el comprobante que sustituye, no en notas de crédito, débito ni en el REP.`);
+  if (r.codigo === '13' && tipo !== 'NC') err('El código 13 «Anula documento de referencia por error material» solo se usa en notas de crédito: un comprobante válido solo se anula con nota de crédito.', FUENTE_AJUSTES);
+  if (r.codigo === '14' && !ajuste) err('El código 14 «Corrige monto por error material» solo se usa en notas de crédito o débito.', FUENTE_AJUSTES);
+  if ((r.codigo === '13' || r.codigo === '14') && ajuste && r.fechaEmision) {
+    const periodo = r.fechaEmision.slice(0, 7).split('-').reverse().join('/');
+    reportar('advertencia', `Código ${r.codigo}: el efecto contable se refleja en el período del comprobante que se modifica (${periodo}), no en el mes de emisión de la nota.`, `${FUENTE_COMUNICADO}; nota 9`);
   }
-  if (r.codigo === '16' && r.tipoDoc !== '10') err('El código 16 «Sustituye comprobante electrónico rechazado» se usa con el tipo de documento 10.');
-  if (r.codigo === '17' && tipo !== 'REP') err('El código 17 «Pago a comprobante electrónico» es exclusivo del Recibo Electrónico de Pago.');
-  if (tipo === 'REP' && r.codigo !== '17') exigir(`El REP debe referenciar el comprobante pagado con el código 17 «Pago a comprobante electrónico» (obligatorio ${desde}).`, obligatorio);
-  if (r.tipoDoc === '10' && r.codigo !== '16') exigir(`Para sustituir un comprobante rechazado por Hacienda use el código 16 (obligatorio ${desde}).`, obligatorio);
+  if ((r.codigo === '15' || r.codigo === '16') && (ajuste || tipo === 'REP')) {
+    err(`El código ${r.codigo} se usa en el comprobante que sustituye, no en notas de crédito, débito ni en el REP.`, FUENTE_SUSTITUCION);
+  }
+  if (r.codigo === '16' && r.tipoDoc !== '10') err('El código 16 «Sustituye comprobante electrónico rechazado» se usa con el tipo de documento 10.', FUENTE_RECHAZADO);
+  if (r.codigo === '17' && tipo !== 'REP') err('El código 17 «Pago a comprobante electrónico» es exclusivo del Recibo Electrónico de Pago.', `${FUENTE_COMUNICADO}; nota 9`);
+  if (tipo === 'REP' && r.codigo !== '17') exigir('El REP debe referenciar el comprobante pagado con el código 17 «Pago a comprobante electrónico»', `${FUENTE_COMUNICADO}; nota 9`);
+  if (r.tipoDoc === '10' && r.codigo !== '16') exigir('Para sustituir un comprobante rechazado por Hacienda use el código 16', FUENTE_RECHAZADO);
 }
 
 export function hayErrores(v: Validacion[]): boolean {

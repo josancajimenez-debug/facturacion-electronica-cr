@@ -1,6 +1,7 @@
-import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion } from '@fe-cr/core';
+import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion, periodoContable } from '@fe-cr/core';
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Alerta, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { csv, descargar, dinero, mesCR, signoVenta } from '../lib/formato';
@@ -12,7 +13,11 @@ export function Reportes() {
   const [mes, setMes] = useState(mesCR);
 
   const datos = useMemo(() => {
-    const delMes = comprobantes.filter((c) => c.fechaEmision.startsWith(mes) && c.estado === 'aceptado');
+    // Las NC/ND con códigos 13 y 14 se imputan al período del comprobante que modifican.
+    const aceptados = comprobantes.filter((c) => c.estado === 'aceptado');
+    const delMes = aceptados.filter((c) => periodoContable(c) === mes);
+    const imputadosAqui = delMes.filter((c) => !c.fechaEmision.startsWith(mes));
+    const imputadosOtro = aceptados.filter((c) => c.fechaEmision.startsWith(mes) && periodoContable(c) !== mes);
     const porTarifa = new Map<string, Fila>();
     const porMedio = new Map<string, Fila>();
     const porTipo = new Map<string, Fila>();
@@ -59,6 +64,8 @@ export function Reportes() {
       recibidosConfirmados: confirmados.length,
       creditoRecibidos: confirmados.reduce((s, r) => s + r.totalImpuesto, 0),
       pendientes: recMes.filter((r) => r.estado === 'pendiente').length,
+      imputadosAqui,
+      imputadosOtro,
     };
   }, [comprobantes, recibidos, mes]);
 
@@ -77,6 +84,11 @@ export function Reportes() {
       [],
       ['Compras con FEC', datos.compras.toFixed(2), datos.ivaCompras.toFixed(2)],
       ['Recibidos confirmados', datos.recibidosConfirmados, datos.creditoRecibidos.toFixed(2)],
+      [],
+      ['Ajustes por error material (códigos 13/14) imputados a este período', 'Emitido', 'Total', 'Consecutivo'],
+      ...datos.imputadosAqui.map((c) => [NOMBRE_COMPROBANTE[c.tipo], c.fechaEmision.slice(0, 10), (c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)).toFixed(2), c.consecutivo]),
+      ['Emitidos en este mes e imputados a otro período', 'Período', 'Total', 'Consecutivo'],
+      ...datos.imputadosOtro.map((c) => [NOMBRE_COMPROBANTE[c.tipo], periodoContable(c), (c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)).toFixed(2), c.consecutivo]),
     ]), 'text/csv');
 
   const maxMedio = Math.max(1, ...datos.medios.map((m) => Math.abs(m.base)));
@@ -139,6 +151,26 @@ export function Reportes() {
             {datos.pendientes > 0 && <Alerta tipo="warn">{datos.pendientes} comprobante(s) recibidos del período siguen pendientes de confirmar.</Alerta>}
           </div>
         </div>
+        {(datos.imputadosAqui.length > 0 || datos.imputadosOtro.length > 0) && (
+          <div className="card">
+            <div className="card-head"><h2>Ajustes por error material</h2></div>
+            <div className="card-body stack">
+              <p className="small muted" style={{ margin: 0 }}>Las notas con los códigos 13 y 14 reflejan su efecto contable en el período del comprobante que modifican (actualización v4.4, obligatoria desde el 1/11/2026).</p>
+              {datos.imputadosAqui.map((c) => (
+                <div key={c.clave} className="row" style={{ justifyContent: 'space-between' }}>
+                  <span><Link to={`/comprobantes/${c.clave}`}>{NOMBRE_COMPROBANTE[c.tipo]}</Link> emitida el {c.fechaEmision.slice(0, 10)} · <strong>incluida aquí</strong></span>
+                  <span className="num">{dinero(signoVenta(c.tipo) * c.resumen.totalComprobante * (c.resumen.tipoCambio || 1))}</span>
+                </div>
+              ))}
+              {datos.imputadosOtro.map((c) => (
+                <div key={c.clave} className="row" style={{ justifyContent: 'space-between' }}>
+                  <span><Link to={`/comprobantes/${c.clave}`}>{NOMBRE_COMPROBANTE[c.tipo]}</Link> emitida este mes · <strong>imputada a {periodoContable(c)}</strong></span>
+                  <span className="num">{dinero(signoVenta(c.tipo) * c.resumen.totalComprobante * (c.resumen.tipoCambio || 1))}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,8 +1,8 @@
 # Pruebas
 
-| Comando | Qué prueba | Requiere | Resultado verificado (23/10/2026) |
+| Comando | Qué prueba | Requiere | Resultado verificado (26/10/2026) |
 | --- | --- | --- | --- |
-| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas y códigos de referencia 13-17 con su vigencia del 1/11/2026 (62). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas y CSV (8). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 86/86 ✔ |
+| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC (72). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas y CSV (8). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 96/96 ✔ |
 | `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge | Node | Sin errores ✔ |
 | `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 | `npm audit` | Vulnerabilidades conocidas en dependencias | Node | 0 ✔ |
@@ -58,10 +58,12 @@ Además, la función Edge se ejecutó en **Deno 2.1.4** y está desplegada en el
 7. Factura electrónica de compra (régimen especial) → aceptado
 8. Comprobante «sin internet» → aceptado
 9. Nota de crédito que anula la última factura → aceptado
-10. Receptor no inscrito → rechazado (nivel 3)
-11. CAByS inexistente → rechazado (nivel 3)
-12. Rechazo forzado → rechazado (para practicar la sustitución)
-13. Medios de pago que no suman el total → error de validación
+10. Anulación por error material (código 13) → aceptado; luego «Emitir sustituto (código 15)» desde el detalle
+11. Nota de crédito mayor que lo facturado → aceptado con advertencia hasta el 31/10/2026; rechazado desde el 1/11/2026
+12. Receptor no inscrito → rechazado (nivel 3)
+13. CAByS inexistente → rechazado (nivel 3)
+14. Rechazo forzado → rechazado (para practicar la sustitución)
+15. Medios de pago que no suman el total → error de validación
 
 ## Datos ficticios
 

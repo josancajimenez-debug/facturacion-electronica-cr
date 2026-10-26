@@ -1,4 +1,4 @@
-import { RECEPTORES_DEMO, fechaEmisionCR, type BorradorComprobante, type Comprobante, type Emisor, type LineaBorrador, type Validacion } from '@fe-cr/core';
+import { RECEPTORES_DEMO, actualizacionVigente, fechaEmisionCR, type BorradorComprobante, type Comprobante, type Emisor, type LineaBorrador, type Validacion } from '@fe-cr/core';
 import { Play } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -46,6 +46,19 @@ const ESCENARIOS: Escenario[] = [
       const fe = comprobantes.find((c) => c.tipo === 'FE' && c.estado === 'aceptado');
       if (!fe) return 'Primero ejecute un escenario de factura aceptada.';
       return { ...fe.borrador, tipo: 'NC', situacion: '1', referencias: [{ tipoDoc: '01', numero: fe.clave, fechaEmision: fe.fechaEmision, codigo: '01', razon: 'Anula documento de referencia' }] };
+    } },
+  { id: 'nc-error-material', titulo: 'Anulación por error material (código 13)', descripcion: 'NC que anula la última factura aceptada por error material; su efecto se imputa al período de la factura. Luego, desde el detalle, emita el sustituto con el código 15.', esperado: 'aceptado', fuente: 'Nota 9 códigos 13 y 15 (actualización v4.4); Decreto 44739-H art. 10',
+    armar: (_base, { comprobantes }) => {
+      const fe = comprobantes.find((c) => c.tipo === 'FE' && c.estado === 'aceptado');
+      if (!fe) return 'Primero ejecute un escenario de factura aceptada.';
+      return { ...fe.borrador, tipo: 'NC', situacion: '1', referencias: [{ tipoDoc: '01', numero: fe.clave, fechaEmision: fe.fechaEmision, codigo: '13', razon: 'Anula documento de referencia por error material' }] };
+    } },
+  { id: 'nc-excede', titulo: 'Nota de crédito mayor que lo facturado', descripcion: 'NC por el doble de la última factura aceptada. Hasta el 31/10/2026 se acepta con advertencia; desde el 1/11/2026 se rechaza.', esperado: actualizacionVigente() ? 'rechazado' : 'aceptado', fuente: 'Anexos y Estructuras v4.4 actualizado (límite de la NC)',
+    armar: (_base, { comprobantes }) => {
+      const fe = comprobantes.find((c) => c.tipo === 'FE' && c.estado === 'aceptado');
+      if (!fe) return 'Primero ejecute un escenario de factura aceptada.';
+      return { ...fe.borrador, tipo: 'NC', situacion: '1', lineas: fe.borrador.lineas.map((l) => ({ ...l, cantidad: l.cantidad * 2 })), mediosPago: fe.borrador.mediosPago.map((m) => ({ tipo: m.tipo })).slice(0, 1),
+        referencias: [{ tipoDoc: '01', numero: fe.clave, fechaEmision: fe.fechaEmision, codigo: '02', razon: 'Corrige monto' }] };
     } },
   { id: 'rech-receptor', titulo: 'Rechazo: receptor no inscrito', descripcion: 'La cédula del receptor no existe en el padrón simulado (validación de nivel 3).', esperado: 'rechazado', fuente: 'Anexo 1 p. 23; validación nivel 3',
     armar: (b) => ({ ...b, contraparte: { nombre: 'Cliente Inexistente', identificacion: { tipo: '01', numero: '199999999' } }, lineas: [L()] }) },

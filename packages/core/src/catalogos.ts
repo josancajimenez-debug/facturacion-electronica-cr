@@ -158,8 +158,9 @@ export const VIGENCIA_CODIGOS_ACTUALIZACION = '2026-11-01';
 /**
  * Nota 9 – códigos de referencia (Anexo v4.4, nov. 2024, y comunicado de actualización 2026).
  * El comunicado agrega los códigos 13 a 17 y ajusta el 12, pero no transcribe sus
- * descripciones; se toman de publicaciones que citan el Anexo actualizado (Alegra y Siempre al
- * Día, 2026) y deben confirmarse con el documento oficial (ver docs/MATRIZ_NORMATIVA.md).
+ * descripciones; se toman de fuentes coincidentes que citan el Anexo actualizado (KPMG, 2026;
+ * FACBOX, 2026; Factura Profesional, 2026; Delfino, 2026) y deben confirmarse con el documento
+ * oficial de la OVi (ver docs/MATRIZ_NORMATIVA.md).
  */
 export const CODIGO_REFERENCIA: Codigo[] = [
   { codigo: '01', descripcion: 'Anula Documento de Referencia' },
