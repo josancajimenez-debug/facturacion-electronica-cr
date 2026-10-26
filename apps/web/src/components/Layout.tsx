@@ -1,4 +1,5 @@
 import {
+  BookA,
   BookOpen,
   Building2,
   ClipboardList,
@@ -37,6 +38,7 @@ const NAV = [
   { a: '/escenarios', texto: 'Escenarios de prueba', icono: FlaskConical },
   { grupo: 'Referencia' },
   { a: '/normativa', texto: 'Matriz normativa', icono: BookOpen },
+  { a: '/glosario', texto: 'Glosario', icono: BookA },
   { a: '/configuracion', texto: 'Configuración', icono: Settings },
 ] as const;
 

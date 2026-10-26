@@ -2,7 +2,7 @@
 
 | Comando | Qué prueba | Requiere | Resultado verificado (26/10/2026) |
 | --- | --- | --- | --- |
-| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas; regresiones de la revisión integral (vigencia según la fecha del simulador, tipo 10 en NC/ND/REP, base del IVA devuelto, fechas imposibles en la clave) (87). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas, CSV e identificación alfanumérica (10). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 113/113 ✔ |
+| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas; regresiones de la revisión integral (vigencia según la fecha del simulador, tipo 10 en NC/ND/REP, base del IVA devuelto, fechas imposibles en la clave) (87). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas, CSV, identificación alfanumérica y glosario (cada cita con su referencia APA, orden alfabético, búsqueda sin tildes) (13). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 116/116 ✔ |
 | `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge | Node | Sin errores ✔ |
 | `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 | `npm audit` | Vulnerabilidades conocidas en dependencias | Node | 0 ✔ |
@@ -47,6 +47,8 @@ Cada error corregido quedó cubierto por una prueba automática:
 | Al cambiar de emisor activo, formularios abiertos conservaban sucursales y actividades del anterior | Las páginas no se reiniciaban | Revisión manual |
 
 Guion de navegador (Chrome sin interfaz, modo local): registro, datos demo, cédula alfanumérica, terminal nueva, factura desde el formulario (aceptada), pestañas y PDF, nota de crédito (aceptada), rechazo forzado y su sustituto (aceptado), los 15 escenarios con el resultado esperado, Reportes, Auditoría, Recepción con confirmación, Configuración, Normativa y vista móvil a 390 px sin desbordamiento. Consola: sin errores ni advertencias.
+
+Guion de navegador del Glosario (26/10/2026, modo local): 55 términos, 24 siglas y 11 referencias; la búsqueda «credito» encuentra 13 términos y 1 sigla; una búsqueda sin coincidencias muestra el aviso vacío; a 390 px las filas se apilan sin desbordamiento horizontal. Consola: sin errores ni advertencias.
 
 ## Casos de cálculo verificados a mano
 

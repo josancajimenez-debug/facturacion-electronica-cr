@@ -5,7 +5,8 @@
 ```
 ┌───────────────────── apps/web (React + Vite) — GitHub Pages ─────────────────────┐
 │ Páginas: Panel · Emitir · Comprobantes · Recepción · Emisor · Receptores ·        │
-│ Productos · Reportes · Auditoría · Escenarios · Matriz normativa · Configuración  │
+│ Productos · Reportes · Auditoría · Escenarios · Matriz normativa · Glosario ·     │
+│ Configuración                                                                     │
 │                    │ interfaz Backend (backend/tipos.ts)                          │
 │        ┌───────────┴──────────────┐                                               │
 │   LocalBackend                SupabaseBackend                                     │

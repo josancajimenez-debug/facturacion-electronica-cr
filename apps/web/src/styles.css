@@ -296,6 +296,14 @@ tr.clickable { cursor: pointer; }
   .grid > * { grid-column: auto !important; }
   h1 { font-size: 19px; }
 }
+/* Tablas de lectura (Glosario): en pantallas angostas cada fila se apila en lugar de desplazarse de lado. */
+@media (max-width: 640px) {
+  table.apilada thead { display: none; }
+  table.apilada tr, table.apilada td { display: block; min-width: 0 !important; }
+  table.apilada td { border: 0; padding: 2px 16px; }
+  table.apilada td:first-child { padding-top: 12px; }
+  table.apilada td:last-child { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+}
 @media print {
   /* La franja de SIMULACIÓN se conserva al imprimir: el documento no debe parecer real. */
   .sidebar, .topbar, .no-print, .toasts { display: none !important; }

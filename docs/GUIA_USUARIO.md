@@ -72,7 +72,12 @@ Menú **Recepción**.
 
 Quince casos listos para ejecutar con un clic, con el resultado esperado y la fuente normativa de cada uno.
 
-## 9. Configuración
+## 9. Matriz normativa y glosario
+
+- **Matriz normativa**: normas vigentes, su estado en SINALEVI y dónde se aplican en la herramienta.
+- **Glosario**: 55 términos y 24 siglas definidos según la normativa, con su fuente en formato APA 7 y la lista de referencias. El buscador filtra por término, sigla o cualquier palabra de la definición, sin distinguir tildes ni mayúsculas.
+
+## 10. Configuración
 
 - **Código QR** en el PDF: desactivado por defecto porque el Transitorio III de la RES-0027 lo suspende.
 - **Feriados**: agréguelos para que el plazo de confirmación excluya esos días.

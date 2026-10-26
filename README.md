@@ -13,7 +13,7 @@ Aplicación educativa para practicar la emisión, recepción y validación de co
 - **Recepción** de comprobantes de proveedores y **mensajes de confirmación** 05/06/07 con plazo de 8 días hábiles.
 - **Medios de pago** de la nota 6, incluido **SINPE Móvil**.
 - Consultas con filtros, **reportes**, **auditoría** (bitácora inmutable) y **descargas** (XML, respuesta, PDF, CSV).
-- 15 **escenarios de prueba** y la **matriz normativa** dentro de la app.
+- 15 **escenarios de prueba**, la **matriz normativa** y un **glosario** con citas APA 7 dentro de la app.
 
 ## Inicio rápido
 
