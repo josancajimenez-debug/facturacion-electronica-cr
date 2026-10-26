@@ -19,10 +19,10 @@ export const MATRIZ: NormaMatriz[] = [
   {
     norma: 'Resolución MH-DGT-RES-0027-2024 – Disposiciones técnicas de los comprobantes electrónicos',
     datos: '13/11/2024 · Alcance 186, La Gaceta 217 del 19/11/2024 · Fe de erratas La Gaceta 226 del 2/12/2024',
-    estado: 'Vigente desde 19/11/2024; SINALEVI versión 3 de 3 (27/08/2025). Reformada por RES-0001-2025 y RES-0043-2025 (Transitorio I).',
-    disposiciones: 'Art. 1 formatos (Anexos y Estructuras); 2 consecutivo; 3 clave de 50 dígitos; 4-5 QR y representación gráfica PDF; 6 bitácoras; 7 proveedores; 9 NC/ND y rechazos; 10 confirmación del receptor en 8 días hábiles; 11 validación MH en máx. 3 horas; 12 deroga DGT-R-12-2018, DGT-R-39-2018 y DGT-R-033-2019; Transitorio I v4.4 obligatoria tras 9 meses desde 1/12/2024 (voluntaria desde 1/4/2025; prórroga máx. 6/10/2025); Transitorio III QR suspendido.',
-    implementacion: 'core/clave.ts, core/xml.ts, core/simulador.ts, lib/pdf.ts (QR opcional y apagado), bitácora, Recepción (plazo 8 días hábiles).',
-    url: `${S}param1=103276&param2=143300&param3=3&param4=20`,
+    estado: 'Vigente desde 19/11/2024; SINALEVI versión 3 de 3 (27/08/2025), verificada el 26/10/2026. Transitorio I reformado: párrafo 1 por la RES-0001-2025 (Alcance 20, La Gaceta 29 del 13/02/2025) y párrafo 2 por la RES-0043-2025. El resto del articulado no cambió.',
+    disposiciones: 'Art. 1 formatos (Anexos y Estructuras); 2 consecutivo; 3 clave de 50 dígitos; 4-5 QR y representación gráfica PDF; 6 bitácoras; 7 proveedores; 9 NC/ND y rechazos; 10 confirmación del receptor en 8 días hábiles; 11 validación MH en máx. 3 horas; 12 deroga DGT-R-12-2018, DGT-R-39-2018 y DGT-R-033-2019; Transitorio I v4.4 obligatoria tras 9 meses desde 1/12/2024 (voluntaria desde 1/4/2025; prórroga máx. 6/10/2025); Transitorio II registro de medicamento y forma farmacéutica desde 1/01/2025; Transitorio III QR suspendido.',
+    implementacion: 'core/clave.ts, core/xml.ts, core/simulador.ts (secuencia del consecutivo), lib/pdf.ts (QR opcional y apagado), bitácora, Recepción (plazo 8 días hábiles).',
+    url: `${S}param1=103276&param2=147532&param3=1`,
   },
   {
     norma: 'Anexos y Estructuras para la Emisión de Comprobantes Electrónicos v4.4 (DGT, nov. 2024; bitácora de ajustes al 22/04/2026) y comunicado de actualización',
