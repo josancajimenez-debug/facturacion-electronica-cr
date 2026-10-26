@@ -33,6 +33,8 @@ export interface ContextoSimulador {
   exoneraciones?: Record<string, { tarifaMaxima: number; vigente: boolean }>;
   /** Claves ya recibidas, para detectar duplicados. */
   clavesRecibidas?: Set<string>;
+  /** Consecutivos de los demás comprobantes del emisor (cualquier estado), para verificar la secuencia. */
+  consecutivosEmitidos?: string[];
   /** Comprobantes del emisor ya aceptados, para verificar el saldo de las notas de crédito. */
   documentosAceptados?: DocumentoResumen[];
   /** Escenario de prueba: fuerza un rechazo con el motivo indicado. */
@@ -85,6 +87,13 @@ export function validarComoHacienda(c: Comprobante, ctx: ContextoSimulador = {})
   // ---------- Nivel 3: bases de datos y cálculos ----------
   if (!nivelFallido) {
     if (ctx.clavesRecibidas?.has(c.clave)) detalle.push('Nivel 3: la clave ya fue recibida anteriormente (comprobante duplicado).');
+
+    // RES-0027 art. 2; campo NumeroConsecutivo: «se verificará el cumplimiento de la secuencia».
+    if (ctx.consecutivosEmitidos) {
+      const s = verificarSecuencia(c.consecutivo, ctx.consecutivosEmitidos);
+      if (s.duplicado) detalle.push(`Nivel 3: el consecutivo ${c.consecutivo} ya fue utilizado por otro comprobante del emisor.`);
+      if (s.faltantes > 0) advertencias.push(`Secuencia: faltan ${s.faltantes} número(s) antes del ${Number(c.consecutivo.slice(10))} en la sucursal ${c.consecutivo.slice(0, 3)}, terminal ${c.consecutivo.slice(3, 8)}, tipo ${c.consecutivo.slice(8, 10)} (advertencia).`);
+    }
 
     const obligado = c.emisor.identificacion.numero;
     const registro = ctx.padron?.[obligado];
@@ -178,6 +187,18 @@ export function validarComoHacienda(c: Comprobante, ctx: ContextoSimulador = {})
     fecha: fechaEmisionCR(ahora),
     xml,
   };
+}
+
+/**
+ * Secuencia del consecutivo dentro de su sucursal, terminal y tipo (primeras 10 posiciones):
+ * duplicado si otro comprobante ya usa el mismo número; faltantes = números anteriores sin usar.
+ */
+export function verificarSecuencia(consecutivo: string, otros: string[]): { duplicado: boolean; faltantes: number } {
+  const prefijo = consecutivo.slice(0, 10);
+  const numero = Number(consecutivo.slice(10));
+  const usados = new Set(otros.filter((o) => o.slice(0, 10) === prefijo).map((o) => Number(o.slice(10))));
+  const anteriores = [...usados].filter((n) => n < numero).length;
+  return { duplicado: usados.has(numero), faltantes: numero - 1 - anteriores };
 }
 
 /** Codifica texto UTF-8 en Base64 (navegador y Node). */

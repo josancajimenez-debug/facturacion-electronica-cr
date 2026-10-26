@@ -51,6 +51,8 @@ export interface Repo {
   insertarComprobante(c: ComprobanteGuardado): Promise<void>;
   guardarComprobante(c: ComprobanteGuardado): Promise<void>;
   clavesValidadas(emisorId: string): Promise<Set<string>>;
+  /** Consecutivos de todos los comprobantes del emisor (secuencia, RES-0027 art. 2). */
+  consecutivos(emisorId: string): Promise<{ clave: string; consecutivo: string }[]>;
   /** Comprobantes aceptados del emisor (saldo de las notas de crédito, actualización v4.4). */
   documentosAceptados(emisorId: string): Promise<DocumentoResumen[]>;
   recibido(emisorId: string, clave: string): Promise<Recibido | null>;
@@ -136,7 +138,8 @@ async function simularRespuesta(
   const previas = await repo.clavesValidadas(c.emisorId);
   previas.delete(c.clave);
   const documentosAceptados = c.tipo === 'NC' || c.tipo === 'ND' ? await repo.documentosAceptados(c.emisorId) : undefined;
-  const respuesta = validarComoHacienda(c, { ...ctx, cabysValido: op.cabysValido, clavesRecibidas: previas, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
+  const consecutivosEmitidos = (await repo.consecutivos(c.emisorId)).filter((x) => x.clave !== c.clave).map((x) => x.consecutivo);
+  const respuesta = validarComoHacienda(c, { ...ctx, cabysValido: op.cabysValido, clavesRecibidas: previas, consecutivosEmitidos, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
   await esperar(op.pausaMs);
   c.respuestaHacienda = respuesta;
   await evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones');

@@ -299,6 +299,12 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
 
   // ---- Sucursal y terminal ----
   if (!/^\d{3}$/.test(b.sucursal)) err('sucursal', 'La sucursal debe tener 3 dígitos.');
+  // RES-0027 art. 2 y nota 3: la numeración se lleva por sucursal (001 casa matriz) y terminal registradas.
+  if (emisor.sucursales?.length) {
+    const suc = emisor.sucursales.find((s) => s.codigo === b.sucursal);
+    if (!suc) err('sucursal', `La sucursal ${b.sucursal} no está registrada para el emisor.`, `RES-0027-2024 art. 2; ${ANEXO}, nota 3`);
+    else if (!suc.terminales.includes(b.terminal)) err('terminal', `La terminal ${b.terminal} no está registrada en la sucursal ${b.sucursal}.`, `RES-0027-2024 art. 2; ${ANEXO}, nota 3`);
+  }
   if (!/^\d{5}$/.test(b.terminal)) err('terminal', 'La terminal debe tener 5 dígitos.');
 
   return v;

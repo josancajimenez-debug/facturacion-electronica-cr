@@ -41,6 +41,10 @@ function crearRepo(db: SupabaseClient): Repo {
       const rows = ok(await db.from('comprobantes').select('clave').eq('emisor_id', emisorId).in('estado', ['aceptado', 'rechazado']));
       return new Set(rows.map((r) => r.clave as string));
     },
+    async consecutivos(emisorId) {
+      const rows = ok(await db.from('comprobantes').select('clave, consecutivo:datos->>consecutivo').eq('emisor_id', emisorId));
+      return rows as unknown as { clave: string; consecutivo: string }[];
+    },
     async documentosAceptados(emisorId) {
       const rows = ok(await db.from('comprobantes').select('clave, tipo, resumen:datos->resumen, borrador:datos->borrador').eq('emisor_id', emisorId).eq('estado', 'aceptado'));
       return rows.map((r) => resumenDocumento(r as unknown as Pick<Comprobante, 'clave' | 'tipo' | 'resumen' | 'borrador'>));

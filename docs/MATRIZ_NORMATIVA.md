@@ -34,7 +34,7 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 
 | Requisito | Fuente | Implementación |
 | --- | --- | --- |
-| Consecutivo de 20 dígitos: sucursal (3) + terminal (5) + tipo (2) + número (10); reinicio en 1 al tope | Anexo 1, nota 3 | `generarConsecutivo`, `siguienteNumero` |
+| Consecutivo de 20 dígitos: sucursal (3, 001 casa matriz) + terminal (5) + tipo (2) + número (10), asignado de forma automática y consecutiva por sucursal, terminal y tipo, iniciando en 1 y reiniciando al tope; el simulador verifica la secuencia (rechaza repetidos y advierte saltos) | RES-0027 art. 2; Anexo 1, nota 3 y campo `NumeroConsecutivo` | `generarConsecutivo`, `siguienteNumero`, `siguiente_consecutivo()` atómico en PostgreSQL, `verificarSecuencia()`; la sucursal y la terminal deben estar registradas en el emisor |
 | Clave de 50 dígitos: 506 + día + mes + año + cédula (12) + consecutivo + situación + seguridad (8) | RES-0027 art. 3; nota 3 y 4.1 | `generarClave`, `validarClave` |
 | Fecha RFC 3339 en hora de Costa Rica, asignada por el sistema | Anexo p. 19; Decreto 44739-H art. 14 inc. 7 | `fechaEmisionCR` |
 | Situación 1 normal, 2 contingencia, 3 sin internet | Nota 3; Decreto 44739-H arts. 21 y 23 | Campo «Situación»; validación de referencia al provisional |

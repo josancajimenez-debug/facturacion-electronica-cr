@@ -31,6 +31,9 @@ const repo: Repo = {
   async clavesValidadas(e) {
     return new Set((await como<{ clave: string }>(null, "select clave from comprobantes where emisor_id = $1 and estado in ('aceptado','rechazado')", [e])).map((r) => r.clave));
   },
+  async consecutivos(e) {
+    return como<{ clave: string; consecutivo: string }>(null, "select clave, datos->>'consecutivo' as consecutivo from comprobantes where emisor_id = $1", [e]);
+  },
   async documentosAceptados(e) {
     return (await como<{ datos: Comprobante }>(null, "select datos from comprobantes where emisor_id = $1 and estado = 'aceptado'", [e])).map((r) => resumenDocumento(r.datos));
   },

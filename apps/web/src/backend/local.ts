@@ -318,10 +318,10 @@ export class LocalBackend implements Backend {
       } catch {
         cabysValido = undefined; // sin catálogo disponible se omite esa verificación
       }
-      const documentosAceptados = Object.values(this.estado.comprobantes[emisorId] ?? {})
-        .filter((x) => x.estado === 'aceptado')
-        .map(resumenDocumento);
-      const respuesta = validarComoHacienda(c, { ...ctx, cabysValido, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
+      const delEmisor = Object.values(this.estado.comprobantes[emisorId] ?? {});
+      const documentosAceptados = delEmisor.filter((x) => x.estado === 'aceptado').map(resumenDocumento);
+      const consecutivosEmitidos = delEmisor.filter((x) => x.clave !== c.clave).map((x) => x.consecutivo);
+      const respuesta = validarComoHacienda(c, { ...ctx, cabysValido, consecutivosEmitidos, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
       await esperar(PAUSA_MS);
       this.bitacora(emisorId, { accion: `respuesta-${respuesta.estado}`, clave, detalle: respuesta.detalle.join(' | ') });
       evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones', { respuestaHacienda: respuesta });

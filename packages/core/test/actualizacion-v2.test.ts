@@ -5,7 +5,7 @@ import { REGEX_CLAVE, descomponerClave, generarClave, generarConsecutivo, valida
 import { EMISOR_DEMO } from '../src/datos-demo';
 import { extraerDatosComprobante } from '../src/recepcion';
 import { construirComprobante } from '../src/emision';
-import { validarComoHacienda } from '../src/simulador';
+import { validarComoHacienda, verificarSecuencia } from '../src/simulador';
 import type { BorradorComprobante, Referencia } from '../src/tipos';
 import { validarBorrador, validarIdentificacion } from '../src/validaciones';
 import { borrador, linea } from './helpers';
@@ -115,6 +115,35 @@ describe('Actualización Anexos y Estructuras v4.4 (vigente el 1/11/2026)', () =
   it('tipo de cambio en moneda extranjera: advertencia de referencia del BCCR', () => {
     expect(mensajes({ moneda: 'USD', tipoCambio: 505.5 }, 'advertencia', 'tipoCambio')).toMatch(/BCCR/);
     expect(mensajes({}, 'advertencia', 'tipoCambio')).toBe('');
+  });
+});
+
+describe('Numeración consecutiva (RES-0027 art. 2; nota 3)', () => {
+  const cons = (n: number, prefijo = '0010000101') => prefijo + String(n).padStart(10, '0');
+
+  it('detecta consecutivos repetidos y números faltantes por sucursal, terminal y tipo', () => {
+    expect(verificarSecuencia(cons(1), [])).toEqual({ duplicado: false, faltantes: 0 });
+    expect(verificarSecuencia(cons(3), [cons(1), cons(2)])).toEqual({ duplicado: false, faltantes: 0 });
+    expect(verificarSecuencia(cons(2), [cons(1), cons(2)]).duplicado).toBe(true);
+    expect(verificarSecuencia(cons(5), [cons(1), cons(2)]).faltantes).toBe(2);
+    // Otra terminal u otro tipo llevan su propia numeración.
+    expect(verificarSecuencia(cons(1, '0010000201'), [cons(1), cons(2)])).toEqual({ duplicado: false, faltantes: 0 });
+  });
+
+  it('el simulador rechaza un consecutivo repetido y advierte saltos', () => {
+    const c = construirComprobante({ borrador: borrador(), emisor: EMISOR_DEMO, numero: 4, ambiente: 'simulacion', fecha: new Date() });
+    const repetido = validarComoHacienda(c, { consecutivosEmitidos: [c.consecutivo] });
+    expect(repetido.estado).toBe('rechazado');
+    expect(repetido.detalle.join(' ')).toMatch(/ya fue utilizado/);
+    const salto = validarComoHacienda(c, { consecutivosEmitidos: [c.consecutivo.slice(0, 10) + '0000000001'] });
+    expect(salto.estado).toBe('aceptado');
+    expect(salto.advertencias.join(' ')).toMatch(/faltan 2 número/);
+  });
+
+  it('la sucursal y la terminal deben estar registradas en el emisor', () => {
+    expect(mensajes({ sucursal: '009' }, 'error', 'sucursal')).toMatch(/no está registrada/);
+    expect(mensajes({ sucursal: '002', terminal: '00002' }, 'error', 'terminal')).toMatch(/no está registrada en la sucursal 002/);
+    expect(mensajes({ sucursal: '001', terminal: '00002' }, 'error', 'terminal')).toBe('');
   });
 });
 
