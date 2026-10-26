@@ -121,7 +121,9 @@ export function validarClave(clave: string, esperado?: { fechaEmision?: string; 
   if (p.pais !== '506') errores.push('Los tres primeros dígitos de la clave deben ser 506.');
   const dia = Number(p.dia);
   const mes = Number(p.mes);
-  if (mes < 1 || mes > 12 || dia < 1 || dia > 31) errores.push('La fecha contenida en la clave no es válida.');
+  const anio = 2000 + Number(p.anio);
+  const enCalendario = new Date(Date.UTC(anio, mes - 1, dia)).getUTCDate() === dia;
+  if (mes < 1 || mes > 12 || dia < 1 || !enCalendario) errores.push('La fecha contenida en la clave no es válida.');
   if (!['1', '2', '3'].includes(p.situacion)) errores.push('La situación del comprobante (posición 42) debe ser 1, 2 o 3.');
   if (!descomponerConsecutivo(p.consecutivo)) errores.push('El consecutivo contenido en la clave no es válido.');
   if (esperado?.consecutivo && esperado.consecutivo !== p.consecutivo) {

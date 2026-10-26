@@ -1,4 +1,5 @@
-import { NOMBRE_COMPROBANTE } from '@fe-cr/core';
+import { NOMBRE_COMPROBANTE, limiteConfirmacionReceptor, periodoContable } from '@fe-cr/core';
+import type { Recibido } from '../backend/tipos';
 import { FilePlus2, FileText, FlaskConical, Inbox } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
@@ -7,11 +8,12 @@ import { useApp } from '../estado';
 import { aColones, dinero, fecha, fechaHora, mesCR, signoVenta } from '../lib/formato';
 
 export function Dashboard() {
-  const { emisor, comprobantes, recibidos } = useApp();
+  const { emisor, comprobantes, recibidos, preferencias } = useApp();
   const mesActual = mesCR();
 
   const kpi = useMemo(() => {
-    const delMes = comprobantes.filter((c) => c.fechaEmision.startsWith(mesActual) && c.estado === 'aceptado');
+    // Mismo criterio que Reportes: las NC/ND por error material (13/14) cuentan en el período que modifican.
+    const delMes = comprobantes.filter((c) => c.estado === 'aceptado' && periodoContable(c) === mesActual);
     const ventas = delMes.reduce((s, c) => s + signoVenta(c.tipo) * aColones(c.resumen.totalVentaNeta, c.resumen.tipoCambio), 0);
     const iva = delMes.reduce((s, c) => s + signoVenta(c.tipo) * aColones(c.resumen.totalImpuesto, c.resumen.tipoCambio), 0);
     const porEstado: Record<string, number> = {};
@@ -21,6 +23,11 @@ export function Dashboard() {
   }, [comprobantes, recibidos, mesActual]);
 
   const total = comprobantes.length || 1;
+  // Igual que en Recepción: el plazo se recalcula con los feriados configurados.
+  const limiteConFeriados = (r: Recibido) => {
+    const d = new Date(r.fechaEmision);
+    return Number.isNaN(d.getTime()) ? r.limiteConfirmacion : limiteConfirmacionReceptor(d, preferencias.feriados);
+  };
 
   return (
     <>
@@ -83,7 +90,7 @@ export function Dashboard() {
             ) : (
               <table><tbody>
                 {kpi.pendientes.slice(0, 5).map((r) => (
-                  <tr key={r.clave}><td>{r.nombreEmisor}</td><td className="num">{dinero(r.totalComprobante, r.moneda ?? 'CRC')}</td><td className="small">vence {fecha(r.limiteConfirmacion)}</td></tr>
+                  <tr key={r.clave}><td>{r.nombreEmisor}</td><td className="num">{dinero(r.totalComprobante, r.moneda ?? 'CRC')}</td><td className="small">vence {fecha(limiteConFeriados(r))}</td></tr>
                 ))}
               </tbody></table>
             )}

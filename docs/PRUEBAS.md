@@ -2,7 +2,7 @@
 
 | Comando | Qué prueba | Requiere | Resultado verificado (26/10/2026) |
 | --- | --- | --- | --- |
-| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas (81). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas y CSV (8). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 105/105 ✔ |
+| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas; regresiones de la revisión integral (vigencia según la fecha del simulador, tipo 10 en NC/ND/REP, base del IVA devuelto, fechas imposibles en la clave) (87). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas, CSV e identificación alfanumérica (10). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 113/113 ✔ |
 | `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge | Node | Sin errores ✔ |
 | `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 | `npm audit` | Vulnerabilidades conocidas en dependencias | Node | 0 ✔ |
@@ -24,6 +24,29 @@ Cada error corregido quedó cubierto por una prueba automática:
 | Recargar la página (modo local) dejaba el comprobante a medio procesar | `local.test.ts` › retoma al cargar… |
 | Dos pestañas (modo local) se sobrescribían los cambios | `local.test.ts` › recarga los datos cuando otra pestaña… |
 | PDF de varias páginas sin franja de simulación ni numeración | `pdf.test.ts` |
+
+## Pruebas de regresión de la segunda revisión integral (26/10/2026)
+
+| Error | Causa | Prueba |
+| --- | --- | --- |
+| El simulador aplicaba las reglas de la actualización según el reloj del equipo y no según su propia fecha | `validarBorrador` llamaba a `actualizacionVigente()` sin fecha | `regresiones.test.ts` › el simulador aplica las reglas vigentes en su fecha |
+| Un REP que referenciaba un comprobante tipo 10 nunca podía validar desde el 1/11/2026 (se le exigían a la vez los códigos 16 y 17) | Regla del tipo 10 aplicada también al REP | `regresiones.test.ts` › el REP puede referenciar un tipo 10… |
+| Se permitía ajustar con NC/ND un comprobante rechazado | Faltaba la regla (art. 19 Decreto 44739-H) | `regresiones.test.ts` › una nota… no puede ajustar un rechazado |
+| El IVA devuelto de salud sumaba otros impuestos de la línea | Usaba el impuesto neto total de la línea | `regresiones.test.ts` › el IVA devuelto de salud… |
+| La clave aceptaba fechas imposibles (31/02) | Solo se validaban rangos de día y mes | `regresiones.test.ts` › la clave rechaza fechas… |
+| No se podía escribir una cédula jurídica alfanumérica en Emisor ni Receptores | El campo eliminaba todo lo que no fuera dígito | `formato.test.ts` y guion de navegador |
+| No se podía agregar una segunda terminal (la coma desaparecía al escribirla) | El campo descartaba el elemento vacío tras la coma | Guion de navegador |
+| «Emitir comprobante sustituto» de una NC, ND o REP rechazados generaba un borrador inválido (código 16) y el de una FEC perdía sus referencias | Referencia fija tipo 10/16 que reemplazaba las demás | Guion de navegador (sustituto aceptado) |
+| En FEC con vendedor manual se mostraba una ubicación que no estaba en el borrador | Valor por omisión solo visual | Revisión manual |
+| Los errores devueltos al emitir seguían visibles después de corregir el borrador | No se limpiaban al editar | Revisión manual |
+| En TE, FEE y REP viajaba en el XML la actividad del receptor aunque el campo estaba deshabilitado | Se heredaba del receptor seleccionado | Revisión manual |
+| En modo Supabase, tras emitir podía verse «Comprobante no encontrado» un instante | Se navegaba antes de refrescar la lista | Revisión manual |
+| El Panel contaba las NC/ND 13/14 en el mes de emisión (Reportes, en el del documento modificado) y no usaba los feriados para el plazo | Criterios distintos entre páginas | Revisión manual |
+| Los escenarios de NC podían anular dos veces la misma factura | Tomaban siempre la última FE aceptada | Guion de navegador |
+| En desarrollo (StrictMode) se creaban dos backends locales que procesaban los mismos comprobantes | Creación del backend en un efecto que se ejecuta dos veces | Revisión manual |
+| Al cambiar de emisor activo, formularios abiertos conservaban sucursales y actividades del anterior | Las páginas no se reiniciaban | Revisión manual |
+
+Guion de navegador (Chrome sin interfaz, modo local): registro, datos demo, cédula alfanumérica, terminal nueva, factura desde el formulario (aceptada), pestañas y PDF, nota de crédito (aceptada), rechazo forzado y su sustituto (aceptado), los 15 escenarios con el resultado esperado, Reportes, Auditoría, Recepción con confirmación, Configuración, Normativa y vista móvil a 390 px sin desbordamiento. Consola: sin errores ni advertencias.
 
 ## Casos de cálculo verificados a mano
 

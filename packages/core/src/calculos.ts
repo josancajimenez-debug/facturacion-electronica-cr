@@ -167,7 +167,8 @@ export function calcularResumen(borrador: BorradorComprobante, lineas: LineaCalc
     }
     totalImpuesto = totalImpuesto.plus(l.impuestoNeto);
     totalAsumido = totalAsumido.plus(asumidoLinea);
-    if (l.servicioSalud && iva?.tarifa === 4) ivaSalud = ivaSalud.plus(l.impuestoNeto);
+    // Solo el IVA neto de la línea (sin otros impuestos ni lo exonerado o asumido por el emisor).
+    if (l.servicioSalud && iva?.tarifa === 4 && !lineaAsumida) ivaSalud = ivaSalud.plus(D(iva.monto).minus(iva.exoneracion?.montoExoneracion ?? 0));
   }
 
   const totalGravado = acc.servGravados.plus(acc.mercGravadas);

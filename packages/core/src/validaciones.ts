@@ -73,7 +73,14 @@ const esAjuste = (tipo: string) => tipo === 'NC' || tipo === 'ND';
  * Valida un borrador antes de emitirlo. No sustituye la validación del Ministerio de Hacienda;
  * reproduce las reglas de condicionalidad y formato documentadas en el Anexo 1 v4.4.
  */
-export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?: Resumen, lineas?: LineaCalculada[]): Validacion[] {
+export function validarBorrador(
+  b: BorradorComprobante,
+  emisor: Emisor,
+  resumen?: Resumen,
+  lineas?: LineaCalculada[],
+  /** Fecha de referencia para la vigencia de la actualización y la antigüedad de las referencias. */
+  ahora: Date = new Date(),
+): Validacion[] {
   const v: Validacion[] = [];
   const err = (campo: string, mensaje: string, fuente = ANEXO) => v.push({ campo, mensaje, nivel: 'error', fuente });
   const adv = (campo: string, mensaje: string, fuente = ANEXO) => v.push({ campo, mensaje, nivel: 'advertencia', fuente });
@@ -255,7 +262,7 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   if (b.referencias.length > 10) err('referencias', 'Máximo 10 referencias.');
   const requiereRef = ['NC', 'ND', 'FEC', 'REP'].includes(b.tipo) || b.lineas.some((l) => l.exoneracion?.tipoDocumento === '11');
   if (requiereRef && b.referencias.length === 0) err('referencias', 'Este comprobante requiere información de referencia.');
-  const vigente = actualizacionVigente();
+  const vigente = actualizacionVigente(ahora);
   const exigirV2 = (campo: string, mensaje: string, fuente = FUENTE_V2_REFERENCIA) =>
     (vigente ? err : adv)(campo, `${mensaje}${vigente ? '' : ` (obligatorio ${DESDE_VIGENCIA})`}`, fuente);
   b.referencias.forEach((r, i) => {
@@ -287,7 +294,7 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
     if (r.codigo === '99' && !largo(r.codigoOtro, 5, 100)) err(`referencias.${i}`, 'Describa el código de referencia OTRO.');
     validarCodigosActualizacion(b.tipo, r, vigente, (nivel, m, fuente) => (nivel === 'error' ? err : adv)(`referencias.${i}`, m, fuente));
     if (!REGEX_FECHA_RFC3339.test(r.fechaEmision)) err(`referencias.${i}`, 'Fecha del documento de referencia en formato RFC 3339.');
-    else if (Date.now() - new Date(r.fechaEmision).getTime() > 10 * 365.25 * 86400000) {
+    else if (ahora.getTime() - new Date(r.fechaEmision).getTime() > 10 * 365.25 * 86400000) {
       err(`referencias.${i}`, 'La fecha de referencia no puede superar 10 años de antigüedad.');
     }
   });
@@ -343,7 +350,10 @@ function validarCodigosActualizacion(
   if (r.codigo === '16' && r.tipoDoc !== '10') err('El código 16 «Sustituye comprobante electrónico rechazado» se usa con el tipo de documento 10.', FUENTE_RECHAZADO);
   if (r.codigo === '17' && tipo !== 'REP') err('El código 17 «Pago a comprobante electrónico» es exclusivo del Recibo Electrónico de Pago.', NOTA9);
   if (tipo === 'REP' && r.codigo !== '17') exigir('El REP debe referenciar el comprobante pagado con el código 17 «Pago a comprobante electrónico»', `${NOTA9}; ${FUENTE_COMUNICADO}`);
-  if (r.tipoDoc === '10' && r.codigo !== '16') exigir('Para sustituir un comprobante rechazado por Hacienda use el código 16', FUENTE_RECHAZADO);
+  // Un comprobante rechazado carece de validez: no se ajusta con notas, se sustituye (el REP sí puede
+  // referenciarlo, pero siempre con el código 17).
+  if (r.tipoDoc === '10' && ajuste) err('Un comprobante rechazado por Hacienda no se ajusta con notas de crédito o débito: se sustituye por uno nuevo.', FUENTE_RECHAZADO);
+  if (r.tipoDoc === '10' && !ajuste && tipo !== 'REP' && r.codigo !== '16') exigir('Para sustituir un comprobante rechazado por Hacienda use el código 16', FUENTE_RECHAZADO);
 }
 
 export function hayErrores(v: Validacion[]): boolean {

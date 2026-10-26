@@ -4,6 +4,13 @@ import { Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useId, useState, type ReactNode } from 'react';
 import { Alerta, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
+import { limpiarIdentificacion } from '../lib/formato';
+
+/**
+ * Terminales escritas como «00001, 00002». Mientras se escribe se conserva el elemento vacío tras la
+ * última coma: si se descartara, el campo borraría la coma y no se podría agregar otra terminal.
+ */
+const separarTerminales = (texto: string): string[] => (texto.trim() ? texto.split(',').map((t) => t.trim()) : []);
 
 const nuevoEmisor = (): Emisor => ({
   id: '',
@@ -51,7 +58,7 @@ export function EmisorPagina() {
   form.sucursales.forEach((s) => {
     if (!/^\d{3}$/.test(s.codigo)) errores.push(`Sucursal "${s.nombre}": código de 3 dígitos.`);
     if (s.terminales.length === 0) errores.push(`Sucursal ${s.codigo}: registre al menos una terminal.`);
-    s.terminales.forEach((t) => !/^\d{5}$/.test(t) && errores.push(`Sucursal ${s.codigo}: la terminal ${t} debe tener 5 dígitos.`));
+    s.terminales.forEach((t) => !/^\d{5}$/.test(t) && errores.push(t ? `Sucursal ${s.codigo}: la terminal ${t} debe tener 5 dígitos.` : `Sucursal ${s.codigo}: complete o quite la terminal vacía (sobra una coma).`));
     repetidas(s.terminales).forEach((t) => errores.push(`Sucursal ${s.codigo}: la terminal ${t} está repetida.`));
   });
   // Dos sucursales con el mismo código compartirían la numeración consecutiva (Nota 3).
@@ -143,11 +150,11 @@ export function EmisorPagina() {
             ]}
             ayuda="Art. 2 incisos 9, 10 y 21 del Decreto 44739-H." />
           <Selector etiqueta="Tipo de identificación" valor={form.identificacion.tipo} onCambio={(v) => set({ identificacion: { ...form.identificacion, tipo: v } })} opciones={TIPO_IDENTIFICACION.slice(0, 4)} requerido />
-          <CampoConAccion etiqueta="Número de identificación" valor={form.identificacion.numero} onCambio={(v) => set({ identificacion: { ...form.identificacion, numero: v.replace(/\D/g, '') } })} accion={
+          <CampoConAccion etiqueta="Número de identificación" valor={form.identificacion.numero} onCambio={(v) => set({ identificacion: { ...form.identificacion, numero: limpiarIdentificacion(form.identificacion.tipo, v) } })} alfanumerico={form.identificacion.tipo === '02'} accion={
             <button className="btn btn-sm" onClick={consultarHacienda} disabled={consultando || !!eId} title="Consulta pública GET /fe/ae">
               <Search /> Consultar
             </button>
-          } ayuda="Sin guiones. Física 9 dígitos, jurídica 10, DIMEX 11-12, NITE 10." />
+          } ayuda="Sin guiones. Física 9 dígitos, jurídica 10 caracteres (admite letras desde la actualización v4.4), DIMEX 11-12, NITE 10." />
           <Texto etiqueta="Proveedor de sistemas" valor={form.proveedorSistemas} onCambio={(v) => set({ proveedorSistemas: v.replace(/\s/g, '') })} requerido ayuda="Cédula del proveedor; si es desarrollo propio, la del mismo emisor." />
           <Texto etiqueta="Registro fiscal bebidas alcohólicas (Ley 8707)" valor={form.registroFiscal8707} onCambio={(v) => set({ registroFiscal8707: v || undefined })} max={12} />
         </div>
@@ -206,7 +213,7 @@ export function EmisorPagina() {
                   <div style={{ flex: 1 }}><Texto etiqueta="Nombre" valor={s.nombre} onCambio={(v) => set({ sucursales: form.sucursales.map((x, j) => (j === i ? { ...x, nombre: v } : x)) })} /></div>
                   {form.sucursales.length > 1 && <button className="btn btn-ghost btn-icon btn-danger" aria-label="Eliminar sucursal" onClick={() => set({ sucursales: form.sucursales.filter((_, j) => j !== i) })}><Trash2 /></button>}
                 </div>
-                <Texto etiqueta="Terminales (separadas por coma)" valor={s.terminales.join(', ')} onCambio={(v) => set({ sucursales: form.sucursales.map((x, j) => (j === i ? { ...x, terminales: v.split(',').map((t) => t.trim()).filter(Boolean) } : x)) })} />
+                <Texto etiqueta="Terminales (separadas por coma)" valor={s.terminales.join(', ')} onCambio={(v) => set({ sucursales: form.sucursales.map((x, j) => (j === i ? { ...x, terminales: separarTerminales(v) } : x)) })} />
               </div>
             ))}
           </div>
@@ -235,13 +242,13 @@ export function EmisorPagina() {
 }
 
 /** Campo de texto con un botón de acción al lado (consulta al API de Hacienda). */
-function CampoConAccion({ etiqueta, valor, onCambio, accion, ayuda }: { etiqueta: string; valor: string; onCambio: (v: string) => void; accion: ReactNode; ayuda?: string }) {
+function CampoConAccion({ etiqueta, valor, onCambio, accion, ayuda, alfanumerico }: { etiqueta: string; valor: string; onCambio: (v: string) => void; accion: ReactNode; ayuda?: string; alfanumerico?: boolean }) {
   const id = useId();
   return (
     <div className="field">
       <label htmlFor={id}>{etiqueta} *</label>
       <div className="row" style={{ flexWrap: 'nowrap' }}>
-        <input id={id} inputMode="numeric" value={valor} onChange={(e) => onCambio(e.target.value)} maxLength={12} />
+        <input id={id} inputMode={alfanumerico ? 'text' : 'numeric'} value={valor} onChange={(e) => onCambio(e.target.value)} maxLength={12} />
         {accion}
       </div>
       {ayuda && <span className="hint">{ayuda}</span>}

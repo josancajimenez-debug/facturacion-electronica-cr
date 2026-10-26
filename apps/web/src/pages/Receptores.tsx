@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, Modal, Selector, Texto, Vacio } from '../components/ui';
 import { useApp } from '../estado';
-import { aRfc, deRfc } from '../lib/formato';
+import { aRfc, deRfc, limpiarIdentificacion } from '../lib/formato';
 
 const vacio = (): Receptor => ({ id: '', nombre: '', identificacion: { tipo: '01', numero: '' } });
 
@@ -124,7 +124,7 @@ function FormReceptor({ inicial, onCerrar }: { inicial: Receptor; onCerrar: () =
           <Texto etiqueta="Nombre o razón social" valor={r.nombre} onCambio={(v) => set({ nombre: v })} requerido max={100} />
           <Texto etiqueta="Nombre comercial" valor={r.nombreComercial} onCambio={(v) => set({ nombreComercial: v || undefined })} max={80} />
           <Selector etiqueta="Tipo de identificación" valor={r.identificacion?.tipo} onCambio={(v) => set({ identificacion: { numero: r.identificacion?.numero ?? '', tipo: v } })} opciones={TIPO_IDENTIFICACION.slice(0, 5)} />
-          <Texto etiqueta="Número" valor={r.identificacion?.numero} onCambio={(v) => set({ identificacion: { tipo: r.identificacion?.tipo ?? '01', numero: extranjero ? v.replace(/[^A-Za-z0-9]/g, '') : v.replace(/\D/g, '') } })} ayuda={extranjero ? 'Hasta 20 caracteres alfanuméricos.' : 'Sin guiones.'} />
+          <Texto etiqueta="Número" valor={r.identificacion?.numero} onCambio={(v) => set({ identificacion: { tipo: r.identificacion?.tipo ?? '01', numero: limpiarIdentificacion(r.identificacion?.tipo ?? '01', v) } })} ayuda={extranjero ? 'Hasta 20 caracteres alfanuméricos.' : r.identificacion?.tipo === '02' ? 'Sin guiones; 10 caracteres (dígitos o letras).' : 'Sin guiones.'} />
           <Texto etiqueta="Correo electrónico" tipo="email" valor={r.correo} onCambio={(v) => set({ correo: v || undefined })} />
           <Texto etiqueta="Actividad económica del receptor" valor={r.actividadEconomica} onCambio={(v) => set({ actividadEconomica: v || undefined })} ayuda="Código CIIU 4 inscrito (p. ej. 4719.9). Requerido si el receptor lo pide para crédito o gasto." />
         </div>

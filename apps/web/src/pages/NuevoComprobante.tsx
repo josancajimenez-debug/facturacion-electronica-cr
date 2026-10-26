@@ -46,7 +46,10 @@ const TIPOS: { codigo: TipoComprobante; corto: string }[] = [
   { codigo: 'REP', corto: 'Recibo de pago' },
 ];
 
-export const contraparteDesde = (r: Receptor): Contraparte => ({
+/** Comprobantes en los que no se consigna la actividad económica del receptor. */
+const SIN_ACTIVIDAD_RECEPTOR: TipoComprobante[] = ['TE', 'FEE', 'REP'];
+
+export const contraparteDesde =(r: Receptor): Contraparte => ({
   nombre: r.nombre,
   nombreComercial: r.nombreComercial,
   identificacion: r.identificacion,
@@ -102,7 +105,8 @@ export function NuevoComprobante() {
         n.codigoActividadEmisor = undefined;
       } else {
         n.codigoActividadEmisor = x.codigoActividadEmisor ?? principal;
-        if (!receptor?.actividadEconomica) n.codigoActividadReceptor = undefined;
+        // En TE, FEE y REP el campo está deshabilitado: no debe viajar en el XML un valor heredado.
+        if (!receptor?.actividadEconomica || SIN_ACTIVIDAD_RECEPTOR.includes(x.tipo)) n.codigoActividadReceptor = undefined;
       }
       if (x.tipo === 'FEE') n.lineas = x.lineas.map((l) => ({ ...l, exoneracion: undefined }));
       return n;
@@ -114,7 +118,7 @@ export function NuevoComprobante() {
     if (receptor) {
       set({
         contraparte: contraparteDesde(receptor),
-        codigoActividadReceptor: b.tipo === 'FEC' ? b.codigoActividadReceptor : receptor.actividadEconomica,
+        codigoActividadReceptor: b.tipo === 'FEC' ? b.codigoActividadReceptor : SIN_ACTIVIDAD_RECEPTOR.includes(b.tipo) ? undefined : receptor.actividadEconomica,
       });
     } else if (receptorId === '') {
       set({ contraparte: undefined });
@@ -122,6 +126,8 @@ export function NuevoComprobante() {
   }, [receptorId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const vista = useMemo(() => previsualizar(b, emisor!), [b, emisor]);
+  // Los errores devueltos al emitir dejan de ser válidos en cuanto se modifica el borrador.
+  useEffect(() => setErroresServidor([]), [b]);
   const errores = vista.validaciones.filter((v) => v.nivel === 'error');
   const r = vista.resumen;
 
@@ -274,13 +280,19 @@ export function NuevoComprobante() {
                   <Texto etiqueta="Nombre" valor={b.contraparte?.nombre} onCambio={(v) => set({ contraparte: { ...b.contraparte, nombre: v } })} requerido />
                   <Texto etiqueta="Correo" valor={b.contraparte?.correo} onCambio={(v) => set({ contraparte: { nombre: '', ...b.contraparte, correo: v || undefined } })} />
                   <Selector etiqueta="Tipo de identificación" valor={b.contraparte?.identificacion?.tipo} vacio="—" onCambio={(v) => set({ contraparte: { nombre: '', ...b.contraparte, identificacion: v ? { tipo: v, numero: b.contraparte?.identificacion?.numero ?? '' } : undefined } })} opciones={TIPO_IDENTIFICACION} />
-                  <Texto etiqueta="Número" valor={b.contraparte?.identificacion?.numero} onCambio={(v) => b.contraparte?.identificacion && set({ contraparte: { ...b.contraparte, identificacion: { ...b.contraparte.identificacion, numero: v.trim() } } })} />
-                  {esFEC && (
-                    <UbicacionCampos
-                      valor={b.contraparte?.ubicacion ?? { provincia: '1', canton: '01', distrito: '01', otrasSenas: '' }}
-                      onCambio={(u) => set({ contraparte: { nombre: '', ...b.contraparte, ubicacion: u } })}
-                    />
-                  )}
+                  <Texto etiqueta="Número" valor={b.contraparte?.identificacion?.numero} deshabilitado={!b.contraparte?.identificacion}
+                    ayuda={b.contraparte?.identificacion ? undefined : 'Elija primero el tipo de identificación.'}
+                    onCambio={(v) => b.contraparte?.identificacion && set({ contraparte: { ...b.contraparte, identificacion: { ...b.contraparte.identificacion, numero: v.trim().toUpperCase() } } })} />
+                  {/* La ubicación solo se muestra cuando existe en el borrador: así lo que se ve es lo que se valida y emite. */}
+                  {esFEC && (b.contraparte?.ubicacion ? (
+                    <UbicacionCampos valor={b.contraparte.ubicacion} onCambio={(u) => set({ contraparte: { nombre: '', ...b.contraparte, ubicacion: u } })} />
+                  ) : (
+                    <div className="field" style={{ justifyContent: 'flex-end' }}>
+                      <button className="btn btn-sm" onClick={() => set({ contraparte: { nombre: '', ...b.contraparte, ubicacion: { provincia: '1', canton: '01', distrito: '01', otrasSenas: '' } } })}>
+                        <Plus /> Indicar ubicación del vendedor
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
               {receptor?.exoneracion && b.tipo !== 'FEE' && (

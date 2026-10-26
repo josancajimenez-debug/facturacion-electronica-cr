@@ -55,7 +55,7 @@ export function descargar(nombre: string, contenido: string | Blob, tipo = 'appl
 export function csv(filas: (string | number | undefined | null)[][]): string {
   const esc = (v: string | number | undefined | null) => {
     const s = v === undefined || v === null ? '' : String(v);
-    return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return '﻿' + filas.map((f) => f.map(esc).join(';')).join('\r\n');
 }
@@ -71,3 +71,14 @@ export const ETIQUETA_ESTADO: Record<string, { texto: string; clase: string }> =
   pendiente: { texto: 'Pendiente', clase: 'warn' },
   'aceptado-parcial': { texto: 'Aceptado parcial', clase: 'info' },
 };
+
+/**
+ * Normaliza lo que se escribe en un número de identificación (nota 4): sin guiones ni espacios.
+ * La cédula jurídica admite letras mayúsculas desde la actualización v4.4 (cédulas alfanuméricas del
+ * Registro Nacional); el extranjero no domiciliado y el no contribuyente, cualquier alfanumérico.
+ */
+export function limpiarIdentificacion(tipo: string, texto: string): string {
+  if (tipo === '02') return texto.toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if (tipo === '05' || tipo === '06') return texto.replace(/[^A-Za-z0-9]/g, '');
+  return texto.replace(/\D/g, '');
+}

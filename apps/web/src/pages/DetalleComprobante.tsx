@@ -14,6 +14,7 @@ import {
   respuestaApiSimulada,
   type BorradorComprobante,
   type Comprobante,
+  type Referencia,
 } from '@fe-cr/core';
 import { ArrowLeft, Download, FileMinus, FilePlus, FileText, RefreshCcw, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -82,13 +83,20 @@ export function DetalleComprobante() {
         }),
       },
     });
+  // Las referencias propias del comprobante (p. ej. el tipo 16 de una FEC a un no domiciliado) se conservan
+  // detrás de la referencia de sustitución, sin superar el máximo de 10.
+  const conReferencia = (nueva: Referencia, previas: Referencia[]) =>
+    [nueva, ...previas.filter((r) => r.numero !== nueva.numero || r.codigo !== nueva.codigo)].slice(0, 10);
   // Art. 19 Decreto 44739-H: el comprobante rechazado carece de validez; se emite uno nuevo que lo sustituye, sin nota de crédito.
-  // Código 16 de la nota 9 (obligatorio desde el 1/11/2026).
+  // FE, TE, FEC y FEE usan el tipo 10 con el código 16 (nota 9, obligatorio desde el 1/11/2026). Las NC, ND y REP no
+  // admiten el código 16: el sustituto repite las referencias del rechazado (el documento que ajusta o paga).
   const sustituir = () =>
     navegar('/emitir', {
       state: {
         borrador: base(c.tipo, {
-          referencias: [{ tipoDoc: '10', numero: c.clave, fechaEmision: c.fechaEmision, codigo: '16', razon: 'Sustituye comprobante electrónico rechazado' }],
+          referencias: ['NC', 'ND', 'REP'].includes(c.tipo)
+            ? c.borrador.referencias
+            : conReferencia({ tipoDoc: '10', numero: c.clave, fechaEmision: c.fechaEmision, codigo: '16', razon: 'Sustituye comprobante electrónico rechazado' }, c.borrador.referencias),
         }),
       },
     });
@@ -100,10 +108,10 @@ export function DetalleComprobante() {
         borrador: {
           ...original.borrador,
           situacion: '1',
-          referencias: [{
+          referencias: conReferencia({
             tipoDoc: tipoDocRef(original, 'sustituir'), numero: original.clave, fechaEmision: original.fechaEmision, codigo: CODIGO_SUSTITUTO[codigoAnulacion],
             razon: codigoAnulacion === '13' ? 'Sustituye comprobante electrónico por error material' : 'Sustituye comprobante electrónico',
-          }],
+          }, original.borrador.referencias),
         },
       },
     });

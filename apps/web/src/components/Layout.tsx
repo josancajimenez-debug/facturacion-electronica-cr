@@ -132,7 +132,7 @@ export function Layout() {
         <main className="content">
           {/* Las páginas se cargan bajo demanda (App.tsx); el menú sigue visible mientras tanto. */}
           <Suspense fallback={<Cargando />}>
-            <Outlet />
+            <Outlet key={emisor?.id ?? ''} />
           </Suspense>
         </main>
       </div>

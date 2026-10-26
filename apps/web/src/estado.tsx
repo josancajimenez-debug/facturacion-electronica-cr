@@ -5,12 +5,14 @@ import { LocalBackend } from './backend/local';
 import { Cargando } from './components/ui';
 import type { Backend, EntradaBitacora, Recibido, Usuario } from './backend/tipos';
 
-async function crearBackend(): Promise<Backend> {
-  if (config.backend === 'supabase') {
-    const { SupabaseBackend } = await import('./backend/supabase');
-    return new SupabaseBackend();
-  }
-  return new LocalBackend();
+let backendUnico: Promise<Backend> | null = null;
+
+/** Una sola instancia por página: React (StrictMode) puede montar dos veces el proveedor. */
+function crearBackend(): Promise<Backend> {
+  backendUnico ??= config.backend === 'supabase'
+    ? import('./backend/supabase').then(({ SupabaseBackend }) => new SupabaseBackend())
+    : Promise.resolve(new LocalBackend());
+  return backendUnico;
 }
 
 export interface Preferencias {

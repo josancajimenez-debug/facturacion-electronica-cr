@@ -78,7 +78,7 @@ export function validarComoHacienda(c: Comprobante, ctx: ContextoSimulador = {})
     const idEmisor = c.tipo === 'FEC' ? c.contraparte?.identificacion : c.emisor.identificacion;
     const e = validarIdentificacion(idEmisor);
     if (e) detalle.push(`Nivel 2: identificación del emisor – ${e}`);
-    validarBorrador(c.borrador, c.emisor, c.resumen, c.lineas)
+    validarBorrador(c.borrador, c.emisor, c.resumen, c.lineas, ahora)
       .filter((v) => v.nivel === 'error')
       .forEach((v) => detalle.push(`Nivel 2: ${v.mensaje}`));
     if (detalle.length) nivelFallido = 2;
