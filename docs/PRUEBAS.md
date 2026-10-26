@@ -2,7 +2,7 @@
 
 | Comando | Qué prueba | Requiere | Resultado verificado (26/10/2026) |
 | --- | --- | --- | --- |
-| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC (72). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas y CSV (8). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 96/96 ✔ |
+| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado (78). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas y CSV (8). Supabase: esquema, RLS, consecutivo atómico y auditoría (7) y función Edge completa sobre PostgreSQL/PGlite (9) | Node | 102/102 ✔ |
 | `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge | Node | Sin errores ✔ |
 | `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 | `npm audit` | Vulnerabilidades conocidas en dependencias | Node | 0 ✔ |

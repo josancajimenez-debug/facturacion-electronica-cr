@@ -9,7 +9,7 @@
  *
  * No se conecta con el Ministerio de Hacienda ni pretende replicar todas sus reglas.
  */
-import { actualizacionVigente, excesosNotaCredito, resumenDocumento, type DocumentoResumen } from './actualizacion';
+import { actualizacionVigente, diferenciasConReferencia, excesosNotaCredito, resumenDocumento, type DocumentoResumen } from './actualizacion';
 import { calcularComprobante } from './calculos';
 import { CODIGO_TIPO_DOCUMENTO, ESQUEMA_XML } from './catalogos';
 import { descomponerConsecutivo, validarClave } from './clave';
@@ -131,10 +131,15 @@ export function validarComoHacienda(c: Comprobante, ctx: ContextoSimulador = {})
       }
     });
 
-    // Actualización v4.4: la NC no puede superar lo facturado más las ND aplicadas al documento.
-    if (c.tipo === 'NC' && ctx.documentosAceptados) {
+    // Actualización v4.4 (información de referencia, campo Numero): la NC no puede superar lo
+    // facturado más las ND aplicadas, y los datos de la nota deben corresponder al referenciado.
+    if ((c.tipo === 'NC' || c.tipo === 'ND') && ctx.documentosAceptados) {
       const vigente = actualizacionVigente(ahora);
-      for (const e of excesosNotaCredito(resumenDocumento(c), ctx.documentosAceptados)) {
+      const nota = resumenDocumento(c);
+      for (const d of diferenciasConReferencia(nota, ctx.documentosAceptados)) {
+        advertencias.push(`Datos de referencia: ${d} (advertencia; Hacienda verifica que correspondan al comprobante de referencia).`);
+      }
+      for (const e of excesosNotaCredito(nota, ctx.documentosAceptados)) {
         const texto = `la nota de crédito supera el saldo acreditable del documento ${e.clave} (disponible ₡${e.disponible.toFixed(2)}: monto facturado más notas de débito, menos notas de crédito previas)`;
         if (vigente) detalle.push(`Nivel 3: ${texto}.`);
         else advertencias.push(`${texto[0].toUpperCase()}${texto.slice(1)}. Desde el 1/11/2026 se rechaza (advertencia).`);

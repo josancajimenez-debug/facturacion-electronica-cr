@@ -8,7 +8,9 @@
  * notas de crédito/débito que ajustan comprobantes previos, según las notas al pie del Anexo.
  */
 
+import formasHacienda from './datos/formas-farmaceuticas-hacienda.json';
 import formasMinsa from './datos/formas-farmaceuticas-minsa.json';
+import monedasHacienda from './datos/monedas-hacienda.json';
 
 export interface Codigo {
   codigo: string;
@@ -156,14 +158,11 @@ export const TARIFA_IVA: TarifaIva[] = [
 export const VIGENCIA_CODIGOS_ACTUALIZACION = '2026-11-01';
 
 /**
- * Nota 9 – códigos de referencia (Anexo v4.4, nov. 2024, y comunicado de actualización 2026).
- * El comunicado agrega los códigos 13 a 17 y ajusta el 12, pero no transcribe sus
- * descripciones; se toman de fuentes coincidentes que citan el Anexo actualizado (KPMG, 2026;
- * FACBOX, 2026; Factura Profesional, 2026; Delfino, 2026) y deben confirmarse con el documento
- * oficial de la OVi (ver docs/MATRIZ_NORMATIVA.md).
+ * Nota 9 – códigos de referencia, con las descripciones literales del Anexo v4.4 actualizado
+ * (bitácora de ajustes al 22/04/2026, publicado en la OVi de TRIBU-CR).
  */
 export const CODIGO_REFERENCIA: Codigo[] = [
-  { codigo: '01', descripcion: 'Anula Documento de Referencia' },
+  { codigo: '01', descripcion: 'Anula Documento de Referencia', nota: 'Efecto en el período de la nota. Si se emite un comprobante nuevo, lleva el código 07.' },
   { codigo: '02', descripcion: 'Corrige monto' },
   { codigo: '04', descripcion: 'Referencia a otro documento' },
   { codigo: '05', descripcion: 'Sustituye comprobante provisional por contingencia' },
@@ -173,9 +172,9 @@ export const CODIGO_REFERENCIA: Codigo[] = [
   { codigo: '09', descripcion: 'Nota de crédito financiera' },
   { codigo: '10', descripcion: 'Nota de débito financiera' },
   { codigo: '11', descripcion: 'Proveedor No Domiciliado' },
-  { codigo: '12', descripcion: 'Nota de crédito financiera por exoneración posterior a la facturación' },
-  { codigo: '13', descripcion: 'Anula documento de referencia por error material', nota: 'Solo en nota de crédito. Se encadena con el código 15 en el comprobante sustituto.' },
-  { codigo: '14', descripcion: 'Corrige monto por error material', nota: 'Solo en notas de crédito o débito.' },
+  { codigo: '12', descripcion: 'Nota de crédito financiera por exoneración posterior a la facturación', nota: 'Solo en notas de crédito, cuando se aplica una exoneración de impuestos locales aprobada después de la transacción.' },
+  { codigo: '13', descripcion: 'Anula documento de referencia por error material', nota: 'Solo en nota de crédito; efecto en el período del comprobante modificado. Si se emite un comprobante nuevo, lleva el código 15.' },
+  { codigo: '14', descripcion: 'Corrige monto por error material', nota: 'Solo en notas de crédito o débito; efecto en el período del comprobante modificado.' },
   { codigo: '15', descripcion: 'Sustituye comprobante electrónico por error material', nota: 'En el comprobante que reemplaza al anulado con el código 13.' },
   { codigo: '16', descripcion: 'Sustituye comprobante electrónico rechazado', nota: 'Con el tipo de documento 10; no requiere nota de crédito.' },
   { codigo: '17', descripcion: 'Pago a comprobante electrónico', nota: 'Solo en Recibo Electrónico de Pago.' },
@@ -339,14 +338,10 @@ export const INSTITUCION_EXONERACION: Codigo[] = [
 ];
 
 /**
- * Nota 13.1 remite al documento "Codigodemoneda_V4.4", que no forma parte de la
- * bibliografía analizada. Se incluyen únicamente monedas ISO 4217 de uso frecuente.
+ * Nota 13.1 – tabla oficial "Codigodemoneda_V4.4" de Hacienda (OVi de TRIBU-CR), generada con
+ * scripts/extraer-catalogos-hacienda.mjs. CRC, USD y EUR van primero.
  */
-export const MONEDA: Codigo[] = [
-  { codigo: 'CRC', descripcion: 'Colón costarricense' },
-  { codigo: 'USD', descripcion: 'Dólar estadounidense' },
-  { codigo: 'EUR', descripcion: 'Euro' },
-];
+export const MONEDA: Codigo[] = monedasHacienda.codigos;
 
 /** Provincias (nota 14). Cantones y distritos: ver ubicacion.ts (División Territorial Administrativa 2022). */
 export const PROVINCIA: Codigo[] = [
@@ -375,10 +370,16 @@ export function codigoTarifaDesdeCabys(impuesto: string): string | undefined {
 }
 
 /**
+ * Nota 19 – tabla oficial "Código de forma farmacéutica" de Hacienda (OVi de TRIBU-CR), con
+ * códigos de 1 a 3 dígitos para el campo FormaFarmaceutica del XML (String 3).
+ */
+export const FORMA_FARMACEUTICA: Codigo[] = formasHacienda.codigos;
+
+/**
  * Formas farmacéuticas del Ministerio de Salud (CodeSystem FHIR "drugs-presentation-code",
  * versión 1.1.0-ballot, estado borrador). Sus códigos son SNOMED CT de hasta 14 dígitos, por lo
- * que NO caben en el campo FormaFarmaceutica del XML (String 3, nota 19 de Hacienda): se usan como
- * catálogo de referencia del producto y se muestran en la representación gráfica.
+ * que NO caben en el campo FormaFarmaceutica del XML: se conservan como referencia descriptiva
+ * opcional del producto y se muestran en la representación gráfica.
  */
 export const FORMAS_FARMACEUTICAS_MINSA: Codigo[] = formasMinsa.codigos;
 export const FUENTE_FORMAS_FARMACEUTICAS = formasMinsa.fuente;

@@ -1,4 +1,4 @@
-import { FORMAS_FARMACEUTICAS_MINSA, MONEDA, TARIFA_IVA, TIPO_CODIGO_COMERCIAL, UNIDAD_MEDIDA, descripcion, esCabysServicio, type Producto } from '@fe-cr/core';
+import { FORMA_FARMACEUTICA, FORMAS_FARMACEUTICAS_MINSA, MONEDA, TARIFA_IVA, TIPO_CODIGO_COMERCIAL, UNIDAD_MEDIDA, descripcion, esCabysServicio, type Producto } from '@fe-cr/core';
 import { Package, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { CabysBuscador } from '../components/CabysBuscador';
@@ -120,11 +120,12 @@ function FormProducto({ inicial, onCerrar }: { inicial: Producto; onCerrar: () =
           <Texto etiqueta="Código comercial" valor={p.codigoComercial?.codigo} onCambio={(v) => p.codigoComercial && set({ codigoComercial: { ...p.codigoComercial, codigo: v } })} max={20}
             deshabilitado={!p.codigoComercial} ayuda={p.codigoComercial ? undefined : 'Elija primero el tipo de código.'} />
           <Texto etiqueta="Registro de medicamento" valor={p.registroMedicamento} onCambio={(v) => set({ registroMedicamento: v || undefined })} max={100} />
-          <Selector etiqueta="Forma farmacéutica (catálogo Ministerio de Salud)" valor={p.formaFarmaceuticaMinsa} vacio="— No aplica —" mostrarCodigo={false}
+          <Selector etiqueta="Forma farmacéutica (nota 19, tabla de Hacienda)" valor={p.formaFarmaceutica} vacio="— No aplica —"
+            onCambio={(v) => set({ formaFarmaceutica: v || undefined })} opciones={FORMA_FARMACEUTICA}
+            ayuda="Campo FormaFarmaceutica del XML, según la tabla «Código de forma farmacéutica» publicada en la OVi." />
+          <Selector etiqueta="Referencia: catálogo del Ministerio de Salud" valor={p.formaFarmaceuticaMinsa} vacio="— No aplica —" mostrarCodigo={false}
             onCambio={(v) => set({ formaFarmaceuticaMinsa: v || undefined })} opciones={FORMAS_FARMACEUTICAS_MINSA}
-            ayuda="CodeSystem FHIR drugs-presentation-code (v1.1.0-ballot, borrador). Referencia: no se envía en el XML." />
-          <Texto etiqueta="Forma farmacéutica – código Hacienda (nota 19)" valor={p.formaFarmaceutica} max={3} onCambio={(v) => set({ formaFarmaceutica: v.trim() || undefined })}
-            ayuda="Campo FormaFarmaceutica del XML (hasta 3 caracteres), según el documento «Código de forma farmacéutica» de Hacienda." />
+            ayuda="Opcional. CodeSystem FHIR drugs-presentation-code (borrador); no se envía en el XML." />
           <Texto etiqueta="Partida arancelaria (FEE)" valor={p.partidaArancelaria} onCambio={(v) => set({ partidaArancelaria: v.replace(/\D/g, '') || undefined })} max={12} ayuda="Obligatoria para mercancías en factura de exportación." />
         </div>
         <label className="check">

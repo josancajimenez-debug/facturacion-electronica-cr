@@ -1,4 +1,6 @@
 import {
+  CODIGO_REFERENCIA,
+  CODIGO_SUSTITUTO,
   CONDICION_VENTA,
   MEDIO_PAGO,
   NOMBRE_COMPROBANTE,
@@ -90,15 +92,18 @@ export function DetalleComprobante() {
         }),
       },
     });
-  // Código 13 → 15: anulado el comprobante por error material, el nuevo indica con el código 15 cuál sustituye
-  // (Decreto 44739-H art. 20, por analogía; nota 9 actualizada).
-  const sustituirErrorMaterial = (original: Comprobante) =>
+  // Nota 9: anulado un comprobante con NC, el nuevo que lo reemplaza lleva el código 07 (si se anuló con 01)
+  // o el 15 (si se anuló por error material con 13).
+  const sustituirAnulado = (original: Comprobante, codigoAnulacion: string) =>
     navegar('/emitir', {
       state: {
         borrador: {
           ...original.borrador,
           situacion: '1',
-          referencias: [{ tipoDoc: tipoDocRef(original, 'sustituir'), numero: original.clave, fechaEmision: original.fechaEmision, codigo: '15', razon: 'Sustituye comprobante electrónico por error material' }],
+          referencias: [{
+            tipoDoc: tipoDocRef(original, 'sustituir'), numero: original.clave, fechaEmision: original.fechaEmision, codigo: CODIGO_SUSTITUTO[codigoAnulacion],
+            razon: codigoAnulacion === '13' ? 'Sustituye comprobante electrónico por error material' : 'Sustituye comprobante electrónico',
+          }],
         },
       },
     });
@@ -141,14 +146,17 @@ export function DetalleComprobante() {
 
   const aceptado = c.estado === 'aceptado';
   const esCreditoIva = ['08', '10'].includes(c.borrador.condicionVenta) && c.tipo === 'FE';
-  // Anulación por error material: desde la NC (código 13) se llega al original, y desde el original a su NC.
-  const refAnulacion = c.tipo === 'NC' ? c.borrador.referencias.find((r) => r.codigo === '13') : undefined;
+  // Anulación con NC (código 01 o 13): desde la NC se llega al original, y desde el original a su NC.
+  const anula = (r: { codigo?: string }) => r.codigo === '01' || r.codigo === '13';
+  const refAnulacion = c.tipo === 'NC' ? c.borrador.referencias.find(anula) : undefined;
   const anulado = refAnulacion ? comprobantes.find((x) => x.clave === refAnulacion.numero) : undefined;
   const ncAnulacion = c.tipo !== 'NC'
-    ? comprobantes.find((x) => x.tipo === 'NC' && x.estado === 'aceptado' && x.borrador.referencias.some((r) => r.codigo === '13' && r.numero === c.clave))
+    ? comprobantes.find((x) => x.tipo === 'NC' && x.estado === 'aceptado' && x.borrador.referencias.some((r) => anula(r) && r.numero === c.clave))
     : undefined;
   const original = aceptado && anulado ? anulado : ncAnulacion ? c : undefined;
-  const sustituto = original && comprobantes.find((x) => x.estado !== 'rechazado' && x.borrador.referencias.some((r) => r.codigo === '15' && r.numero === original.clave));
+  const codigoAnulacion = (refAnulacion ?? ncAnulacion?.borrador.referencias.find((r) => anula(r) && r.numero === c.clave))?.codigo ?? '01';
+  const codigoSustituto = CODIGO_SUSTITUTO[codigoAnulacion];
+  const sustituto = original && comprobantes.find((x) => x.estado !== 'rechazado' && x.borrador.referencias.some((r) => r.codigo === codigoSustituto && r.numero === original.clave));
   const periodoAjuste = refErrorMaterial(c);
 
   return (
@@ -182,11 +190,11 @@ export function DetalleComprobante() {
       )}
       {original && (
         <Alerta tipo={sustituto ? 'info' : 'warn'}>
-          <strong>Anulado por error material (código 13).</strong>{' '}
+          <strong>{codigoAnulacion === '13' ? 'Anulado por error material (código 13).' : 'Anulado con nota de crédito (código 01).'}</strong>{' '}
           {sustituto
             ? <>El comprobante sustituto ya fue emitido: <Link to={`/comprobantes/${sustituto.clave}`}>ver</Link>.</>
-            : <>Si corresponde emitir un comprobante nuevo, debe referenciar al anulado con el código 15 «Sustituye comprobante electrónico por error material».</>}
-          {!sustituto && <div style={{ marginTop: 8 }}><button className="btn btn-sm" onClick={() => sustituirErrorMaterial(original)}><RefreshCcw /> Emitir sustituto (código 15)</button></div>}
+            : <>Si corresponde emitir un comprobante nuevo, debe referenciar al anulado con el código {codigoSustituto} «{descripcion(CODIGO_REFERENCIA, codigoSustituto)}» (nota 9).</>}
+          {!sustituto && <div style={{ marginTop: 8 }}><button className="btn btn-sm" onClick={() => sustituirAnulado(original, codigoAnulacion)}><RefreshCcw /> Emitir sustituto (código {codigoSustituto})</button></div>}
         </Alerta>
       )}
       {periodoAjuste && (

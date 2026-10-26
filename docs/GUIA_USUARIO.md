@@ -40,7 +40,7 @@ Menú **Emitir comprobante**.
 - Descargas con los nombres de la Nota 3: `clave.xml`, `clave_respuesta.xml`, `clave.pdf`.
 - **Clave numérica** desglosada y **trazabilidad** con fecha de cada estado.
 - Acciones:
-  - **Nota de crédito / débito** (comprobantes aceptados): abre el formulario con la referencia ya llena.
+  - **Nota de crédito / débito** (comprobantes aceptados): abre el formulario con la referencia ya llena. Si la nota de crédito anula con el código 01, el detalle ofrece **Emitir sustituto (código 07)**.
   - **Anular por error material**: nota de crédito con el código 13. Una vez aceptada, el detalle del original y el de la nota ofrecen **Emitir sustituto (código 15)**.
   - **Emitir comprobante sustituto** (rechazados): un comprobante rechazado no tiene validez y **no** se anula con nota de crédito; se emite uno nuevo que lo referencia con el código 16.
   - **Registrar pago (REP)**: para facturas con condición 08 o 10; referencia la factura con el código 17.
@@ -48,8 +48,11 @@ Menú **Emitir comprobante**.
 ### Actualización v4.4 obligatoria desde el 1/11/2026
 
 - Hasta el 31/10/2026 la herramienta **advierte** lo que pasará a ser obligatorio; desde el 1/11/2026 lo **rechaza**: código 16 al sustituir un rechazado, código 17 en el REP, REP sin referencias a notas de débito o crédito (02/03), clave obligatoria al referenciar los tipos 17-20 y notas de crédito que superen lo facturado más las notas de débito.
-- Las notas con los códigos 13 y 14 se reflejan en el **período del comprobante que modifican**; el detalle lo indica y **Reportes** las suma en ese mes.
-- Se aceptan cédulas jurídicas de **10 caracteres alfanuméricos** (la clave puede contener letras) y teléfonos de menos de 8 dígitos.
+- Las notas con los códigos 13 y 14 se reflejan en el **período del comprobante que modifican**; el detalle lo indica y **Reportes** las suma en ese mes. Las de 01, 02, 06 y 12 se reflejan en el mes de la nota.
+- El simulador advierte si una nota de crédito o débito tiene otra moneda, otro tipo de cambio o CAByS que no están en el comprobante que ajusta.
+- Se aceptan cédulas jurídicas de **10 caracteres alfanuméricos** (la clave puede contener letras) y teléfonos especiales como el **911**.
+- **IVA devuelto** (servicios de salud al 4 % pagados con tarjeta): si todo se paga con tarjeta se devuelve el IVA completo; con varios medios de pago u otros productos, se aplica (monto con tarjeta / venta neta) × IVA de salud.
+- **Moneda** y **forma farmacéutica** se eligen de las tablas oficiales de Hacienda (notas 13.1 y 19).
 
 ## 6. Recepción de comprobantes de proveedores
 

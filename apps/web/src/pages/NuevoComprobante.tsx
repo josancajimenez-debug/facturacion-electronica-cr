@@ -2,6 +2,7 @@ import {
   CODIGO_DESCUENTO,
   CODIGO_REFERENCIA,
   CONDICION_VENTA,
+  FORMA_FARMACEUTICA,
   FORMAS_FARMACEUTICAS_MINSA,
   INSTITUCION_EXONERACION,
   MEDIO_PAGO,
@@ -368,7 +369,7 @@ export function NuevoComprobante() {
                           <Texto etiqueta="Registro de medicamento" valor={l.registroMedicamento} onCambio={(v) => setLinea(i, { registroMedicamento: v || undefined })} />
                           {l.registroMedicamento && (
                             <>
-                              <Texto etiqueta="Forma farmacéutica – código Hacienda (nota 19)" valor={l.formaFarmaceutica} max={3} onCambio={(v) => setLinea(i, { formaFarmaceutica: v.trim() || undefined })} ayuda="Hasta 3 caracteres." />
+                              <Selector etiqueta="Forma farmacéutica (nota 19, tabla de Hacienda)" valor={l.formaFarmaceutica} vacio="—" onCambio={(v) => setLinea(i, { formaFarmaceutica: v || undefined })} opciones={FORMA_FARMACEUTICA} ayuda="Va en el campo FormaFarmaceutica del XML." />
                               <Selector etiqueta="Forma farmacéutica (catálogo Min. Salud)" valor={l.formaFarmaceuticaMinsa} vacio="—" onCambio={(v) => setLinea(i, { formaFarmaceuticaMinsa: v || undefined })} opciones={FORMAS_FARMACEUTICAS_MINSA} mostrarCodigo={false} ayuda="Referencia; se imprime en el PDF, no va en el XML." />
                             </>
                           )}

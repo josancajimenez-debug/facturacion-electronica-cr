@@ -167,7 +167,7 @@ export function calcularResumen(borrador: BorradorComprobante, lineas: LineaCalc
     }
     totalImpuesto = totalImpuesto.plus(l.impuestoNeto);
     totalAsumido = totalAsumido.plus(asumidoLinea);
-    if (l.servicioSalud) ivaSalud = ivaSalud.plus(l.impuestoNeto);
+    if (l.servicioSalud && iva?.tarifa === 4) ivaSalud = ivaSalud.plus(l.impuestoNeto);
   }
 
   const totalGravado = acc.servGravados.plus(acc.mercGravadas);
@@ -181,9 +181,18 @@ export function calcularResumen(borrador: BorradorComprobante, lineas: LineaCalc
   const totalVentaNeta = totalVenta.minus(totalDescuentos);
   const totalOtrosCargos = borrador.otrosCargos.reduce((s, c) => s.plus(c.monto), D(0));
 
-  // IVA devuelto: servicios de salud cuyo medio de pago sea tarjeta (código 02).
-  const pagoConTarjeta = borrador.mediosPago.length > 0 && borrador.mediosPago.every((m) => m.tipo === '02');
-  const totalIVADevuelto = pagoConTarjeta ? ivaSalud : D(0);
+  // IVA devuelto (campo TotalIVADevuelto, Anexo actualizado al 22/04/2026): servicios de salud al 4 %
+  // pagados con tarjeta (02). Si todo se paga con tarjeta se devuelve el IVA de salud completo; con
+  // varios medios de pago u otros bienes o servicios: (monto pagado con tarjeta / venta neta) × IVA
+  // de salud, que nunca puede superar ese IVA.
+  const soloTarjeta = borrador.mediosPago.length > 0 && borrador.mediosPago.every((m) => m.tipo === '02');
+  const montoTarjeta = borrador.mediosPago.filter((m) => m.tipo === '02').reduce((s, m) => s.plus(m.monto ?? 0), D(0));
+  const proporcion = soloTarjeta
+    ? D(1)
+    : totalVentaNeta.greaterThan(0)
+      ? Decimal.min(1, montoTarjeta.dividedBy(totalVentaNeta))
+      : D(0);
+  const totalIVADevuelto = ivaSalud.times(proporcion).toDecimalPlaces(5);
 
   // REP: TotalComprobante = TotalVenta (regla literal del Anexo, p. 55).
   const totalComprobante =

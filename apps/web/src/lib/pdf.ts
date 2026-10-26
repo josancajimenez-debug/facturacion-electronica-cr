@@ -7,6 +7,7 @@
  */
 import {
   CONDICION_VENTA,
+  FORMA_FARMACEUTICA,
   FORMAS_FARMACEUTICAS_MINSA,
   MEDIO_PAGO,
   NOMBRE_COMPROBANTE,
@@ -123,8 +124,11 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
   encabezado();
   doc.setFont('helvetica', 'normal').setTextColor(15, 23, 42);
   for (const l of c.lineas) {
-    const forma = l.formaFarmaceuticaMinsa ? descripcion(FORMAS_FARMACEUTICAS_MINSA, l.formaFarmaceuticaMinsa) : undefined;
-    const textoDetalle = [l.detalle, l.registroMedicamento ? `Reg. sanitario: ${l.registroMedicamento}` : '', forma || l.formaFarmaceutica ? `Forma farmacéutica: ${forma ?? ''}${l.formaFarmaceutica ? ` (${l.formaFarmaceutica})` : ''}` : '']
+    // Nota 7: se imprime la descripción del código (tabla de Hacienda; si no hay, la referencia del Ministerio de Salud).
+    const forma = l.formaFarmaceutica
+      ? `${descripcion(FORMA_FARMACEUTICA, l.formaFarmaceutica)} (${l.formaFarmaceutica})`
+      : l.formaFarmaceuticaMinsa ? descripcion(FORMAS_FARMACEUTICAS_MINSA, l.formaFarmaceuticaMinsa) : undefined;
+    const textoDetalle = [l.detalle, l.registroMedicamento ? `Reg. sanitario: ${l.registroMedicamento}` : '', forma ? `Forma farmacéutica: ${forma}` : '']
       .filter(Boolean)
       .join(' · ');
     const detalle = doc.splitTextToSize(textoDetalle, cols[4].w - 2) as string[];

@@ -135,7 +135,7 @@ async function simularRespuesta(
   }
   const previas = await repo.clavesValidadas(c.emisorId);
   previas.delete(c.clave);
-  const documentosAceptados = c.tipo === 'NC' ? await repo.documentosAceptados(c.emisorId) : undefined;
+  const documentosAceptados = c.tipo === 'NC' || c.tipo === 'ND' ? await repo.documentosAceptados(c.emisorId) : undefined;
   const respuesta = validarComoHacienda(c, { ...ctx, cabysValido: op.cabysValido, clavesRecibidas: previas, documentosAceptados, forzarRechazo: c.escenarioPrueba ?? undefined });
   await esperar(op.pausaMs);
   c.respuestaHacienda = respuesta;

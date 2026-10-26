@@ -2,8 +2,10 @@ import {
   CODIGO_DESCUENTO,
   CODIGO_REFERENCIA,
   CONDICION_VENTA,
+  FORMA_FARMACEUTICA,
   INSTITUCION_EXONERACION,
   MEDIO_PAGO,
+  MONEDA,
   TARIFA_IVA,
   TIPO_DOC_REFERENCIA,
   TIPO_EXONERACION,
@@ -14,6 +16,7 @@ import {
 import {
   FUENTE_COMUNICADO,
   FUENTE_V2,
+  FUENTE_V2_REFERENCIA,
   REP_TIPOS_DOC_ANTES,
   REP_TIPOS_DOC_V2,
   TIPOS_DOC_CON_CLAVE,
@@ -142,11 +145,11 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   }
 
   // ---- Moneda ----
-  if (!/^[A-Z]{3}$/.test(b.moneda)) err('moneda', 'Código de moneda inválido.');
+  if (!enCatalogo(MONEDA, b.moneda)) err('moneda', 'El código de moneda no está en la tabla de Hacienda (nota 13.1, Codigodemoneda_V4.4).');
   if (b.moneda === 'CRC' && b.tipoCambio !== 1) err('tipoCambio', 'Para colones (CRC) el tipo de cambio debe ser 1.');
   if (!(b.tipoCambio > 0)) err('tipoCambio', 'El tipo de cambio debe ser mayor que cero.');
   if (b.moneda !== 'CRC') {
-    adv('tipoCambio', 'Hacienda verifica que el tipo de cambio coincida con el de referencia de venta del BCCR del día; el simulador no puede consultarlo.', FUENTE_V2);
+    adv('tipoCambio', 'Hacienda verifica que el tipo de cambio coincida con el de referencia de venta del BCCR del día; el simulador no puede consultarlo.', `${ANEXO}, campo TipoCambio (Ley 9635)`);
   }
 
   // ---- Líneas ----
@@ -182,8 +185,8 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
     if (b.tipo === 'FEE' && /^[0-4]/.test(l.codigoCabys) && !/^\d{12,}$/.test(l.partidaArancelaria ?? '')) {
       err(`${p}.partidaArancelaria`, `Línea ${n}: la partida arancelaria (al menos 12 dígitos) es obligatoria para mercancías en FEE.`);
     }
-    if (l.formaFarmaceutica && !/^[A-Za-z0-9]{1,3}$/.test(l.formaFarmaceutica)) {
-      err(`${p}.formaFarmaceutica`, `Línea ${n}: FormaFarmaceutica admite hasta 3 caracteres (nota 19). Los códigos SNOMED del catálogo del Ministerio de Salud no caben en este campo.`);
+    if (l.formaFarmaceutica && !enCatalogo(FORMA_FARMACEUTICA, l.formaFarmaceutica)) {
+      err(`${p}.formaFarmaceutica`, `Línea ${n}: la forma farmacéutica ${l.formaFarmaceutica} no está en la tabla «Código de forma farmacéutica» de Hacienda (nota 19).`);
     }
     if (l.registroMedicamento && !l.formaFarmaceutica) {
       adv(`${p}.formaFarmaceutica`, `Línea ${n}: con registro de medicamento, la forma farmacéutica (nota 19) se vuelve obligatoria.`);
@@ -253,7 +256,7 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
   const requiereRef = ['NC', 'ND', 'FEC', 'REP'].includes(b.tipo) || b.lineas.some((l) => l.exoneracion?.tipoDocumento === '11');
   if (requiereRef && b.referencias.length === 0) err('referencias', 'Este comprobante requiere información de referencia.');
   const vigente = actualizacionVigente();
-  const exigirV2 = (campo: string, mensaje: string, fuente = FUENTE_V2) =>
+  const exigirV2 = (campo: string, mensaje: string, fuente = FUENTE_V2_REFERENCIA) =>
     (vigente ? err : adv)(campo, `${mensaje}${vigente ? '' : ` (obligatorio ${DESDE_VIGENCIA})`}`, fuente);
   b.referencias.forEach((r, i) => {
     const td = enCatalogo(TIPO_DOC_REFERENCIA, r.tipoDoc);
@@ -265,7 +268,7 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
       } else if (!REP_TIPOS_DOC_V2.includes(r.tipoDoc)) {
         exigirV2(`referencias.${i}`, `Con la actualización v4.4 el REP ya no puede referenciar notas de débito (02) ni de crédito (03); se admiten ${REP_TIPOS_DOC_V2.join(', ')}`);
       } else if (!vigente && !REP_TIPOS_DOC_ANTES.includes(r.tipoDoc)) {
-        adv(`referencias.${i}`, `El tipo ${r.tipoDoc} en el REP es de uso voluntario hasta el 31/10/2026 y obligatorio ${DESDE_VIGENCIA}.`, FUENTE_V2);
+        adv(`referencias.${i}`, `El tipo ${r.tipoDoc} en el REP es de uso voluntario hasta el 31/10/2026 y obligatorio ${DESDE_VIGENCIA}.`, FUENTE_V2_REFERENCIA);
       }
     }
     if (r.tipoDoc === '99' && !largo(r.tipoDocOtro, 5, 100)) err(`referencias.${i}`, 'Describa el tipo de documento de referencia OTRO.');
@@ -302,9 +305,10 @@ export function validarBorrador(b: BorradorComprobante, emisor: Emisor, resumen?
 }
 
 const DESDE_VIGENCIA = 'a partir del 1.º de noviembre de 2026';
-const FUENTE_AJUSTES = 'Decreto 44739-H art. 10; RES-0027-2024 art. 9; nota 9 códigos 13-14';
-const FUENTE_SUSTITUCION = 'Decreto 44739-H arts. 19-20; nota 9 códigos 15-16';
-const FUENTE_RECHAZADO = 'Decreto 44739-H art. 19; nota 10 código 10; nota 9 código 16';
+const NOTA9 = `${FUENTE_V2}; nota 9`;
+const FUENTE_AJUSTES = `Decreto 44739-H art. 10; RES-0027-2024 art. 9; ${NOTA9}`;
+const FUENTE_SUSTITUCION = `Decreto 44739-H arts. 19-20; ${NOTA9}`;
+const FUENTE_RECHAZADO = `Decreto 44739-H art. 19; nota 10 código 10; ${NOTA9}`;
 
 /**
  * Códigos de referencia 13-17. Las reglas de uso exclusivo son errores siempre (se derivan del
@@ -322,16 +326,17 @@ function validarCodigosActualizacion(
   const ajuste = tipo === 'NC' || tipo === 'ND';
   if (r.codigo === '13' && tipo !== 'NC') err('El código 13 «Anula documento de referencia por error material» solo se usa en notas de crédito: un comprobante válido solo se anula con nota de crédito.', FUENTE_AJUSTES);
   if (r.codigo === '14' && !ajuste) err('El código 14 «Corrige monto por error material» solo se usa en notas de crédito o débito.', FUENTE_AJUSTES);
+  if (r.codigo === '12' && tipo !== 'NC') err('El código 12 «Nota de crédito financiera por exoneración posterior a la facturación» solo se usa en notas de crédito.', NOTA9);
   if ((r.codigo === '13' || r.codigo === '14') && ajuste && r.fechaEmision) {
     const periodo = r.fechaEmision.slice(0, 7).split('-').reverse().join('/');
-    reportar('advertencia', `Código ${r.codigo}: el efecto contable se refleja en el período del comprobante que se modifica (${periodo}), no en el mes de emisión de la nota.`, `${FUENTE_COMUNICADO}; nota 9`);
+    reportar('advertencia', `Código ${r.codigo}: el efecto contable se refleja en el período del comprobante que se modifica (${periodo}), no en el mes de emisión de la nota.`, NOTA9);
   }
   if ((r.codigo === '15' || r.codigo === '16') && (ajuste || tipo === 'REP')) {
     err(`El código ${r.codigo} se usa en el comprobante que sustituye, no en notas de crédito, débito ni en el REP.`, FUENTE_SUSTITUCION);
   }
   if (r.codigo === '16' && r.tipoDoc !== '10') err('El código 16 «Sustituye comprobante electrónico rechazado» se usa con el tipo de documento 10.', FUENTE_RECHAZADO);
-  if (r.codigo === '17' && tipo !== 'REP') err('El código 17 «Pago a comprobante electrónico» es exclusivo del Recibo Electrónico de Pago.', `${FUENTE_COMUNICADO}; nota 9`);
-  if (tipo === 'REP' && r.codigo !== '17') exigir('El REP debe referenciar el comprobante pagado con el código 17 «Pago a comprobante electrónico»', `${FUENTE_COMUNICADO}; nota 9`);
+  if (r.codigo === '17' && tipo !== 'REP') err('El código 17 «Pago a comprobante electrónico» es exclusivo del Recibo Electrónico de Pago.', NOTA9);
+  if (tipo === 'REP' && r.codigo !== '17') exigir('El REP debe referenciar el comprobante pagado con el código 17 «Pago a comprobante electrónico»', `${NOTA9}; ${FUENTE_COMUNICADO}`);
   if (r.tipoDoc === '10' && r.codigo !== '16') exigir('Para sustituir un comprobante rechazado por Hacienda use el código 16', FUENTE_RECHAZADO);
 }
 

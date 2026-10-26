@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { actualizacionVigente, excesosNotaCredito, periodoContable, type DocumentoResumen } from '../src/actualizacion';
+import { actualizacionVigente, diferenciasConReferencia, excesosNotaCredito, periodoContable, type DocumentoResumen } from '../src/actualizacion';
+import { calcularComprobante } from '../src/calculos';
 import { REGEX_CLAVE, descomponerClave, generarClave, generarConsecutivo, validarClave } from '../src/clave';
 import { EMISOR_DEMO } from '../src/datos-demo';
 import { extraerDatosComprobante } from '../src/recepcion';
@@ -7,7 +8,7 @@ import { construirComprobante } from '../src/emision';
 import { validarComoHacienda } from '../src/simulador';
 import type { BorradorComprobante, Referencia } from '../src/tipos';
 import { validarBorrador, validarIdentificacion } from '../src/validaciones';
-import { borrador } from './helpers';
+import { borrador, linea } from './helpers';
 
 const CLAVE = '50623102600010123045600100001010000000025112345678';
 const ref = (extra: Partial<Referencia>): Referencia => ({ tipoDoc: '01', numero: CLAVE, fechaEmision: '2026-09-15T08:00:00-06:00', codigo: '04', razon: 'Referencia de prueba', ...extra });
@@ -90,9 +91,41 @@ describe('Actualización Anexos y Estructuras v4.4 (vigente el 1/11/2026)', () =
     expect(periodoContable({ ...nota('13'), tipo: 'FE' })).toBe('2026-11');
   });
 
+  it('código 12 solo en notas de crédito; las reglas citan el Anexo actualizado', () => {
+    vi.setSystemTime(DESPUES);
+    expect(mensajes({ tipo: 'ND', referencias: [ref({ codigo: '12' })] }, 'error')).toMatch(/solo se usa en notas de crédito/);
+    expect(mensajes({ tipo: 'NC', referencias: [ref({ codigo: '12' })] }, 'error')).toBe('');
+    const v = validarBorrador(borrador({ tipo: 'FE', referencias: [ref({ codigo: '17' })] }), EMISOR_DEMO).find((x) => x.campo === 'referencias.0');
+    expect(v?.fuente).toMatch(/22\/04\/2026/);
+  });
+
+  it('IVA devuelto con la fórmula del Anexo actualizado', () => {
+    const salud = linea({ codigoCabys: '9310100000100', detalle: 'Consulta médica', precioUnitario: 30000, codigoTarifaIva: '04', servicioSalud: true });
+    const otro = linea({ precioUnitario: 10000 });
+    // Solo salud, todo con tarjeta: se devuelve el IVA completo.
+    expect(calcularComprobante(borrador({ lineas: [salud], mediosPago: [{ tipo: '02' }] })).resumen.totalIVADevuelto).toBe(1200);
+    // Salud + otro servicio con varios medios: (tarjeta / venta neta) × IVA de salud al 4 %.
+    const mixto = calcularComprobante(borrador({ lineas: [salud, otro], mediosPago: [{ tipo: '02', monto: 20000 }, { tipo: '01', monto: 22100 }] })).resumen;
+    expect(mixto.totalIVADevuelto).toBe(600); // 20 000 / 40 000 × 1 200
+    // Sin tarjeta no hay devolución; la salud a otra tarifa no cuenta.
+    expect(calcularComprobante(borrador({ lineas: [salud], mediosPago: [{ tipo: '01' }] })).resumen.totalIVADevuelto).toBe(0);
+    expect(calcularComprobante(borrador({ lineas: [{ ...salud, codigoTarifaIva: '08' }], mediosPago: [{ tipo: '02' }] })).resumen.totalIVADevuelto).toBe(0);
+  });
+
   it('tipo de cambio en moneda extranjera: advertencia de referencia del BCCR', () => {
     expect(mensajes({ moneda: 'USD', tipoCambio: 505.5 }, 'advertencia', 'tipoCambio')).toMatch(/BCCR/);
     expect(mensajes({}, 'advertencia', 'tipoCambio')).toBe('');
+  });
+});
+
+describe('Datos de la nota frente al comprobante referenciado', () => {
+  const fe: DocumentoResumen = { clave: 'FE1', tipo: 'FE', totalCRC: 1000, referencias: [], moneda: 'CRC', tipoCambio: 1, cabys: ['8222100000000'] };
+  it('advierte diferencias de moneda, tipo de cambio y CAByS', () => {
+    const nc = (extra: Partial<DocumentoResumen>): DocumentoResumen => ({ clave: 'NC1', tipo: 'NC', totalCRC: 100, referencias: ['FE1'], moneda: 'CRC', tipoCambio: 1, cabys: ['8222100000000'], ...extra });
+    expect(diferenciasConReferencia(nc({}), [fe])).toEqual([]);
+    expect(diferenciasConReferencia(nc({ moneda: 'USD', tipoCambio: 505 }), [fe])[0]).toMatch(/moneda/);
+    expect(diferenciasConReferencia(nc({ cabys: ['9999999999999'] }), [fe])[0]).toMatch(/CAByS 9999999999999/);
+    expect(diferenciasConReferencia({ ...nc({}), tipo: 'FE' }, [fe])).toEqual([]);
   });
 });
 

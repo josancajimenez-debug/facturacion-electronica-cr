@@ -1,0 +1,921 @@
+{
+ "fuente": "Ministerio de Hacienda – Código de forma farmacéutica (nota 19, Anexos y Estructuras v4.4)",
+ "codigos": [
+  {
+   "codigo": "01",
+   "descripcion": "Anillo vaginal"
+  },
+  {
+   "codigo": "02",
+   "descripcion": "Aposito"
+  },
+  {
+   "codigo": "03",
+   "descripcion": "Capleta"
+  },
+  {
+   "codigo": "04",
+   "descripcion": "Cápsula"
+  },
+  {
+   "codigo": "05",
+   "descripcion": "Cápsula blanda"
+  },
+  {
+   "codigo": "06",
+   "descripcion": "Capsula con granulado con recubrimiento enterico"
+  },
+  {
+   "codigo": "07",
+   "descripcion": "Cápsula con gránulos de liberación retardada"
+  },
+  {
+   "codigo": "08",
+   "descripcion": "Cápsula con pellets entéricos"
+  },
+  {
+   "codigo": "09",
+   "descripcion": "Capsula de gelatina blanda"
+  },
+  {
+   "codigo": "10",
+   "descripcion": "Cápsula de gelatina dura"
+  },
+  {
+   "codigo": "11",
+   "descripcion": "Capsula de gelatina suave"
+  },
+  {
+   "codigo": "12",
+   "descripcion": "Cápsula de liberación controlada"
+  },
+  {
+   "codigo": "13",
+   "descripcion": "Capsula de liberacion prolongada"
+  },
+  {
+   "codigo": "14",
+   "descripcion": "Capsula de liberacion retardada"
+  },
+  {
+   "codigo": "15",
+   "descripcion": "Cápsula de liberación retardada (conteniendo gránulos con cubierta entéric)"
+  },
+  {
+   "codigo": "16",
+   "descripcion": "Capsula de liberacion retardada gastrorresistente"
+  },
+  {
+   "codigo": "17",
+   "descripcion": "Cápsula de liberación retardada(conteniendo gránulos con cubierta entérica)"
+  },
+  {
+   "codigo": "18",
+   "descripcion": "Capsula dura"
+  },
+  {
+   "codigo": "19",
+   "descripcion": "Capsula dura de liberacion prolongada"
+  },
+  {
+   "codigo": "20",
+   "descripcion": "Capsula gastrorresistente"
+  },
+  {
+   "codigo": "21",
+   "descripcion": "Cápsula para inhalación"
+  },
+  {
+   "codigo": "22",
+   "descripcion": "Capsulas con granulos entericos"
+  },
+  {
+   "codigo": "23",
+   "descripcion": "Cápsulas con microgránulos de liberación prolongada"
+  },
+  {
+   "codigo": "24",
+   "descripcion": "Capsulas con microgranulos gastrorresistentes"
+  },
+  {
+   "codigo": "25",
+   "descripcion": "Cápsulas con pellets de liberación prolongada"
+  },
+  {
+   "codigo": "26",
+   "descripcion": "Cápsulas de liberación modificada"
+  },
+  {
+   "codigo": "27",
+   "descripcion": "Capsulas duras de liberación prolongada"
+  },
+  {
+   "codigo": "28",
+   "descripcion": "Cápsulas duras gastrorresistentes"
+  },
+  {
+   "codigo": "29",
+   "descripcion": "Cápsulas para inhalación"
+  },
+  {
+   "codigo": "30",
+   "descripcion": "Caramelo"
+  },
+  {
+   "codigo": "31",
+   "descripcion": "Champu"
+  },
+  {
+   "codigo": "32",
+   "descripcion": "Comprimido"
+  },
+  {
+   "codigo": "33",
+   "descripcion": "Comprimido bicapa"
+  },
+  {
+   "codigo": "34",
+   "descripcion": "Comprimido bucodispersable"
+  },
+  {
+   "codigo": "35",
+   "descripcion": "Comprimido con cubierta pelicular"
+  },
+  {
+   "codigo": "36",
+   "descripcion": "Comprimido con recubrimiento enterico"
+  },
+  {
+   "codigo": "37",
+   "descripcion": "Comprimido de disolucion bucal"
+  },
+  {
+   "codigo": "38",
+   "descripcion": "Comprimido de liberación modificada"
+  },
+  {
+   "codigo": "39",
+   "descripcion": "Comprimido de liberación osmótica"
+  },
+  {
+   "codigo": "40",
+   "descripcion": "Comprimido de liberacion prolongada"
+  },
+  {
+   "codigo": "41",
+   "descripcion": "Comprimido de liberacion retardada"
+  },
+  {
+   "codigo": "42",
+   "descripcion": "Comprimido dispersable"
+  },
+  {
+   "codigo": "43",
+   "descripcion": "Comprimido dispersable / masticable"
+  },
+  {
+   "codigo": "44",
+   "descripcion": "Comprimido efervescente"
+  },
+  {
+   "codigo": "45",
+   "descripcion": "Comprimido entérico"
+  },
+  {
+   "codigo": "46",
+   "descripcion": "Comprimido gastrorresistente"
+  },
+  {
+   "codigo": "47",
+   "descripcion": "Comprimido masticable"
+  },
+  {
+   "codigo": "48",
+   "descripcion": "Comprimido orodispersable"
+  },
+  {
+   "codigo": "49",
+   "descripcion": "Comprimido peliculado de liberacion modificada"
+  },
+  {
+   "codigo": "50",
+   "descripcion": "Comprimido peliculado de liberación prolongada"
+  },
+  {
+   "codigo": "51",
+   "descripcion": "Comprimido ranurado"
+  },
+  {
+   "codigo": "52",
+   "descripcion": "Comprimido recubierto"
+  },
+  {
+   "codigo": "53",
+   "descripcion": "Comprimido recubierto con película"
+  },
+  {
+   "codigo": "54",
+   "descripcion": "Comprimido recubierto de liberación prolongada"
+  },
+  {
+   "codigo": "55",
+   "descripcion": "Comprimido recubierto gastroresistente"
+  },
+  {
+   "codigo": "56",
+   "descripcion": "Comprimido sublingual"
+  },
+  {
+   "codigo": "57",
+   "descripcion": "Comprimidos de liberación prolongada recubiertos con película"
+  },
+  {
+   "codigo": "58",
+   "descripcion": "Comprimidos ranurados de liberación modificada"
+  },
+  {
+   "codigo": "59",
+   "descripcion": "Comprimidos recubiertos de liberación controlada"
+  },
+  {
+   "codigo": "60",
+   "descripcion": "Comprimidos recubiertos de liberación sostenida"
+  },
+  {
+   "codigo": "61",
+   "descripcion": "Comprimidos revestidos"
+  },
+  {
+   "codigo": "62",
+   "descripcion": "Concentrado para solución inyectable"
+  },
+  {
+   "codigo": "63",
+   "descripcion": "Concentrado para solución para infusión"
+  },
+  {
+   "codigo": "64",
+   "descripcion": "Concentrado para solución para perfusión"
+  },
+  {
+   "codigo": "65",
+   "descripcion": "Crema"
+  },
+  {
+   "codigo": "66",
+   "descripcion": "Crema vaginal"
+  },
+  {
+   "codigo": "67",
+   "descripcion": "Dispersión liposomal inyectable endovenosa"
+  },
+  {
+   "codigo": "68",
+   "descripcion": "Dispositivo vaginal con polvo"
+  },
+  {
+   "codigo": "69",
+   "descripcion": "Elixir"
+  },
+  {
+   "codigo": "70",
+   "descripcion": "Emulsion"
+  },
+  {
+   "codigo": "71",
+   "descripcion": "Emulsion inyectable"
+  },
+  {
+   "codigo": "72",
+   "descripcion": "Emulsion oral"
+  },
+  {
+   "codigo": "73",
+   "descripcion": "Enema"
+  },
+  {
+   "codigo": "74",
+   "descripcion": "Enjuague bucal"
+  },
+  {
+   "codigo": "75",
+   "descripcion": "Espuma"
+  },
+  {
+   "codigo": "76",
+   "descripcion": "Gas medicinal"
+  },
+  {
+   "codigo": "77",
+   "descripcion": "Gas para inhalación"
+  },
+  {
+   "codigo": "78",
+   "descripcion": "Gasa impregnada con ungüento"
+  },
+  {
+   "codigo": "79",
+   "descripcion": "Gel"
+  },
+  {
+   "codigo": "80",
+   "descripcion": "Gel capilar"
+  },
+  {
+   "codigo": "81",
+   "descripcion": "Gel oftalmico"
+  },
+  {
+   "codigo": "82",
+   "descripcion": "Gel oral"
+  },
+  {
+   "codigo": "83",
+   "descripcion": "Gel vaginal"
+  },
+  {
+   "codigo": "84",
+   "descripcion": "Gotas óticas en solución"
+  },
+  {
+   "codigo": "85",
+   "descripcion": "Gragea"
+  },
+  {
+   "codigo": "86",
+   "descripcion": "Gragea de liberación prolongada"
+  },
+  {
+   "codigo": "87",
+   "descripcion": "Gragea gastroresistente"
+  },
+  {
+   "codigo": "88",
+   "descripcion": "Granulado para solución oral"
+  },
+  {
+   "codigo": "89",
+   "descripcion": "Granulado para suspension"
+  },
+  {
+   "codigo": "90",
+   "descripcion": "Gránulo gastrorresistente para suspensión"
+  },
+  {
+   "codigo": "91",
+   "descripcion": "Granulos"
+  },
+  {
+   "codigo": "92",
+   "descripcion": "Granulos de liberacion prolongada"
+  },
+  {
+   "codigo": "93",
+   "descripcion": "Gránulos de liberación prolongada para suspensión"
+  },
+  {
+   "codigo": "94",
+   "descripcion": "Granulos efervescentes"
+  },
+  {
+   "codigo": "95",
+   "descripcion": "Granulos gastro-resistentes"
+  },
+  {
+   "codigo": "96",
+   "descripcion": "Granulos para solucion"
+  },
+  {
+   "codigo": "97",
+   "descripcion": "Granulos para suspension"
+  },
+  {
+   "codigo": "98",
+   "descripcion": "Implante"
+  },
+  {
+   "codigo": "99",
+   "descripcion": "Jabon solido"
+  },
+  {
+   "codigo": "100",
+   "descripcion": "Jalea"
+  },
+  {
+   "codigo": "101",
+   "descripcion": "Jarabe"
+  },
+  {
+   "codigo": "102",
+   "descripcion": "Jarabe (solucion oral)"
+  },
+  {
+   "codigo": "103",
+   "descripcion": "Laca para uñas"
+  },
+  {
+   "codigo": "104",
+   "descripcion": "Liofilizado para suspensión inyectable"
+  },
+  {
+   "codigo": "105",
+   "descripcion": "Líquido"
+  },
+  {
+   "codigo": "106",
+   "descripcion": "Líquido anestésico"
+  },
+  {
+   "codigo": "107",
+   "descripcion": "Liquido para inhalación"
+  },
+  {
+   "codigo": "108",
+   "descripcion": "Líquido para inhalación del vapor"
+  },
+  {
+   "codigo": "109",
+   "descripcion": "Líquido viscoso"
+  },
+  {
+   "codigo": "110",
+   "descripcion": "Locion"
+  },
+  {
+   "codigo": "111",
+   "descripcion": "Microesferas liofilizadas estériles"
+  },
+  {
+   "codigo": "112",
+   "descripcion": "Microesferas para suspensión inyectable"
+  },
+  {
+   "codigo": "113",
+   "descripcion": "Mixtura"
+  },
+  {
+   "codigo": "114",
+   "descripcion": "Óvulo"
+  },
+  {
+   "codigo": "115",
+   "descripcion": "Parche"
+  },
+  {
+   "codigo": "116",
+   "descripcion": "Parche transdermico"
+  },
+  {
+   "codigo": "117",
+   "descripcion": "Pastilla"
+  },
+  {
+   "codigo": "118",
+   "descripcion": "Pelicula bucodispersable"
+  },
+  {
+   "codigo": "119",
+   "descripcion": "Polvo"
+  },
+  {
+   "codigo": "120",
+   "descripcion": "Polvo concentrado para solución para infusión"
+  },
+  {
+   "codigo": "121",
+   "descripcion": "Polvo para suspensión de lib. Prolong para jeringa prellenada"
+  },
+  {
+   "codigo": "122",
+   "descripcion": "Polvo cristalino para solución inyectable"
+  },
+  {
+   "codigo": "123",
+   "descripcion": "Polvo efervescente"
+  },
+  {
+   "codigo": "124",
+   "descripcion": "Polvo estéril para solución inyectable"
+  },
+  {
+   "codigo": "125",
+   "descripcion": "Polvo granulado"
+  },
+  {
+   "codigo": "126",
+   "descripcion": "Polvo granulado para solución oral"
+  },
+  {
+   "codigo": "127",
+   "descripcion": "Polvo liofilizado"
+  },
+  {
+   "codigo": "128",
+   "descripcion": "Polvo liofilizado para concentrado para solución para perfusión"
+  },
+  {
+   "codigo": "129",
+   "descripcion": "Polvo liofilizado para solución inyectable"
+  },
+  {
+   "codigo": "130",
+   "descripcion": "Polvo liofilizado para solución para infusión intravenosa"
+  },
+  {
+   "codigo": "131",
+   "descripcion": "Polvo liofilizado para solución para perfusión"
+  },
+  {
+   "codigo": "132",
+   "descripcion": "Polvo liofilizado para suspensión inyectable"
+  },
+  {
+   "codigo": "133",
+   "descripcion": "Polvo liofilizado para suspensión inyectable de liberación prolongada"
+  },
+  {
+   "codigo": "134",
+   "descripcion": "Polvo liofilizado para uso parenteral"
+  },
+  {
+   "codigo": "135",
+   "descripcion": "Polvo para concentrado para solución para infusión"
+  },
+  {
+   "codigo": "136",
+   "descripcion": "Polvo para concentrado para solución para infusión intravenosa"
+  },
+  {
+   "codigo": "137",
+   "descripcion": "Polvo para concentrado para solución para perfusión"
+  },
+  {
+   "codigo": "138",
+   "descripcion": "Polvo para concentrado para solución para perfusión intravenoso"
+  },
+  {
+   "codigo": "139",
+   "descripcion": "Polvo para infusion"
+  },
+  {
+   "codigo": "140",
+   "descripcion": "Polvo para inhalacion"
+  },
+  {
+   "codigo": "141",
+   "descripcion": "Polvo para inhalación en cápsulas"
+  },
+  {
+   "codigo": "142",
+   "descripcion": "Polvo para inhalacion en capsulas duras"
+  },
+  {
+   "codigo": "143",
+   "descripcion": "Polvo para solucion"
+  },
+  {
+   "codigo": "144",
+   "descripcion": "Polvo para solución estéril inyectable"
+  },
+  {
+   "codigo": "145",
+   "descripcion": "Polvo para solucion inyectable"
+  },
+  {
+   "codigo": "146",
+   "descripcion": "Polvo para solucion oral"
+  },
+  {
+   "codigo": "147",
+   "descripcion": "Polvo para solución para infusión"
+  },
+  {
+   "codigo": "148",
+   "descripcion": "Polvo para solución para perfusión"
+  },
+  {
+   "codigo": "149",
+   "descripcion": "Polvo para suspensión"
+  },
+  {
+   "codigo": "150",
+   "descripcion": "Polvo para suspension inyectable"
+  },
+  {
+   "codigo": "151",
+   "descripcion": "Polvo para suspensión oral"
+  },
+  {
+   "codigo": "152",
+   "descripcion": "Polvo para suspensión oral y rectal"
+  },
+  {
+   "codigo": "153",
+   "descripcion": "Polvo topico"
+  },
+  {
+   "codigo": "154",
+   "descripcion": "Polvo y disolvente para solución inyectable."
+  },
+  {
+   "codigo": "155",
+   "descripcion": "Pomada"
+  },
+  {
+   "codigo": "156",
+   "descripcion": "Sistema de liberación vaginal"
+  },
+  {
+   "codigo": "157",
+   "descripcion": "Sistema intrauterino de liberación"
+  },
+  {
+   "codigo": "158",
+   "descripcion": "Solución"
+  },
+  {
+   "codigo": "159",
+   "descripcion": "Solución anestésica inhalatoria"
+  },
+  {
+   "codigo": "160",
+   "descripcion": "Solucion concentrada"
+  },
+  {
+   "codigo": "161",
+   "descripcion": "Solución concentrada para infusión"
+  },
+  {
+   "codigo": "162",
+   "descripcion": "Solución de infusión para aplicación intravenosa"
+  },
+  {
+   "codigo": "163",
+   "descripcion": "Solución en aerosol"
+  },
+  {
+   "codigo": "164",
+   "descripcion": "Solución en spray"
+  },
+  {
+   "codigo": "165",
+   "descripcion": "Solución estéril"
+  },
+  {
+   "codigo": "166",
+   "descripcion": "Solución estéril para inyección"
+  },
+  {
+   "codigo": "167",
+   "descripcion": "Solución gotas"
+  },
+  {
+   "codigo": "168",
+   "descripcion": "Solución intraocular"
+  },
+  {
+   "codigo": "169",
+   "descripcion": "Solucion inyectable"
+  },
+  {
+   "codigo": "170",
+   "descripcion": "Solución inyectable concentrada"
+  },
+  {
+   "codigo": "171",
+   "descripcion": "Solución inyectable concentrado para infusión"
+  },
+  {
+   "codigo": "172",
+   "descripcion": "Solución inyectable de liberación prolongada"
+  },
+  {
+   "codigo": "173",
+   "descripcion": "Solucion inyectable para infusion"
+  },
+  {
+   "codigo": "174",
+   "descripcion": "Solución oftálmica"
+  },
+  {
+   "codigo": "175",
+   "descripcion": "Solución oleosa inyectable"
+  },
+  {
+   "codigo": "176",
+   "descripcion": "Solucion oral"
+  },
+  {
+   "codigo": "177",
+   "descripcion": "Solucion para dialisis peritoneal"
+  },
+  {
+   "codigo": "178",
+   "descripcion": "Solucion para hemodialisis"
+  },
+  {
+   "codigo": "179",
+   "descripcion": "Solución para infusión intravenosa"
+  },
+  {
+   "codigo": "180",
+   "descripcion": "Solucion para inhalacion"
+  },
+  {
+   "codigo": "181",
+   "descripcion": "Solucion para irrigacion"
+  },
+  {
+   "codigo": "182",
+   "descripcion": "Solucion para nebulizacion"
+  },
+  {
+   "codigo": "183",
+   "descripcion": "Solución para perfusión"
+  },
+  {
+   "codigo": "184",
+   "descripcion": "Solucion para uñas"
+  },
+  {
+   "codigo": "185",
+   "descripcion": "Solucion rectal"
+  },
+  {
+   "codigo": "186",
+   "descripcion": "Spray solución nasal"
+  },
+  {
+   "codigo": "187",
+   "descripcion": "Supositorio"
+  },
+  {
+   "codigo": "188",
+   "descripcion": "Suspension"
+  },
+  {
+   "codigo": "189",
+   "descripcion": "Suspensión para inhalación"
+  },
+  {
+   "codigo": "190",
+   "descripcion": "Suspensión acuosa"
+  },
+  {
+   "codigo": "191",
+   "descripcion": "Suspensión en aerosol"
+  },
+  {
+   "codigo": "192",
+   "descripcion": "Suspensión en spray"
+  },
+  {
+   "codigo": "193",
+   "descripcion": "Suspensión estéril"
+  },
+  {
+   "codigo": "194",
+   "descripcion": "Suspensión inyectable"
+  },
+  {
+   "codigo": "195",
+   "descripcion": "Suspensión inyectable de liberación prolongada"
+  },
+  {
+   "codigo": "196",
+   "descripcion": "Suspension oral"
+  },
+  {
+   "codigo": "197",
+   "descripcion": "Suspensión para inhalación"
+  },
+  {
+   "codigo": "198",
+   "descripcion": "Suspensión presurizada"
+  },
+  {
+   "codigo": "199",
+   "descripcion": "Tableta"
+  },
+  {
+   "codigo": "200",
+   "descripcion": "Tableta bicapa"
+  },
+  {
+   "codigo": "201",
+   "descripcion": "Tableta con capa entérica"
+  },
+  {
+   "codigo": "202",
+   "descripcion": "Tableta con cubierta entérica"
+  },
+  {
+   "codigo": "203",
+   "descripcion": "Tableta cubierta"
+  },
+  {
+   "codigo": "204",
+   "descripcion": "Tableta de acción prolongada"
+  },
+  {
+   "codigo": "205",
+   "descripcion": "Tableta de liberacion prolongada"
+  },
+  {
+   "codigo": "206",
+   "descripcion": "Tableta de liberación retardada."
+  },
+  {
+   "codigo": "207",
+   "descripcion": "Tableta dispersable"
+  },
+  {
+   "codigo": "208",
+   "descripcion": "Tableta efervescente"
+  },
+  {
+   "codigo": "209",
+   "descripcion": "Tableta masticable"
+  },
+  {
+   "codigo": "210",
+   "descripcion": "Tableta orodispersable"
+  },
+  {
+   "codigo": "211",
+   "descripcion": "Tableta para chupar"
+  },
+  {
+   "codigo": "212",
+   "descripcion": "Tableta ranurada"
+  },
+  {
+   "codigo": "213",
+   "descripcion": "Tableta recubierta"
+  },
+  {
+   "codigo": "214",
+   "descripcion": "Tableta recubierta con película"
+  },
+  {
+   "codigo": "215",
+   "descripcion": "Tableta recubierta de liberación extendida"
+  },
+  {
+   "codigo": "216",
+   "descripcion": "Tableta recubierta de liberacion modificada"
+  },
+  {
+   "codigo": "217",
+   "descripcion": "Tableta recubierta de liberación prolongada"
+  },
+  {
+   "codigo": "218",
+   "descripcion": "Tableta recubierta entérica"
+  },
+  {
+   "codigo": "219",
+   "descripcion": "Tableta recubierta gastrorresistente"
+  },
+  {
+   "codigo": "220",
+   "descripcion": "Tableta revestida"
+  },
+  {
+   "codigo": "221",
+   "descripcion": "Tableta sublingual"
+  },
+  {
+   "codigo": "222",
+   "descripcion": "Tabletas de disolución oral instantánea"
+  },
+  {
+   "codigo": "223",
+   "descripcion": "Tabletas de liberación extendida"
+  },
+  {
+   "codigo": "224",
+   "descripcion": "Tabletas dispersables / masticables"
+  },
+  {
+   "codigo": "225",
+   "descripcion": "Tabletas laqueadas"
+  },
+  {
+   "codigo": "226",
+   "descripcion": "Tabletas recubiertas de acción prolongada"
+  },
+  {
+   "codigo": "227",
+   "descripcion": "Tabletas recubiertas de liberacion retardada"
+  },
+  {
+   "codigo": "228",
+   "descripcion": "Tintura"
+  },
+  {
+   "codigo": "229",
+   "descripcion": "Unguento"
+  }
+ ]
+}
