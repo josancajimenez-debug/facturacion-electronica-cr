@@ -12,6 +12,9 @@ import { limpiarIdentificacion } from '../lib/formato';
  */
 const separarTerminales = (texto: string): string[] => (texto.trim() ? texto.split(',').map((t) => t.trim()) : []);
 
+/** Teléfonos del emisor en orden: el principal primero y luego los adicionales. */
+const listaTelefonos = (e: Emisor): string[] => [...(e.telefono ? [e.telefono.numero] : []), ...(e.telefonosAdicionales ?? []).map((t) => t.numero)];
+
 const nuevoEmisor = (): Emisor => ({
   id: '',
   nombre: '',
@@ -53,7 +56,9 @@ export function EmisorPagina() {
   repetidas(form.actividades.map((a) => a.codigo.trim())).forEach((c) => errores.push(`La actividad ${c} está repetida.`));
   if (!form.proveedorSistemas) errores.push('Indique el proveedor de sistemas (su propia identificación si es desarrollo propio).');
   // Anexo actualizado al 22/04/2026: mínimo 8 y máximo 20 dígitos, excepto números especiales como el 911.
-  if (form.telefono && !/^(\d{8,20}|\d{3,4})$/.test(form.telefono.numero)) errores.push('El teléfono debe tener entre 8 y 20 dígitos (o ser un número especial de 3-4 dígitos, como el 911).');
+  const telefonos = listaTelefonos(form);
+  telefonos.forEach((t, i) => !/^(\d{8,20}|\d{3,4})$/.test(t) && errores.push(`Teléfono ${i + 1}: entre 8 y 20 dígitos (o un número especial de 3-4 dígitos, como el 911).`));
+  repetidas(telefonos).forEach((t) => errores.push(`El teléfono ${t} está repetido.`));
   if (form.sucursales.length === 0) errores.push('Registre al menos una sucursal.');
   form.sucursales.forEach((s) => {
     if (!/^\d{3}$/.test(s.codigo)) errores.push(`Sucursal "${s.nombre}": código de 3 dígitos.`);
@@ -63,7 +68,22 @@ export function EmisorPagina() {
   });
   // Dos sucursales con el mismo código compartirían la numeración consecutiva (Nota 3).
   repetidas(form.sucursales.map((s) => s.codigo)).forEach((c) => errores.push(`El código de sucursal ${c} está repetido.`));
-  const telefonoEsSinpe = !!form.telefono && form.telefonosSinpe.includes(form.telefono.numero);
+  /** Guarda la lista de teléfonos: el primero es el principal (va al XML) y el resto, adicionales. */
+  const setTelefonos = (lista: string[], telefonosSinpe = form.telefonosSinpe) =>
+    set({
+      telefono: lista.length ? { codigoPais: '506', numero: lista[0] } : undefined,
+      telefonosAdicionales: lista.length > 1 ? lista.slice(1).map((numero) => ({ codigoPais: '506', numero })) : undefined,
+      telefonosSinpe,
+    });
+  const cambiarTelefono = (i: number, texto: string) => {
+    const anterior = telefonos[i];
+    const numero = texto.replace(/\D/g, '').slice(0, 20);
+    // Un número marcado como SINPE Móvil se actualiza junto con el teléfono.
+    const sinpe = anterior && form.telefonosSinpe.includes(anterior)
+      ? form.telefonosSinpe.filter((t) => t !== anterior).concat(/^\d{8}$/.test(numero) ? [numero] : [])
+      : form.telefonosSinpe;
+    setTelefonos(telefonos.map((t, j) => (j === i ? numero : t)), sinpe);
+  };
   form.telefonosSinpe.forEach((t) => !/^\d{8}$/.test(t) && errores.push(`Número SINPE ${t || '(vacío)'}: 8 dígitos.`));
   repetidas(form.telefonosSinpe).forEach((t) => errores.push(`El número SINPE ${t} está repetido.`));
 
@@ -165,23 +185,6 @@ export function EmisorPagina() {
         <div className="card-head"><h2>Ubicación y contacto</h2></div>
         <div className="card-body grid grid-3">
           <UbicacionCampos valor={form.ubicacion} onCambio={(u) => set({ ubicacion: u })} />
-          <div className="stack" style={{ gap: 6 }}>
-            <Texto etiqueta="Teléfono" valor={form.telefono?.numero} ayuda="8 a 20 dígitos." onCambio={(v) => {
-              const numero = v.replace(/\D/g, '');
-              // Si el teléfono estaba marcado como SINPE Móvil, el número registrado se actualiza con él.
-              const anterior = form.telefono?.numero;
-              const telefonosSinpe = anterior && telefonoEsSinpe ? form.telefonosSinpe.filter((t) => t !== anterior).concat(/^\d{8}$/.test(numero) ? [numero] : []) : form.telefonosSinpe;
-              set({ telefono: numero ? { codigoPais: '506', numero } : undefined, telefonosSinpe });
-            }} />
-            {/^\d{8}$/.test(form.telefono?.numero ?? '') && (
-              <label className="check small">
-                <input type="checkbox" checked={telefonoEsSinpe} onChange={(e) => set({
-                  telefonosSinpe: e.target.checked ? [...form.telefonosSinpe.filter(Boolean), form.telefono!.numero] : form.telefonosSinpe.filter((t) => t !== form.telefono!.numero),
-                })} />
-                Este teléfono también recibe pagos por SINPE Móvil
-              </label>
-            )}
-          </div>
           {form.correos.map((c, i) => (
             <Texto key={i} etiqueta={`Correo ${i + 1}`} tipo="email" valor={c} onCambio={(v) => set({ correos: form.correos.map((x, j) => (j === i ? v : x)) })} requerido={i === 0} />
           ))}
@@ -190,6 +193,30 @@ export function EmisorPagina() {
               <button className="btn" onClick={() => set({ correos: [...form.correos, ''] })}><Plus /> Agregar correo (máx. 4)</button>
             </div>
           )}
+          <div className="stack" style={{ gridColumn: '1 / -1', gap: 8 }}>
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <strong>Teléfonos</strong>
+              <button className="btn btn-sm" onClick={() => setTelefonos([...telefonos, ''])}><Plus /> Agregar teléfono</button>
+            </div>
+            <p className="small muted" style={{ margin: 0 }}>
+              8 a 20 dígitos. El <strong>principal</strong> es el que va en el XML (el nodo &lt;Emisor&gt; admite un solo teléfono). Marque <strong>SINPE Móvil</strong> en los números de 8 dígitos que reciben pagos.
+            </p>
+            {telefonos.length === 0 && <span className="small muted">Sin teléfonos registrados (el teléfono es opcional en el XML).</span>}
+            {telefonos.map((t, i) => (
+              <div key={i} className="row" style={{ alignItems: 'flex-end' }}>
+                <div style={{ width: 220 }}><Texto etiqueta={`Teléfono ${i + 1}`} valor={t} onCambio={(v) => cambiarTelefono(i, v)} /></div>
+                <label className="check" style={{ marginBottom: 8 }}>
+                  <input type="radio" name="telefono-principal" checked={i === 0} onChange={() => setTelefonos([t, ...telefonos.filter((_, j) => j !== i)])} /> Principal (XML)
+                </label>
+                <label className="check" style={{ marginBottom: 8 }} title={/^\d{8}$/.test(t) ? undefined : 'SINPE Móvil requiere un número de 8 dígitos'}>
+                  <input type="checkbox" disabled={!/^\d{8}$/.test(t)} checked={form.telefonosSinpe.includes(t) && !!t}
+                    onChange={(e) => set({ telefonosSinpe: e.target.checked ? [...form.telefonosSinpe.filter(Boolean), t] : form.telefonosSinpe.filter((x) => x !== t) })} /> SINPE Móvil
+                </label>
+                <button className="btn btn-ghost btn-icon btn-danger" aria-label={`Eliminar teléfono ${i + 1}`}
+                  onClick={() => setTelefonos(telefonos.filter((_, j) => j !== i), form.telefonosSinpe.filter((x) => x !== t))}><Trash2 /></button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -251,7 +278,7 @@ export function EmisorPagina() {
             </Alerta>
             {form.telefonosSinpe.length === 0 && (
               <p className="small muted" style={{ margin: 0 }}>
-                Sin números registrados. Use «Número» o marque «Este teléfono también recibe pagos por SINPE Móvil» junto al teléfono de contacto.
+                Sin números registrados. Marque «SINPE Móvil» en uno de los teléfonos de contacto o agregue aquí otro número con «Número».
               </p>
             )}
             {form.telefonosSinpe.map((t, i) => (

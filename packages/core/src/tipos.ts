@@ -44,7 +44,10 @@ export interface Emisor {
   nombreComercial?: string;
   identificacion: Identificacion;
   ubicacion: Ubicacion;
+  /** Teléfono principal: el único que va en el nodo <Emisor> del XML. */
   telefono?: Telefono;
+  /** Otros teléfonos de contacto (no van al XML; pueden marcarse como SINPE Móvil). */
+  telefonosAdicionales?: Telefono[];
   /** De 1 a 4 direcciones (Anexo v4.4, campo CorreoElectronico del emisor). */
   correos: string[];
   actividades: ActividadEconomica[];

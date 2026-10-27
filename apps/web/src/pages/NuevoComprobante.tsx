@@ -457,7 +457,10 @@ export function NuevoComprobante() {
               {b.mediosPago.some((m) => m.tipo === '06') && (
                 <p className="small muted" style={{ margin: 0 }}>
                   SINPE Móvil (código 06, v4.4). Números registrados del emisor: {emisor!.telefonosSinpe.length ? emisor!.telefonosSinpe.join(', ') : 'ninguno'}.
-                  {emisor!.telefonosSinpe.length === 0 && <> <Link to="/emisor">Registrar número SINPE</Link>{emisor!.telefono?.numero && ` (p. ej. el teléfono ${emisor!.telefono.numero})`}.</>}
+                  {emisor!.telefonosSinpe.length === 0 && (() => {
+                    const moviles = [emisor!.telefono, ...(emisor!.telefonosAdicionales ?? [])].map((t) => t?.numero ?? '').filter((n) => /^\d{8}$/.test(n));
+                    return <> <Link to="/emisor">Registrar número SINPE</Link>{moviles.length > 0 && ` (marque «SINPE Móvil» en ${moviles.length > 1 ? 'alguno de sus teléfonos: ' : 'el teléfono '}${moviles.join(', ')})`}.</>;
+                  })()}
                 </p>
               )}
             </div>
