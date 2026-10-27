@@ -27,7 +27,7 @@ import {
   type Receptor,
 } from '@fe-cr/core';
 import { verificadorCabys } from '../lib/cabys';
-import { ErrorConValidaciones, consultarTipoCambio, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type TipoCambio, type Usuario } from './tipos';
+import { ErrorConValidaciones, FRASE_LIMPIAR_TODO, consultarTipoCambio, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type ResultadoLimpieza, type TipoCambio, type Usuario, type UsuarioResumen } from './tipos';
 
 const CLAVE_STORAGE = 'fe-cr:local:v1';
 const PAUSA_MS = 900;
@@ -137,6 +137,8 @@ export class LocalBackend implements Backend {
   }
 
   private bitacora(emisorId: string, entrada: Omit<EntradaBitacora, 'id' | 'fecha'>): void {
+    // Un comprobante que se estaba procesando cuando se limpió su emisor no debe recrear su bitácora.
+    if (!this.estado.emisores[emisorId]) return;
     const lista = (this.estado.bitacora[emisorId] ??= []);
     lista.unshift({ id: id(), fecha: fechaEmisionCR(), ambiente: 'simulacion', usuario: this.usuario()?.email ?? null, ...entrada });
   }
@@ -414,5 +416,68 @@ export class LocalBackend implements Backend {
 
   tipoCambio(): Promise<TipoCambio> {
     return consultarTipoCambio();
+  }
+
+  // ---------------- Limpieza de datos ----------------
+  // Mismas reglas que la función Edge. En modo local todos los datos están en este navegador,
+  // por lo que cualquier usuario con sesión tiene las opciones de administrador.
+  private exigirSesion(): Usuario {
+    const u = this.usuario();
+    if (!u) throw new Error('Debe iniciar sesión.');
+    return u;
+  }
+
+  private eliminarEmisor(emisorId: string): void {
+    for (const tabla of ['emisores', 'receptores', 'productos', 'comprobantes', 'recibidos', 'bitacora'] as const) delete this.estado[tabla][emisorId];
+    for (const k of Object.keys(this.estado.contadores)) if (k.startsWith(`${emisorId}_`)) delete this.estado.contadores[k];
+  }
+
+  private limpiarDatosDe(uid: string): ResultadoLimpieza {
+    const r: ResultadoLimpieza = { emisoresEliminados: 0, emisoresCompartidos: 0 };
+    for (const e of Object.values(this.estado.emisores).filter((x) => x.miembros?.includes(uid))) {
+      if (e.miembros!.every((m) => m === uid)) {
+        this.eliminarEmisor(e.id);
+        r.emisoresEliminados++;
+      } else {
+        e.miembros = e.miembros!.filter((m) => m !== uid);
+        if (e.propietarioUid === uid) e.propietarioUid = e.miembros[0];
+        this.bitacora(e.id, { accion: 'miembro-retirado', detalle: `Se retiró al usuario ${uid} al limpiar sus datos.` });
+        r.emisoresCompartidos++;
+      }
+    }
+    this.guardar();
+    return r;
+  }
+
+  async perfil() {
+    this.exigirSesion();
+    return { administrador: true };
+  }
+
+  async limpiarMisDatos() {
+    return this.limpiarDatosDe(this.exigirSesion().uid);
+  }
+
+  async usuarios(): Promise<UsuarioResumen[]> {
+    this.exigirSesion();
+    const emisores = Object.values(this.estado.emisores);
+    return Object.values(this.estado.usuarios)
+      .map((u) => ({ uid: u.uid, email: u.email, emisores: emisores.filter((e) => e.miembros?.includes(u.uid)).length }))
+      .sort((a, b) => a.email.localeCompare(b.email));
+  }
+
+  async limpiarUsuario(uid: string) {
+    this.exigirSesion();
+    return this.limpiarDatosDe(uid);
+  }
+
+  async limpiarTodo(confirmacion: string) {
+    this.exigirSesion();
+    if (confirmacion !== FRASE_LIMPIAR_TODO) throw new Error(`Escriba «${FRASE_LIMPIAR_TODO}» para confirmar.`);
+    const eliminados = Object.keys(this.estado.emisores).length;
+    // Se conservan solo las cuentas y la sesión; el resto (incluidos restos huérfanos) se vacía.
+    this.estado = { ...vacio(), usuarios: this.estado.usuarios, sesion: this.estado.sesion };
+    this.guardar();
+    return { emisoresEliminados: eliminados, emisoresCompartidos: 0 };
   }
 }

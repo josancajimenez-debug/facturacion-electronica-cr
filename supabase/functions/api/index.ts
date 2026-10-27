@@ -3,7 +3,7 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.118.0';
 import codigosCabys from '../_shared/cabys-codigos.json' with { type: 'json' };
 import { fechaEmisionCR, resumenDocumento, type Comprobante, type Emisor, type Producto, type Receptor } from '@fe-cr/core';
-import { ejecutar, type ComprobanteGuardado, type Recibido, type Repo } from './logica.ts';
+import { ejecutar, type ComprobanteGuardado, type EmisorMiembros, type Recibido, type Repo } from './logica.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -76,8 +76,38 @@ function crearRepo(db: SupabaseClient): Repo {
     async bitacora(emisorId, e) {
       ok(await db.from('bitacora').insert({ emisor_id: emisorId, fecha: fechaEmisionCR(), ...e }));
     },
+    async emisores(uid) {
+      // PostgREST devuelve como máximo 1000 filas por consulta: se pagina.
+      const filas: EmisorMiembros[] = [];
+      for (let desde = 0; ; desde += PAGINA) {
+        let q = db.from('emisores').select('id, miembros, propietario').order('creado_en').range(desde, desde + PAGINA - 1);
+        if (uid) q = q.contains('miembros', [uid]);
+        const pagina = ok(await q) as EmisorMiembros[];
+        filas.push(...pagina);
+        if (pagina.length < PAGINA) return filas;
+      }
+    },
+    async eliminarEmisor(id) {
+      ok(await db.from('emisores').delete().eq('id', id));
+    },
+    async retirarMiembro(id, uid) {
+      const e = ok(await db.from('emisores').select('miembros, propietario').eq('id', id).single());
+      const miembros = (e.miembros as string[]).filter((m) => m !== uid);
+      ok(await db.from('emisores').update({ miembros, propietario: e.propietario === uid ? miembros[0] : e.propietario }).eq('id', id));
+    },
+    async usuarios() {
+      const lista: { id: string; email: string }[] = [];
+      for (let page = 1; ; page++) {
+        const { data, error } = await db.auth.admin.listUsers({ page, perPage: PAGINA });
+        if (error) throw new Error(error.message);
+        lista.push(...data.users.map((x) => ({ id: x.id, email: x.email ?? '' })));
+        if (data.users.length < PAGINA) return lista;
+      }
+    },
   };
 }
+
+const PAGINA = 1000;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
@@ -95,6 +125,7 @@ Deno.serve(async (req) => {
   const r = await ejecutar(String(accion ?? ''), datos, { id: auth.user.id, email: auth.user.email }, crearRepo(servicio), {
     pausaMs: Number(Deno.env.get('SIMULADOR_PAUSA_MS') ?? 1500),
     cabysValido: (c) => cabys.has(c),
+    administradores: (Deno.env.get('ADMIN_EMAILS') ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean),
     // @ts-ignore EdgeRuntime existe en el entorno de Supabase.
     enSegundoPlano: (p) => (typeof EdgeRuntime !== 'undefined' ? EdgeRuntime.waitUntil(p) : p.catch(console.error)),
   });

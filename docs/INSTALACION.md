@@ -86,4 +86,5 @@ El flujo `.github/workflows/pages.yml` compila y publica la web en cada *push* a
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | web / variables de Actions | Conexión pública al proyecto |
 | `VITE_BASE` | flujo de Pages | Ruta base del sitio (`/<repositorio>/`) |
 | `SIMULADOR_PAUSA_MS` | secreto de la función Edge (opcional) | Pausa entre estados simulados (1500 ms por defecto) |
+| `ADMIN_EMAILS` | variable de Actions → secreto de la función Edge (opcional) | Correos separados por coma que pueden limpiar los datos de otro usuario o de todos (Configuración › Limpieza de datos). Sin ella, cada usuario solo limpia lo suyo |
 | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF` | Actions | Despliegue automatizado |

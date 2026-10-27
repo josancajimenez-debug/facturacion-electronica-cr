@@ -83,7 +83,10 @@ Quince casos listos para ejecutar con un clic, con el resultado esperado y la fu
 
 - **Código QR** en el PDF: desactivado por defecto porque el Transitorio III de la RES-0027 lo suspende.
 - **Feriados**: agréguelos para que el plazo de confirmación excluya esos días.
-- **Borrar datos locales** (solo en modo local).
+- **Limpieza de datos**: borra emisores, receptores, productos, comprobantes, recibidos y bitácora de práctica. Las cuentas de acceso se conservan, de modo que se puede volver a cargar los datos ficticios. No se puede deshacer.
+  - **Limpiar mis datos**: disponible para todos; borra solo lo del usuario que tiene la sesión. Un emisor compartido con otros usuarios se conserva para ellos y solo se le retira a quien limpia.
+  - **Limpiar datos de este usuario** y **Limpiar todo**: solo para el administrador (los correos de la variable `ADMIN_EMAILS`, que el servidor verifica). «Limpiar todo» exige escribir «LIMPIAR TODO». En modo local, cualquier usuario del navegador tiene estas opciones.
+- **Borrar datos y cuentas locales** (solo en modo local): además de los datos, elimina las cuentas creadas en ese navegador.
 
 ## Preguntas frecuentes
 

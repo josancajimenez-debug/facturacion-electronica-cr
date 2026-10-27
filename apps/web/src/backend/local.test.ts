@@ -112,6 +112,38 @@ describe('LocalBackend', () => {
   });
 });
 
+describe('LocalBackend: limpieza de datos', () => {
+  beforeEach(() => borrarDatosLocales());
+
+  it('cada usuario limpia lo suyo y conserva su cuenta; los demás no cambian', async () => {
+    const b = new LocalBackend();
+    await b.registrar('a@demo.test', 'secreto123');
+    await b.sembrarDemo();
+    await b.registrar('b@demo.test', 'secreto123');
+    await b.sembrarDemo();
+    expect(await b.limpiarMisDatos()).toEqual({ emisoresEliminados: 1, emisoresCompartidos: 0 });
+    expect(await ultimo<Emisor[]>((cb) => b.onEmisores(cb))).toHaveLength(0);
+    expect((await b.usuarios()).map((u) => [u.email, u.emisores])).toEqual([['a@demo.test', 1], ['b@demo.test', 0]]);
+    await b.salir();
+    await b.ingresar('b@demo.test', 'secreto123');
+  });
+
+  it('limpia los datos de otro usuario y, con la frase, los de todos', async () => {
+    const b = new LocalBackend();
+    await b.registrar('a@demo.test', 'secreto123');
+    const emisorA = await b.sembrarDemo();
+    await b.registrar('b@demo.test', 'secreto123');
+    await b.sembrarDemo();
+    const a = (await b.usuarios()).find((u) => u.email === 'a@demo.test')!;
+    expect(await b.limpiarUsuario(a.uid)).toEqual({ emisoresEliminados: 1, emisoresCompartidos: 0 });
+    expect(await ultimo((cb) => b.onReceptores(emisorA, cb))).toEqual([]);
+    await expect(b.limpiarTodo('limpiar')).rejects.toThrow('LIMPIAR TODO');
+    expect(await b.limpiarTodo('LIMPIAR TODO')).toEqual({ emisoresEliminados: 1, emisoresCompartidos: 0 });
+    expect((await b.usuarios()).every((u) => u.emisores === 0)).toBe(true);
+    expect(await b.perfil()).toEqual({ administrador: true });
+  });
+});
+
 describe('formato CSV', () => {
   it('usa ; como separador, escapa comillas e incluye BOM', () => {
     expect(csv([['a', 'b;c', 'd"e']])).toBe('﻿a;"b;c";"d""e"');

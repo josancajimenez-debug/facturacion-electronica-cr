@@ -6,7 +6,7 @@
 import type { BorradorComprobante, Comprobante, Emisor, Producto, Receptor, Validacion } from '@fe-cr/core';
 import { createClient, type RealtimeChannel } from '@supabase/supabase-js';
 import { config } from '../config';
-import { ErrorConValidaciones, LIMITE_BITACORA, consultarTipoCambio, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type TipoCambio, type Usuario } from './tipos';
+import { ErrorConValidaciones, LIMITE_BITACORA, consultarTipoCambio, type Backend, type DatosConfirmacion, type EntradaBitacora, type Recibido, type ResultadoLimpieza, type TipoCambio, type Usuario, type UsuarioResumen } from './tipos';
 
 const limpiar = <T>(o: T): T => JSON.parse(JSON.stringify(o)) as T;
 
@@ -219,6 +219,34 @@ export class SupabaseBackend implements Backend {
     const r = await this.api<{ clave: string }>('registrarRecibidoXml', { emisorId, xml });
     await this.refrescar('recibidos');
     return r;
+  }
+
+  // ---------------- Limpieza de datos ----------------
+  perfil() {
+    return this.api<{ administrador: boolean }>('perfil', {});
+  }
+
+  /** Tras limpiar se refrescan los emisores: si no queda ninguno, la app vuelve a la bienvenida. */
+  private async limpiar(accion: string, cuerpo: Record<string, unknown>) {
+    const r = await this.api<ResultadoLimpieza>(accion, cuerpo);
+    await this.refrescar('emisores');
+    return r;
+  }
+
+  limpiarMisDatos() {
+    return this.limpiar('limpiarMisDatos', {});
+  }
+
+  async usuarios() {
+    return (await this.api<{ usuarios: UsuarioResumen[] }>('listarUsuarios', {})).usuarios;
+  }
+
+  limpiarUsuario(uid: string) {
+    return this.limpiar('limpiarUsuario', { uid });
+  }
+
+  limpiarTodo(confirmacion: string) {
+    return this.limpiar('limpiarTodo', { confirmacion });
   }
 
   async confirmar(emisorId: string, d: DatosConfirmacion) {

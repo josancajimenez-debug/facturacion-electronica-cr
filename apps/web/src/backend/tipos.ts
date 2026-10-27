@@ -50,6 +50,21 @@ export interface TipoCambio {
   fuente: string;
 }
 
+/** Resultado de limpiar datos: emisores borrados y emisores compartidos de los que solo se retiró al usuario. */
+export interface ResultadoLimpieza {
+  emisoresEliminados: number;
+  emisoresCompartidos: number;
+}
+
+export interface UsuarioResumen {
+  uid: string;
+  email: string;
+  emisores: number;
+}
+
+/** Misma frase que exige la función Edge (supabase/functions/api/logica.ts) para limpiar todo. */
+export const FRASE_LIMPIAR_TODO = 'LIMPIAR TODO';
+
 /** Filas de bitácora que trae el backend Supabase (las más recientes). */
 export const LIMITE_BITACORA = 500;
 
@@ -105,4 +120,14 @@ export interface Backend {
 
   onBitacora(emisorId: string, cb: (b: EntradaBitacora[]) => void): Desuscribir;
   tipoCambio(): Promise<TipoCambio>;
+
+  // Limpieza de datos de práctica: nunca elimina las cuentas de acceso.
+  perfil(): Promise<{ administrador: boolean }>;
+  limpiarMisDatos(): Promise<ResultadoLimpieza>;
+  /** Solo administrador. */
+  usuarios(): Promise<UsuarioResumen[]>;
+  /** Solo administrador. */
+  limpiarUsuario(uid: string): Promise<ResultadoLimpieza>;
+  /** Solo administrador; `confirmacion` debe ser FRASE_LIMPIAR_TODO. */
+  limpiarTodo(confirmacion: string): Promise<ResultadoLimpieza>;
 }

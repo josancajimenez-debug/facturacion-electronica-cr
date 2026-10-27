@@ -56,7 +56,27 @@ const repo: Repo = {
   async bitacora(e, b) {
     await como(null, 'insert into bitacora (emisor_id, fecha, accion, clave, consecutivo, documento, detalle, usuario) values ($1, ahora_cr(), $2, $3, $4, $5, $6, $7)', [e, b.accion, b.clave, b.consecutivo, b.documento, b.detalle, b.usuario]);
   },
+  async emisores(uid) {
+    return uid
+      ? como(null, 'select id, miembros, propietario from emisores where $1::uuid = any (miembros) order by creado_en', [uid])
+      : como(null, 'select id, miembros, propietario from emisores order by creado_en');
+  },
+  async eliminarEmisor(id) {
+    await como(null, 'delete from emisores where id = $1', [id]);
+  },
+  async retirarMiembro(id, uid) {
+    await como(null, 'update emisores set miembros = array_remove(miembros, $2::uuid), propietario = case when propietario = $2::uuid then (array_remove(miembros, $2::uuid))[1] else propietario end where id = $1', [id, uid]);
+  },
+  async usuarios() {
+    return CUENTAS;
+  },
 };
+
+/** Cuentas de Supabase Auth simuladas; limpiar datos nunca las elimina. */
+const CUENTAS = [
+  { id: ANA, email: 'ana@demo.test' },
+  { id: BETO, email: 'beto@demo.test' },
+];
 
 const ana = { id: ANA, email: 'ana@demo.test' };
 let emisorId = '';
@@ -144,5 +164,65 @@ describe('función Edge api', () => {
     const acciones = (await como<{ accion: string }>(ANA, 'select accion from bitacora')).map((b) => b.accion);
     expect(acciones).toEqual(expect.arrayContaining(['datos-demo', 'emision', 'respuesta-aceptado', 'respuesta-rechazado', 'recepcion', 'confirmacion-CCE']));
     expect(await como(BETO, 'select * from bitacora')).toHaveLength(0);
+  });
+});
+
+describe('limpieza de datos', () => {
+  const beto = { id: BETO, email: 'beto@demo.test' };
+  const admin = { id: '00000000-0000-0000-0000-0000000000ad', email: 'Admin@Demo.test' };
+  const conAdmin: Opciones = { ...op, administradores: ['admin@demo.test'] };
+  const cuenta = async (tabla: string) => Number((await como<{ n: string }>(null, `select count(*) as n from ${tabla}`))[0].n);
+
+  it('solo el correo configurado es administrador, sin distinguir mayúsculas', async () => {
+    expect((await ejecutar('perfil', {}, admin, repo, conAdmin)).cuerpo.administrador).toBe(true);
+    expect((await ejecutar('perfil', {}, beto, repo, conAdmin)).cuerpo.administrador).toBe(false);
+    expect((await ejecutar('perfil', {}, admin, repo, op)).cuerpo.administrador).toBe(false);
+  });
+
+  it('las acciones de administrador se niegan a los demás usuarios', async () => {
+    for (const accion of ['listarUsuarios', 'limpiarUsuario', 'limpiarTodo']) {
+      const r = await ejecutar(accion, { uid: ANA, confirmacion: 'LIMPIAR TODO' }, beto, repo, conAdmin);
+      expect(r.status, accion).toBe(403);
+    }
+    expect(await cuenta('emisores')).toBeGreaterThan(0);
+  });
+
+  it('cada usuario limpia solo lo suyo: los datos de otro usuario no cambian', async () => {
+    await ejecutar('sembrarDemo', {}, beto, repo, op);
+    const antesAna = await como(ANA, 'select clave from comprobantes');
+    expect(antesAna.length).toBeGreaterThan(0);
+    const r = await ejecutar('limpiarMisDatos', {}, beto, repo, op);
+    expect(r.cuerpo).toEqual({ emisoresEliminados: 1, emisoresCompartidos: 0 });
+    expect(await como(BETO, 'select id from emisores')).toHaveLength(0);
+    expect(await como(ANA, 'select clave from comprobantes')).toEqual(antesAna);
+  });
+
+  it('en un emisor compartido solo retira al usuario y deja constancia en la bitácora', async () => {
+    const [{ id }] = await como<{ id: string }>(null, 'insert into emisores (propietario, miembros, datos) values ($1, array[$1, $2]::uuid[], $3) returning id', [BETO, ANA, { nombre: 'Emisor compartido', identificacion: { tipo: '02', numero: '3109999009' } }]);
+    const r = await ejecutar('limpiarMisDatos', {}, beto, repo, op);
+    expect(r.cuerpo.emisoresCompartidos).toBe(1);
+    const [e] = await como<{ miembros: string[]; propietario: string }>(null, 'select miembros, propietario from emisores where id = $1', [id]);
+    expect(e).toEqual({ miembros: [ANA], propietario: ANA });
+    expect((await como<{ accion: string }>(ANA, 'select accion from bitacora where emisor_id = $1', [id])).map((b) => b.accion)).toContain('miembro-retirado');
+  });
+
+  it('el administrador lista las cuentas con sus emisores y limpia las de un usuario', async () => {
+    const lista = (await ejecutar('listarUsuarios', {}, admin, repo, conAdmin)).cuerpo.usuarios as { uid: string; emisores: number }[];
+    expect(lista.find((x) => x.uid === ANA)?.emisores).toBe(2);
+    expect((await ejecutar('limpiarUsuario', { uid: 'no-es-uuid' }, admin, repo, conAdmin)).status).toBe(400);
+    const r = await ejecutar('limpiarUsuario', { uid: ANA }, admin, repo, conAdmin);
+    expect(r.cuerpo).toEqual({ emisoresEliminados: 2, emisoresCompartidos: 0 });
+    for (const tabla of ['emisores', 'receptores', 'productos', 'comprobantes', 'recibidos', 'bitacora', 'contadores']) expect(await cuenta(tabla), tabla).toBe(0);
+  });
+
+  it('limpiar todo exige la frase y borra los datos de todos, sin tocar las cuentas', async () => {
+    await ejecutar('sembrarDemo', {}, ana, repo, op);
+    await ejecutar('sembrarDemo', {}, beto, repo, op);
+    expect((await ejecutar('limpiarTodo', { confirmacion: 'limpiar' }, admin, repo, conAdmin)).status).toBe(400);
+    const r = await ejecutar('limpiarTodo', { confirmacion: 'LIMPIAR TODO' }, admin, repo, conAdmin);
+    expect(r.cuerpo.emisoresEliminados).toBe(2);
+    expect(await cuenta('emisores')).toBe(0);
+    expect(await cuenta('bitacora')).toBe(0);
+    expect(await repo.usuarios()).toHaveLength(2);
   });
 });

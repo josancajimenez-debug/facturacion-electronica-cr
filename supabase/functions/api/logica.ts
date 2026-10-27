@@ -61,6 +61,20 @@ export interface Repo {
   confirmarRecibido(emisorId: string, r: Recibido): Promise<boolean>;
   crearEmisor(uid: string, e: Emisor, receptores: Receptor[], productos: Producto[]): Promise<string>;
   bitacora(emisorId: string, e: EntradaBitacora): Promise<void>;
+  /** Emisores de los que el usuario es miembro, o todos si uid es null. */
+  emisores(uid: string | null): Promise<EmisorMiembros[]>;
+  /** Elimina el emisor y, en cascada, sus receptores, productos, comprobantes, recibidos, contadores y bitácora. */
+  eliminarEmisor(id: string): Promise<void>;
+  /** Quita al usuario de un emisor compartido; si era el propietario, pasa a serlo el siguiente miembro. */
+  retirarMiembro(id: string, uid: string): Promise<void>;
+  /** Cuentas registradas (Supabase Auth). */
+  usuarios(): Promise<{ id: string; email: string }[]>;
+}
+
+export interface EmisorMiembros {
+  id: string;
+  miembros: string[];
+  propietario: string;
 }
 
 export interface Usuario {
@@ -73,6 +87,16 @@ export interface Opciones {
   cabysValido?: (codigo: string) => boolean;
   /** Mantiene viva una tarea después de responder (EdgeRuntime.waitUntil en Supabase). */
   enSegundoPlano: (p: Promise<unknown>) => void;
+  /** Correos con permiso de administrador (secreto ADMIN_EMAILS), en minúsculas. */
+  administradores?: string[];
+}
+
+/** Frase que el administrador debe escribir para limpiar los datos de todos los usuarios. */
+export const FRASE_LIMPIAR_TODO = 'LIMPIAR TODO';
+
+export interface ResultadoLimpieza {
+  emisoresEliminados: number;
+  emisoresCompartidos: number;
 }
 
 export interface Respuesta {
@@ -246,6 +270,37 @@ async function confirmar(repo: Repo, d: Record<string, unknown>, u: Usuario): Pr
   return { status: 200, cuerpo: { consecutivo: conf.consecutivo } };
 }
 
+const esAdministrador = (u: Usuario, op: Opciones) => !!u.email && (op.administradores ?? []).includes(u.email.toLowerCase());
+
+function exigirAdministrador(u: Usuario, op: Opciones) {
+  if (!esAdministrador(u, op)) throw new ErrorApi(403, 'Solo el administrador puede hacer esta operación.');
+}
+
+/**
+ * Borra los datos de práctica de un usuario sin tocar su cuenta: elimina los emisores en los que es el
+ * único miembro y lo retira de los compartidos, que conservan sus datos para los demás miembros.
+ */
+async function limpiarDatosDe(repo: Repo, uid: string, quien: string): Promise<ResultadoLimpieza> {
+  const r: ResultadoLimpieza = { emisoresEliminados: 0, emisoresCompartidos: 0 };
+  for (const e of await repo.emisores(uid)) {
+    if (e.miembros.every((m) => m === uid)) {
+      await repo.eliminarEmisor(e.id);
+      r.emisoresEliminados++;
+    } else {
+      await repo.retirarMiembro(e.id, uid);
+      await repo.bitacora(e.id, { accion: 'miembro-retirado', detalle: `Se retiró al usuario ${uid} al limpiar sus datos.`, usuario: quien });
+      r.emisoresCompartidos++;
+    }
+  }
+  return r;
+}
+
+async function listarUsuarios(repo: Repo) {
+  const emisores = await repo.emisores(null);
+  const usuarios = (await repo.usuarios()).map((x) => ({ uid: x.id, email: x.email, emisores: emisores.filter((e) => e.miembros.includes(x.id)).length }));
+  return usuarios.sort((a, b) => a.email.localeCompare(b.email));
+}
+
 /** Punto de entrada: despacha la acción solicitada y convierte errores en respuestas HTTP. */
 export async function ejecutar(accion: string, datos: Record<string, unknown>, u: Usuario, repo: Repo, op: Opciones): Promise<Respuesta> {
   try {
@@ -266,6 +321,25 @@ export async function ejecutar(accion: string, datos: Record<string, unknown>, u
       }
       case 'confirmar':
         return await confirmar(repo, datos, u);
+      case 'perfil':
+        return { status: 200, cuerpo: { administrador: esAdministrador(u, op) } };
+      case 'limpiarMisDatos':
+        return { status: 200, cuerpo: { ...(await limpiarDatosDe(repo, u.id, u.email ?? u.id)) } };
+      case 'listarUsuarios':
+        exigirAdministrador(u, op);
+        return { status: 200, cuerpo: { usuarios: await listarUsuarios(repo) } };
+      case 'limpiarUsuario': {
+        exigirAdministrador(u, op);
+        if (typeof datos.uid !== 'string' || !/^[0-9a-f-]{36}$/i.test(datos.uid)) throw new ErrorApi(400, 'uid inválido.');
+        return { status: 200, cuerpo: { ...(await limpiarDatosDe(repo, datos.uid, u.email ?? u.id)) } };
+      }
+      case 'limpiarTodo': {
+        exigirAdministrador(u, op);
+        if (datos.confirmacion !== FRASE_LIMPIAR_TODO) throw new ErrorApi(400, `Escriba «${FRASE_LIMPIAR_TODO}» para confirmar.`);
+        const emisores = await repo.emisores(null);
+        for (const e of emisores) await repo.eliminarEmisor(e.id);
+        return { status: 200, cuerpo: { emisoresEliminados: emisores.length, emisoresCompartidos: 0 } };
+      }
       default:
         return { status: 400, cuerpo: { error: `Acción desconocida: ${accion}` } };
     }

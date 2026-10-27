@@ -1,9 +1,114 @@
 import { URLS_HACIENDA, motivosBloqueoEnvioReal } from '@fe-cr/core';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { borrarDatosLocales } from '../backend/local';
-import { Alerta, Texto } from '../components/ui';
+import { FRASE_LIMPIAR_TODO, type ResultadoLimpieza, type UsuarioResumen } from '../backend/tipos';
+import { Alerta, Campo, Texto } from '../components/ui';
 import { config } from '../config';
 import { useApp } from '../estado';
+
+const resumenLimpieza = (r: ResultadoLimpieza) =>
+  `${r.emisoresEliminados} emisor(es) eliminado(s)${r.emisoresCompartidos ? `; se retiró al usuario de ${r.emisoresCompartidos} emisor(es) compartido(s)` : ''}. Las cuentas se conservan.`;
+
+/**
+ * Borra datos de práctica sin eliminar cuentas. Cualquier usuario limpia lo suyo; limpiar los datos de
+ * otro usuario o de todos solo se muestra si el servidor confirma que la cuenta es de administrador.
+ */
+function Limpieza() {
+  const { backend, usuario, avisar } = useApp();
+  const [admin, setAdmin] = useState(false);
+  const [usuarios, setUsuarios] = useState<UsuarioResumen[]>([]);
+  const [elegido, setElegido] = useState('');
+  const [frase, setFrase] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+
+  const cargarUsuarios = useCallback(async () => {
+    try {
+      setUsuarios(await backend.usuarios());
+    } catch (e) {
+      avisar((e as Error).message, 'err');
+    }
+  }, [backend, avisar]);
+
+  useEffect(() => {
+    let vivo = true;
+    backend.perfil().then(
+      (p) => {
+        if (!vivo) return;
+        setAdmin(p.administrador);
+        if (p.administrador) void cargarUsuarios();
+      },
+      () => vivo && setAdmin(false),
+    );
+    return () => {
+      vivo = false;
+    };
+  }, [backend, cargarUsuarios]);
+
+  const limpiar = async (pregunta: string, accion: () => Promise<ResultadoLimpieza>) => {
+    if (!confirm(pregunta)) return;
+    setOcupado(true);
+    try {
+      avisar(`Listo: ${resumenLimpieza(await accion())}`, 'ok');
+      setFrase('');
+      if (admin) await cargarUsuarios();
+    } catch (e) {
+      avisar((e as Error).message, 'err');
+    } finally {
+      setOcupado(false);
+    }
+  };
+
+  const persona = usuarios.find((u) => u.uid === elegido);
+  return (
+    <div className="card">
+      <div className="card-head"><h2>Limpieza de datos</h2>{admin && <span className="badge info">Administrador</span>}</div>
+      <div className="card-body stack">
+        <p className="small muted" style={{ margin: 0 }}>
+          Borra emisores, receptores, productos, comprobantes, recibidos y bitácora de práctica. Las cuentas de acceso se conservan: después puede volver a cargar los datos ficticios. No se puede deshacer.
+        </p>
+        <div className="stack">
+          <strong>Mis datos</strong>
+          <span className="small muted">Solo los datos de {usuario?.email}. Si comparte un emisor con otros usuarios, ese emisor se conserva para ellos y solo se le retira a usted.</span>
+          <div>
+            <button className="btn btn-danger" disabled={ocupado} onClick={() => limpiar(`¿Borrar todos sus datos de práctica (${usuario?.email})? Su cuenta se conserva.`, () => backend.limpiarMisDatos())}>
+              Limpiar mis datos
+            </button>
+          </div>
+        </div>
+        {admin && (
+          <>
+            <div className="stack">
+              <strong>Datos de un usuario</strong>
+              <Campo etiqueta="Usuario">
+                {(id) => (
+                  <select id={id} value={elegido} onChange={(e) => setElegido(e.target.value)}>
+                    <option value="">Seleccione un usuario</option>
+                    {usuarios.map((u) => <option key={u.uid} value={u.uid}>{u.email} – {u.emisores} emisor(es)</option>)}
+                  </select>
+                )}
+              </Campo>
+              <div>
+                <button className="btn btn-danger" disabled={ocupado || !persona} onClick={() => persona && limpiar(`¿Borrar los datos de práctica de ${persona.email}? Su cuenta se conserva.`, () => backend.limpiarUsuario(persona.uid))}>
+                  Limpiar datos de este usuario
+                </button>
+              </div>
+            </div>
+            <div className="stack">
+              <strong>Todos los usuarios</strong>
+              <Texto etiqueta={`Escriba «${FRASE_LIMPIAR_TODO}» para confirmar`} valor={frase} onCambio={setFrase}
+                ayuda={`Borra los datos de práctica de las ${usuarios.length} cuenta(s) registradas. Las cuentas se conservan.`} />
+              <div>
+                <button className="btn btn-danger" disabled={ocupado || frase !== FRASE_LIMPIAR_TODO} onClick={() => limpiar('¿Borrar los datos de práctica de TODOS los usuarios? No se puede deshacer.', () => backend.limpiarTodo(frase))}>
+                  Limpiar todo
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function Configuracion() {
   const { backend, preferencias, guardarPreferencias, avisar } = useApp();
@@ -59,12 +164,13 @@ export function Configuracion() {
             </div>
           </div>
         </div>
+        <Limpieza />
         {backend.modo === 'local' && (
           <div className="card">
             <div className="card-head"><h2>Datos locales</h2></div>
             <div className="card-body stack">
-              <p className="small muted" style={{ margin: 0 }}>En modo local todo se guarda en este navegador. Borrarlos elimina usuarios, emisores y comprobantes de práctica.</p>
-              <div><button className="btn btn-danger" onClick={() => { if (confirm('¿Borrar todos los datos locales?')) { borrarDatosLocales(); location.reload(); } }}>Borrar datos locales</button></div>
+              <p className="small muted" style={{ margin: 0 }}>En modo local todo se guarda en este navegador. A diferencia de «Limpiar todo», esta opción también elimina las cuentas creadas en este navegador.</p>
+              <div><button className="btn btn-danger" onClick={() => { if (confirm('¿Borrar todos los datos locales, incluidas las cuentas?')) { borrarDatosLocales(); location.reload(); } }}>Borrar datos y cuentas locales</button></div>
             </div>
           </div>
         )}
