@@ -247,7 +247,7 @@ export function validarBorrador(
   if (b.mediosPago.some((m) => m.tipo === '06') && emisor.telefonosSinpe.length === 0) {
     adv(
       'mediosPago',
-      'Se cobra por SINPE Móvil pero el emisor no tiene números SINPE registrados. El Decreto 45953-H obliga a registrarlos en el RUT según la resolución general que se emita.',
+      'Se cobra por SINPE Móvil pero el emisor no tiene números SINPE registrados. El Decreto 45953-H obliga a registrarlos en el RUT según la resolución general que se emita. Regístrelos en «Emisor y actividades» (o marque el teléfono de contacto como SINPE Móvil).',
       'Decreto 45953-H (art. 22 inc. 3 RPT)',
     );
   }

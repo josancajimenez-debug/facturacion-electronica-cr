@@ -63,6 +63,7 @@ export function EmisorPagina() {
   });
   // Dos sucursales con el mismo código compartirían la numeración consecutiva (Nota 3).
   repetidas(form.sucursales.map((s) => s.codigo)).forEach((c) => errores.push(`El código de sucursal ${c} está repetido.`));
+  const telefonoEsSinpe = !!form.telefono && form.telefonosSinpe.includes(form.telefono.numero);
   form.telefonosSinpe.forEach((t) => !/^\d{8}$/.test(t) && errores.push(`Número SINPE ${t || '(vacío)'}: 8 dígitos.`));
   repetidas(form.telefonosSinpe).forEach((t) => errores.push(`El número SINPE ${t} está repetido.`));
 
@@ -164,7 +165,23 @@ export function EmisorPagina() {
         <div className="card-head"><h2>Ubicación y contacto</h2></div>
         <div className="card-body grid grid-3">
           <UbicacionCampos valor={form.ubicacion} onCambio={(u) => set({ ubicacion: u })} />
-          <Texto etiqueta="Teléfono" valor={form.telefono?.numero} onCambio={(v) => set({ telefono: v ? { codigoPais: '506', numero: v.replace(/\D/g, '') } : undefined })} ayuda="8 a 20 dígitos." />
+          <div className="stack" style={{ gap: 6 }}>
+            <Texto etiqueta="Teléfono" valor={form.telefono?.numero} ayuda="8 a 20 dígitos." onCambio={(v) => {
+              const numero = v.replace(/\D/g, '');
+              // Si el teléfono estaba marcado como SINPE Móvil, el número registrado se actualiza con él.
+              const anterior = form.telefono?.numero;
+              const telefonosSinpe = anterior && telefonoEsSinpe ? form.telefonosSinpe.filter((t) => t !== anterior).concat(/^\d{8}$/.test(numero) ? [numero] : []) : form.telefonosSinpe;
+              set({ telefono: numero ? { codigoPais: '506', numero } : undefined, telefonosSinpe });
+            }} />
+            {/^\d{8}$/.test(form.telefono?.numero ?? '') && (
+              <label className="check small">
+                <input type="checkbox" checked={telefonoEsSinpe} onChange={(e) => set({
+                  telefonosSinpe: e.target.checked ? [...form.telefonosSinpe.filter(Boolean), form.telefono!.numero] : form.telefonosSinpe.filter((t) => t !== form.telefono!.numero),
+                })} />
+                Este teléfono también recibe pagos por SINPE Móvil
+              </label>
+            )}
+          </div>
           {form.correos.map((c, i) => (
             <Texto key={i} etiqueta={`Correo ${i + 1}`} tipo="email" valor={c} onCambio={(v) => set({ correos: form.correos.map((x, j) => (j === i ? v : x)) })} requerido={i === 0} />
           ))}
@@ -232,6 +249,11 @@ export function EmisorPagina() {
               El Decreto 45953-H (La Gaceta, 16/10/2026) adiciona el inciso 3 al art. 22 del Reglamento de Procedimiento Tributario: los números SINPE Móvil usados
               como medio de pago en la actividad deben registrarse en el RUT, según la resolución general que emita la Administración Tributaria (plazo de 12 meses para inscritos).
             </Alerta>
+            {form.telefonosSinpe.length === 0 && (
+              <p className="small muted" style={{ margin: 0 }}>
+                Sin números registrados. Use «Número» o marque «Este teléfono también recibe pagos por SINPE Móvil» junto al teléfono de contacto.
+              </p>
+            )}
             {form.telefonosSinpe.map((t, i) => (
               <div key={i} className="row" style={{ alignItems: 'flex-end' }}>
                 <div style={{ flex: 1 }}><Texto etiqueta={`Número ${i + 1}`} valor={t} onCambio={(v) => set({ telefonosSinpe: form.telefonosSinpe.map((x, j) => (j === i ? v.replace(/\D/g, '').slice(0, 8) : x)) })} /></div>
