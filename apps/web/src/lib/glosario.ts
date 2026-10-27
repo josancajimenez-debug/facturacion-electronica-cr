@@ -351,6 +351,9 @@ export const REFERENCIAS: Referencia[] = [
   { texto: 'Dirección General de Tributación. (2025a, 3 de febrero). *Modificación al Transitorio I de la resolución MH-DGT-RES-0027-2024* (Resolución MH-DGT-RES-0001-2025). *La Gaceta*, Alcance 20, N.° 29 (13 de febrero de 2025).' },
   { texto: 'Dirección General de Tributación. (2025b, 27 de agosto). *Modificaciones a las resoluciones generales que implementan las distintas funcionalidades y formularios dentro del Sistema Integrado de Gestión Tributaria denominado «TRIBU-CR»* (Resolución MH-DGT-RES-0043-2025). *La Gaceta*, Alcance 114, N.° 166.' },
   { texto: 'Dirección General de Tributación. (2026). *Actualización de los Anexos y Estructuras versión 4.4 y validación de comprobantes electrónicos* [Comunicado]. Ministerio de Hacienda.' },
+  { texto: 'Dirección General de Tributación. (s. f.-a). *Código de forma farmacéutica* [Tabla, nota 19 de Anexos y Estructuras v4.4]. Ministerio de Hacienda. Oficina Virtual de TRIBU-CR.' },
+  { texto: 'Dirección General de Tributación. (s. f.-b). *Codigodemoneda_V4.4* [Tabla, nota 13.1 de Anexos y Estructuras v4.4]. Ministerio de Hacienda. Oficina Virtual de TRIBU-CR.' },
+  { texto: 'Instituto Geográfico Nacional y Registro Nacional. (2022). *Tabla por provincias, cantones y distritos de Costa Rica: División territorial administrativa 2022* (v3) [Tabla].' },
   { texto: 'Poder Ejecutivo de la República de Costa Rica. (2024, 2 de octubre). *Reglamento de comprobantes electrónicos para efectos tributarios* (Decreto Ejecutivo N.° 44739-H).' },
   { texto: 'Poder Ejecutivo de la República de Costa Rica. (2026, 29 de setiembre). *Adición al artículo 22 del Reglamento del Procedimiento Tributario, Decreto Ejecutivo N.° 38277-H del 07 de marzo de 2014* (Decreto Ejecutivo N.° 45953-H). *La Gaceta*, Alcance 139, N.° 196.' },
 ];

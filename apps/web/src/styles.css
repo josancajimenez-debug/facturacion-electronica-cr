@@ -296,6 +296,9 @@ tr.clickable { cursor: pointer; }
   .grid > * { grid-column: auto !important; }
   h1 { font-size: 19px; }
 }
+details.catalogo { border-top: 1px solid var(--border); }
+details.catalogo > summary { padding: 12px 16px; cursor: pointer; }
+details.catalogo > summary::marker { color: var(--text-3); }
 /* Tablas de lectura (Glosario): en pantallas angostas cada fila se apila en lugar de desplazarse de lado. */
 @media (max-width: 640px) {
   table.apilada thead { display: none; }

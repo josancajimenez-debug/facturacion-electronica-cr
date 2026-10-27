@@ -75,7 +75,9 @@ Quince casos listos para ejecutar con un clic, con el resultado esperado y la fu
 ## 9. Matriz normativa y glosario
 
 - **Matriz normativa**: normas vigentes, su estado en SINALEVI y dónde se aplican en la herramienta.
-- **Glosario**: 55 términos y 24 siglas definidos según la normativa, con su fuente en formato APA 7 y la lista de referencias. El buscador filtra por término, sigla o cualquier palabra de la definición, sin distinguir tildes ni mayúsculas.
+- **Glosario**, con dos pestañas y la lista de referencias APA 7 al final. El buscador de cada pestaña no distingue tildes ni mayúsculas.
+  - **Términos y siglas**: 55 términos y 24 siglas definidos según la normativa, cada uno con su fuente.
+  - **Códigos por paso del proceso**: los 21 catálogos del Anexo (679 códigos) que usa el simulador, agrupados en cinco pasos: identificar el comprobante, pactar la venta, describir cada línea, referenciar o corregir, y confirmar lo recibido. Cada catálogo explica para qué sirve y cada código muestra su significado y sus restricciones de uso (por ejemplo, «Solo en Recibo Electrónico de Pago»). Monedas, unidades de medida y formas farmacéuticas empiezan plegadas.
 
 ## 10. Configuración
 
