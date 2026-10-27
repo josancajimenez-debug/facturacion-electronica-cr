@@ -1,8 +1,8 @@
-import type { Comprobante, Emisor } from '@fe-cr/core';
+import { balanceComprobacion, estadosFinancieros, generarLibroDiario, type Comprobante, type Emisor, type Producto } from '@fe-cr/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { csv } from '../lib/formato';
 import { LocalBackend, borrarDatosLocales } from './local';
-import { ErrorConValidaciones } from './tipos';
+import { ErrorConValidaciones, type Recibido } from './tipos';
 
 // En jsdom no hay servidor para /data/cabys-2025.json; el simulador omite esa verificación.
 vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 404 })));
@@ -172,4 +172,53 @@ describe('formato CSV', () => {
   it('usa ; como separador, escapa comillas e incluye BOM', () => {
     expect(csv([['a', 'b;c', 'd"e']])).toBe('﻿a;"b;c";"d""e"');
   });
+});
+
+describe('Contabilidad con los datos de práctica', () => {
+  beforeEach(() => borrarDatosLocales());
+
+  it('compra recibida y venta emitida generan asientos, kárdex y estados que cuadran', async () => {
+    const b = new LocalBackend();
+    await b.registrar('conta@demo.test', 'secreto123');
+    const emisorId = await b.sembrarDemo();
+    const [emisor] = await ultimo<Emisor[]>((cb) => b.onEmisores(cb));
+    const productos = await ultimo<Producto[]>((cb) => b.onProductos(emisorId, cb));
+
+    const { clave: claveCompra } = await b.simularRecepcion(emisorId);
+    await b.confirmar(emisorId, { clave: claveCompra, mensaje: '1', condicionImpuesto: '01', codigoActividad: '6920.0' });
+    const { clave } = await b.emitir(emisorId, {
+      tipo: 'FE', emisorId, sucursal: '001', terminal: '00001', situacion: '1', codigoActividadEmisor: '6920.0',
+      contraparte: { nombre: 'Distribuidora Ficticia del Valle S.A.', identificacion: { tipo: '02', numero: '3109999002' } },
+      condicionVenta: '01', moneda: 'CRC', tipoCambio: 1, otrosCargos: [], referencias: [], mediosPago: [{ tipo: '06' }],
+      lineas: [{ codigoCabys: '2391102010200', detalle: 'Café tostado molido 1 kg', cantidad: 2, unidadMedida: 'Kg', precioUnitario: 6500, descuentos: [], codigoTarifaIva: '02' }],
+    });
+    await esperarEstado(b, emisorId, clave);
+    const comprobantes = await ultimo<Comprobante[]>((cb) => b.onComprobantes(emisorId, cb));
+    const recibidos = await ultimo<Recibido[]>((cb) => b.onRecibidos(emisorId, cb));
+
+    const libro = generarLibroDiario({
+      emisor,
+      emitidos: comprobantes,
+      recibidos: recibidos.map((r) => ({ recibido: r, estado: r.estado, xmlConfirmacion: r.confirmacion?.xml })),
+      cabysInventario: productos.map((p) => p.codigoCabys),
+      apertura: { fecha: '2026-01-01', capital: 500000 },
+    });
+    expect(libro.asientos).toHaveLength(3);
+    expect(libro.asientos.every((a) => a.cuadrado)).toBe(true);
+    const compra = libro.asientos.find((a) => a.origen.clave === claveCompra)!;
+    // 24 × 450 al 13 % + 5 × 5 200 al 1 %, a crédito (30 días).
+    expect(compra.lineas).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cuenta: '1.1.03.01', debe: 36800 }),
+      expect.objectContaining({ cuenta: '1.1.04.01', debe: 1664 }),
+      expect.objectContaining({ cuenta: '2.1.01.01', haber: 38464 }),
+    ]));
+    const venta = libro.asientos.find((a) => a.origen.clave === clave)!;
+    expect(venta.lineas).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cuenta: '1.1.01.02', debe: 13130 }),
+      expect.objectContaining({ cuenta: '5.1.01.01', debe: 10400 }),
+    ]));
+    expect(libro.kardex.existencias().find((e) => e.cabys === '2391102010200')).toMatchObject({ cantidad: 3, costo: 15600 });
+    expect(balanceComprobacion(libro.asientos).cuadra).toBe(true);
+    expect(estadosFinancieros(libro.asientos, '2026-01-01', '2026-12-31').situacion.cuadra).toBe(true);
+  }, 20000);
 });

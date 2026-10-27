@@ -12,3 +12,6 @@ export * from './entorno';
 export * from './datos-demo';
 export * from './ubicacion';
 export * from './actualizacion';
+export * from './cuentas';
+export * from './contabilidad';
+export * from './libros';

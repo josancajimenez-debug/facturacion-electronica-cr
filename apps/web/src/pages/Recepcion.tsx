@@ -1,6 +1,7 @@
 import { CONDICION_IMPUESTO, MENSAJE, limiteConfirmacionReceptor, nombresArchivo, type Validacion } from '@fe-cr/core';
 import { Download, Inbox, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ErrorConValidaciones, type DatosConfirmacion, type Recibido } from '../backend/tipos';
 import { Alerta, Estado, ListaValidaciones, Modal, Selector, Texto, Vacio, VisorXml } from '../components/ui';
 import { useApp } from '../estado';
@@ -88,6 +89,7 @@ export function Recepcion() {
                     <td className="nowrap right">
                       <button className="btn btn-sm" onClick={() => setViendo(r)}>Ver</button>{' '}
                       {r.estado === 'pendiente' && <button className="btn btn-sm btn-primary" onClick={() => setConfirmando(r)}>Confirmar</button>}
+                      {(r.estado === 'aceptado' || r.estado === 'aceptado-parcial') && <Link className="btn btn-sm" to={`/contabilidad/diario?clave=${r.clave}`}>Asiento</Link>}
                     </td>
                   </tr>
                 ))}

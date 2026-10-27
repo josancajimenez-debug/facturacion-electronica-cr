@@ -23,7 +23,7 @@ export interface ComprobanteRecibido {
 const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 
 /** Revierte el escapado XML (entidades predefinidas y referencias numéricas). */
-function desescapar(texto: string): string {
+export function desescaparXml(texto: string): string {
   return texto.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (_, e: string) =>
     e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : ENTIDADES[e.toLowerCase()],
   );
@@ -31,7 +31,7 @@ function desescapar(texto: string): string {
 
 function valorTag(xml: string, tag: string, desde = 0): string | undefined {
   const m = new RegExp(`<${tag}>([^<]*)</${tag}>`).exec(xml.slice(desde));
-  return m ? desescapar(m[1].trim()) : undefined;
+  return m ? desescaparXml(m[1].trim()) : undefined;
 }
 
 function montoTag(xml: string, tag: string): number {

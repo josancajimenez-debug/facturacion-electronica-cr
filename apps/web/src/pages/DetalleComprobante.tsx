@@ -19,8 +19,10 @@ import {
 import { ArrowLeft, Download, FileMinus, FilePlus, FileText, RefreshCcw, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { TablaAsiento } from '../components/Asiento';
 import { Alerta, Cargando, Estado, VisorXml } from '../components/ui';
 import { useApp } from '../estado';
+import { useContabilidad } from '../lib/contabilidad';
 import { descargar, dinero, fechaHora } from '../lib/formato';
 import { generarPdf } from '../lib/pdf';
 
@@ -35,7 +37,8 @@ export function DetalleComprobante() {
   const { clave } = useParams();
   const { comprobantes, comprobantesListos, preferencias, avisar } = useApp();
   const navegar = useNavigate();
-  const [pestana, setPestana] = useState<'resumen' | 'xml' | 'respuesta' | 'api' | 'pdf'>('resumen');
+  const [pestana, setPestana] = useState<'resumen' | 'asiento' | 'xml' | 'respuesta' | 'api' | 'pdf'>('resumen');
+  const { libro } = useContabilidad();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generandoPdf, setGenerandoPdf] = useState(false);
 
@@ -54,6 +57,7 @@ export function DetalleComprobante() {
     return <Alerta tipo="warn">Comprobante no encontrado. <Link to="/comprobantes">Volver</Link></Alerta>;
   }
   const partes = descomponerClave(c.clave)!;
+  const asiento = libro?.asientos.find((a) => a.origen.clave === c.clave);
   const m = c.resumen.codigoMoneda;
 
   const base = (tipo: BorradorComprobante['tipo'], extra: Partial<BorradorComprobante>): Partial<BorradorComprobante> => ({
@@ -222,9 +226,9 @@ export function DetalleComprobante() {
       <div className="split">
         <div className="card">
           <div className="tabs" role="tablist">
-            {(['resumen', 'xml', 'respuesta', 'api', 'pdf'] as const).map((p) => (
+            {(['resumen', 'asiento', 'xml', 'respuesta', 'api', 'pdf'] as const).map((p) => (
               <button key={p} role="tab" aria-selected={pestana === p} className={pestana === p ? 'on' : ''} onClick={() => (p === 'pdf' ? verPdf() : setPestana(p))}>
-                {{ resumen: 'Resumen', xml: 'XML comprobante', respuesta: 'Mensaje Hacienda', api: 'API (JSON)', pdf: 'Representación gráfica' }[p]}
+                {{ resumen: 'Resumen', asiento: 'Asiento contable', xml: 'XML comprobante', respuesta: 'Mensaje Hacienda', api: 'API (JSON)', pdf: 'Representación gráfica' }[p]}
               </button>
             ))}
           </div>
@@ -275,6 +279,14 @@ export function DetalleComprobante() {
                 )}
               </div>
             )}
+            {pestana === 'asiento' && (asiento ? (
+              <div className="stack">
+                <TablaAsiento asiento={asiento} />
+                <p className="small" style={{ margin: 0 }}>Asiento N.º {asiento.numero} en borrador · <Link to={`/contabilidad/diario?clave=${c.clave}`}>ver en el libro diario</Link></p>
+              </div>
+            ) : (
+              <Alerta>{c.estado === 'rechazado' ? 'Los comprobantes rechazados por Hacienda no se contabilizan.' : 'El asiento se genera cuando Hacienda acepta el comprobante.'}</Alerta>
+            ))}
             {pestana === 'xml' && <VisorXml xml={c.xml} />}
             {pestana === 'respuesta' && (c.respuestaHacienda ? (
               <div className="stack">

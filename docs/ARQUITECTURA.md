@@ -5,7 +5,8 @@
 ```
 ┌───────────────────── apps/web (React + Vite) — GitHub Pages ─────────────────────┐
 │ Páginas: Panel · Emitir · Comprobantes · Recepción · Emisor · Receptores ·        │
-│ Productos · Reportes · Auditoría · Escenarios · Matriz normativa · Glosario ·     │
+│ Productos · Contabilidad (catálogo, diario, mayor, inventarios y balances) ·      │
+│ Reportes · Auditoría · Escenarios · Matriz normativa · Glosario ·                 │
 │ Configuración                                                                     │
 │                    │ interfaz Backend (backend/tipos.ts)                          │
 │        ┌───────────┴──────────────┐                                               │
@@ -25,6 +26,7 @@
               packages/core (TypeScript puro, sin dependencias de infraestructura)
    catalogos · ubicacion · tipos · fechas · clave · calculos · validaciones · xml
    emision · simulador · recepcion · entorno · datos-demo
+   cuentas · contabilidad · libros (módulo contable, ver CONTABILIDAD.md)
 ```
 
 ## Decisiones

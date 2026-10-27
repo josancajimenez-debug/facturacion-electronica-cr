@@ -13,6 +13,7 @@ Aplicación educativa para practicar la emisión, recepción y validación de co
 - **Recepción** de comprobantes de proveedores y **mensajes de confirmación** 05/06/07 con plazo de 8 días hábiles.
 - **Medios de pago** de la nota 6, incluido **SINPE Móvil**.
 - Consultas con filtros, **reportes**, **auditoría** (bitácora inmutable) y **descargas** (XML, respuesta, PDF, CSV).
+- **Módulo contable** NIIF para las PYMES: catálogo de cuentas con manual, asiento automático de cada comprobante aceptado, libro diario, libro mayor, balance de comprobación, kárdex e inventarios y balances.
 - 15 **escenarios de prueba**, la **matriz normativa** y un **glosario** con citas APA 7 dentro de la app.
 
 ## Inicio rápido
@@ -29,6 +30,7 @@ Supabase (Auth, PostgreSQL con RLS, Realtime y función Edge) y publicación en 
 | Documento | Contenido |
 | --- | --- |
 | [docs/MATRIZ_NORMATIVA.md](docs/MATRIZ_NORMATIVA.md) | Normas vigentes, reformas, contradicciones y referencias APA 7 |
+| [docs/CONTABILIDAD.md](docs/CONTABILIDAD.md) | Módulo contable: reglas de los asientos, clasificación por CAByS, libros y fuentes |
 | [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Componentes, modelo de datos, separación de entornos y estructura del repositorio |
 | [docs/INSTALACION.md](docs/INSTALACION.md) | Instalación, Supabase y GitHub Pages |
 | [docs/PRUEBAS.md](docs/PRUEBAS.md) | Pruebas automatizadas y escenarios |

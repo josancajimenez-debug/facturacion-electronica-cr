@@ -10,6 +10,10 @@ const pagina = <K extends string>(cargar: () => Promise<Record<K, ComponentType>
   lazy(() => cargar().then((m) => ({ default: m[nombre] })));
 
 const Bienvenida = pagina(() => import('./pages/Bienvenida'), 'Bienvenida');
+const CatalogoCuentas = pagina(() => import('./pages/CatalogoCuentas'), 'CatalogoCuentas');
+const InventariosBalances = pagina(() => import('./pages/InventariosBalances'), 'InventariosBalances');
+const LibroDiario = pagina(() => import('./pages/LibroDiario'), 'LibroDiario');
+const LibroMayor = pagina(() => import('./pages/LibroMayor'), 'LibroMayor');
 const Bitacora = pagina(() => import('./pages/Bitacora'), 'Bitacora');
 const Comprobantes = pagina(() => import('./pages/Comprobantes'), 'Comprobantes');
 const Configuracion = pagina(() => import('./pages/Configuracion'), 'Configuracion');
@@ -56,6 +60,10 @@ export function App() {
               <Route path="/emisor" element={<EmisorPagina />} />
               <Route path="/receptores" element={<Receptores />} />
               <Route path="/productos" element={<Productos />} />
+              <Route path="/contabilidad/catalogo" element={<CatalogoCuentas />} />
+              <Route path="/contabilidad/diario" element={<LibroDiario />} />
+              <Route path="/contabilidad/mayor" element={<LibroMayor />} />
+              <Route path="/contabilidad/inventarios-balances" element={<InventariosBalances />} />
               <Route path="/reportes" element={<Reportes />} />
               <Route path="/bitacora" element={<Bitacora />} />
               <Route path="/escenarios" element={<Escenarios />} />
