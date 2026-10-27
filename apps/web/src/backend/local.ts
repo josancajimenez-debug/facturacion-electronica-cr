@@ -31,6 +31,8 @@ import { ErrorConValidaciones, FRASE_LIMPIAR_TODO, consultarTipoCambio, type Bac
 
 const CLAVE_STORAGE = 'fe-cr:local:v1';
 const PAUSA_MS = 900;
+export const ERROR_ALMACENAMIENTO =
+  'No se pudo guardar en este navegador: el espacio está lleno o el almacenamiento está bloqueado (p. ej. navegación privada). Libere espacio con Configuración › Limpieza de datos.';
 
 type ComprobanteGuardado = Comprobante & { escenarioPrueba?: string | null };
 
@@ -57,6 +59,15 @@ function cargar(): Estado {
   }
 }
 
+function almacenamientoDisponible(): boolean {
+  try {
+    localStorage.getItem(CLAVE_STORAGE);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function hash(texto: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -80,7 +91,11 @@ const INACTIVIDAD_MS = 10_000;
 
 export class LocalBackend implements Backend {
   modo = 'local' as const;
-  descripcion = 'Modo local: datos en este navegador (localStorage).';
+  /** false si el navegador bloquea localStorage: se trabaja solo en memoria durante la sesión. */
+  private almacenamiento = almacenamientoDisponible();
+  descripcion = this.almacenamiento
+    ? 'Modo local: datos en este navegador (localStorage).'
+    : 'Modo local sin almacenamiento: el navegador bloquea localStorage y los datos se perderán al cerrar la pestaña.';
   private estado = cargar();
   private oyentes = new Set<() => void>();
   private enCurso = new Set<string>();
@@ -108,13 +123,25 @@ export class LocalBackend implements Backend {
     }
   }
 
+  /**
+   * Persiste el estado y avisa a los suscriptores. Si el navegador no permite guardar (espacio lleno o
+   * modo privado), se vuelve al último estado guardado y se lanza un error: así la pantalla nunca muestra
+   * como hecho algo que se perdería al recargar.
+   */
   private guardar(): void {
+    let fallo = false;
+    if (!this.almacenamiento) {
+      this.oyentes.forEach((f) => f());
+      return;
+    }
     try {
       localStorage.setItem(CLAVE_STORAGE, JSON.stringify(this.estado));
     } catch {
-      console.warn('No se pudo guardar en localStorage (¿espacio lleno o modo privado?).');
+      fallo = true;
+      this.estado = cargar();
     }
     this.oyentes.forEach((f) => f());
+    if (fallo) throw new Error(ERROR_ALMACENAMIENTO);
   }
 
   private suscribir(f: () => void): () => void {
@@ -329,8 +356,13 @@ export class LocalBackend implements Backend {
       evento(respuesta.estado, respuesta.detalle.join(' | ') || 'Sin observaciones', { respuestaHacienda: respuesta });
     } catch (e) {
       const motivo = `Falla del simulador: ${(e as Error).message}`;
-      this.bitacora(emisorId, { accion: 'respuesta-error', clave, detalle: motivo });
-      evento('error', motivo);
+      try {
+        this.bitacora(emisorId, { accion: 'respuesta-error', clave, detalle: motivo });
+        evento('error', motivo);
+      } catch (sinEspacio) {
+        // Sin espacio para guardar: el comprobante queda en su último estado guardado y se retoma al recargar.
+        console.error(sinEspacio);
+      }
     } finally {
       this.enCurso.delete(clave);
     }

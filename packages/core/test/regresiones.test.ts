@@ -5,6 +5,7 @@ import { EMISOR_DEMO } from '../src/datos-demo';
 import { construirComprobante } from '../src/emision';
 import { validarComoHacienda } from '../src/simulador';
 import type { BorradorComprobante, Referencia } from '../src/tipos';
+import { extraerDatosComprobante, montoRecibidoEnColones } from '../src/recepcion';
 import { validarBorrador } from '../src/validaciones';
 import { borrador, linea } from './helpers';
 
@@ -59,5 +60,19 @@ describe('Regresiones de la revisión integral', () => {
     expect(validarClave(conFecha('31', '02', '26'))).toContain('La fecha contenida en la clave no es válida.');
     expect(validarClave(conFecha('29', '02', '28'))).not.toContain('La fecha contenida en la clave no es válida.');
     expect(validarClave(conFecha('29', '02', '27'))).toContain('La fecha contenida en la clave no es válida.');
+  });
+});
+
+describe('Regresiones de la tercera revisión integral', () => {
+  it('lee el tipo de cambio del comprobante recibido y convierte sus montos a colones', () => {
+    const b = borrador({ moneda: 'USD', tipoCambio: 505.25, lineas: [linea({ precioUnitario: 100 })] });
+    const c = construirComprobante({ borrador: b, emisor: EMISOR_DEMO, numero: 1, ambiente: 'simulacion' });
+    const r = extraerDatosComprobante(c.xml);
+    expect(r.moneda).toBe('USD');
+    expect(r.tipoCambio).toBe(505.25);
+    expect(montoRecibidoEnColones(r, r.totalImpuesto)).toBeCloseTo(r.totalImpuesto * 505.25, 5);
+    expect(montoRecibidoEnColones({ moneda: 'CRC' }, 1300)).toBe(1300);
+    // Un registro viejo en dólares sin tipo de cambio no se suma como si fueran colones.
+    expect(montoRecibidoEnColones({ moneda: 'USD' }, 13)).toBeNull();
   });
 });

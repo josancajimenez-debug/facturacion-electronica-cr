@@ -1,6 +1,6 @@
 import { CONDICION_IMPUESTO, MENSAJE, limiteConfirmacionReceptor, nombresArchivo, type Validacion } from '@fe-cr/core';
 import { Download, Inbox, Upload } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ErrorConValidaciones, type DatosConfirmacion, type Recibido } from '../backend/tipos';
 import { Alerta, Estado, ListaValidaciones, Modal, Selector, Texto, Vacio, VisorXml } from '../components/ui';
 import { useApp } from '../estado';
@@ -18,6 +18,7 @@ export function Recepcion() {
   const [confirmando, setConfirmando] = useState<Recibido | null>(null);
   const [viendo, setViendo] = useState<Recibido | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const archivoRef = useRef<HTMLInputElement>(null);
   const hoy = hoyCR();
 
   const simular = async () => {
@@ -57,10 +58,9 @@ export function Recepcion() {
           <p>Mensaje de confirmación del receptor: aceptación total (05), parcial (06) o rechazo (07) — art. 10 MH-DGT-RES-0027-2024.</p>
         </div>
         <div className="row">
-          <label className={`btn ${ocupado ? 'disabled' : ''}`}>
-            <Upload /> Cargar XML
-            <input type="file" accept=".xml,text/xml,application/xml" hidden disabled={ocupado} onChange={(e) => { void cargarXml(e.target.files?.[0]); e.target.value = ''; }} />
-          </label>
+          {/* Botón real (enfocable con el teclado) que abre el selector de archivos oculto. */}
+          <button className="btn" disabled={ocupado} onClick={() => archivoRef.current?.click()}><Upload /> Cargar XML</button>
+          <input ref={archivoRef} type="file" accept=".xml,text/xml,application/xml" hidden aria-hidden onChange={(e) => { void cargarXml(e.target.files?.[0]); e.target.value = ''; }} />
           <button className="btn btn-primary" onClick={simular} disabled={ocupado}><Inbox /> Simular comprobante de proveedor</button>
         </div>
       </div>

@@ -13,9 +13,28 @@ const CORS = {
 
 const cabys = new Set<string>(codigosCabys as string[]);
 
-function ok<T>(r: { data: T; error: { message: string } | null }): T {
+/**
+ * Lanza el error de PostgREST o devuelve los datos. Sin error, una consulta con select() siempre trae
+ * datos (single() falla si no hay fila); las escrituras sin select() no usan el valor devuelto.
+ */
+function ok<T>(r: { data: T; error: { message: string } | null }): NonNullable<T> {
   if (r.error) throw new Error(r.error.message);
-  return r.data;
+  return r.data as NonNullable<T>;
+}
+
+const PAGINA = 1000;
+
+/**
+ * PostgREST devuelve como máximo 1000 filas por consulta (max_rows en config.toml): sin paginar, a partir
+ * de ese número se perderían filas en silencio. La consulta debe tener un orden estable.
+ */
+async function todas<T>(pedir: (desde: number, hasta: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>): Promise<T[]> {
+  const filas: T[] = [];
+  for (let desde = 0; ; desde += PAGINA) {
+    const pagina = (ok(await pedir(desde, desde + PAGINA - 1)) ?? []) as T[];
+    filas.push(...pagina);
+    if (pagina.length < PAGINA) return filas;
+  }
 }
 
 function crearRepo(db: SupabaseClient): Repo {
@@ -25,8 +44,8 @@ function crearRepo(db: SupabaseClient): Repo {
       return data ? { ...(data.datos as Emisor), id: data.id, miembros: data.miembros, propietarioUid: data.propietario } : null;
     },
     async receptores(emisorId) {
-      const rows = ok(await db.from('receptores').select('id, datos').eq('emisor_id', emisorId));
-      return rows.map((r) => ({ ...(r.datos as Receptor), id: r.id }));
+      const rows = await todas<{ id: string; datos: Receptor }>((d, h) => db.from('receptores').select('id, datos').eq('emisor_id', emisorId).order('id').range(d, h));
+      return rows.map((r) => ({ ...r.datos, id: r.id }));
     },
     async siguienteNumero(emisorId, clave) {
       return Number(ok(await db.rpc('siguiente_consecutivo', { p_emisor: emisorId, p_clave: clave })));
@@ -38,16 +57,16 @@ function crearRepo(db: SupabaseClient): Repo {
       ok(await db.from('comprobantes').update({ estado: c.estado, datos: c }).eq('clave', c.clave));
     },
     async clavesValidadas(emisorId) {
-      const rows = ok(await db.from('comprobantes').select('clave').eq('emisor_id', emisorId).in('estado', ['aceptado', 'rechazado']));
-      return new Set(rows.map((r) => r.clave as string));
+      const rows = await todas<{ clave: string }>((d, h) => db.from('comprobantes').select('clave').eq('emisor_id', emisorId).in('estado', ['aceptado', 'rechazado']).order('clave').range(d, h));
+      return new Set(rows.map((r) => r.clave));
     },
     async consecutivos(emisorId) {
-      const rows = ok(await db.from('comprobantes').select('clave, consecutivo:datos->>consecutivo').eq('emisor_id', emisorId));
-      return rows as unknown as { clave: string; consecutivo: string }[];
+      return await todas<{ clave: string; consecutivo: string }>((d, h) => db.from('comprobantes').select('clave, consecutivo:datos->>consecutivo').eq('emisor_id', emisorId).order('clave').range(d, h));
     },
     async documentosAceptados(emisorId) {
-      const rows = ok(await db.from('comprobantes').select('clave, tipo, resumen:datos->resumen, borrador:datos->borrador').eq('emisor_id', emisorId).eq('estado', 'aceptado'));
-      return rows.map((r) => resumenDocumento(r as unknown as Pick<Comprobante, 'clave' | 'tipo' | 'resumen' | 'borrador'>));
+      const rows = await todas<Pick<Comprobante, 'clave' | 'tipo' | 'resumen' | 'borrador'>>((d, h) =>
+        db.from('comprobantes').select('clave, tipo, resumen:datos->resumen, borrador:datos->borrador').eq('emisor_id', emisorId).eq('estado', 'aceptado').order('clave').range(d, h));
+      return rows.map(resumenDocumento);
     },
     async recibido(emisorId, clave) {
       const { data } = await db.from('recibidos').select('datos').eq('emisor_id', emisorId).eq('clave', clave).maybeSingle();
@@ -77,15 +96,10 @@ function crearRepo(db: SupabaseClient): Repo {
       ok(await db.from('bitacora').insert({ emisor_id: emisorId, fecha: fechaEmisionCR(), ...e }));
     },
     async emisores(uid) {
-      // PostgREST devuelve como máximo 1000 filas por consulta: se pagina.
-      const filas: EmisorMiembros[] = [];
-      for (let desde = 0; ; desde += PAGINA) {
-        let q = db.from('emisores').select('id, miembros, propietario').order('creado_en').range(desde, desde + PAGINA - 1);
-        if (uid) q = q.contains('miembros', [uid]);
-        const pagina = ok(await q) as EmisorMiembros[];
-        filas.push(...pagina);
-        if (pagina.length < PAGINA) return filas;
-      }
+      return await todas<EmisorMiembros>((d, h) => {
+        const q = db.from('emisores').select('id, miembros, propietario').order('creado_en').order('id').range(d, h);
+        return uid ? q.contains('miembros', [uid]) : q;
+      });
     },
     async eliminarEmisor(id) {
       ok(await db.from('emisores').delete().eq('id', id));
@@ -107,27 +121,35 @@ function crearRepo(db: SupabaseClient): Repo {
   };
 }
 
-const PAGINA = 1000;
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   const json = (status: number, cuerpo: unknown) => new Response(JSON.stringify(cuerpo), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
   if (req.method !== 'POST') return json(405, { error: 'Método no permitido.' });
 
-  const url = Deno.env.get('SUPABASE_URL')!;
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
-  const publico = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!);
-  const { data: auth, error } = await publico.auth.getUser(token);
-  if (error || !auth.user) return json(401, { error: 'Debe iniciar sesión.' });
+  // Toda falla inesperada (p. ej. sin conexión con Auth) responde JSON con CORS: si no, el navegador
+  // solo vería un error de red sin detalle.
+  try {
+    const url = Deno.env.get('SUPABASE_URL')!;
+    const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+    const publico = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!);
+    const { data: auth, error } = await publico.auth.getUser(token);
+    if (error || !auth.user) return json(401, { error: 'Debe iniciar sesión.' });
 
-  const servicio = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
-  const { accion, ...datos } = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const r = await ejecutar(String(accion ?? ''), datos, { id: auth.user.id, email: auth.user.email }, crearRepo(servicio), {
-    pausaMs: Number(Deno.env.get('SIMULADOR_PAUSA_MS') ?? 1500),
-    cabysValido: (c) => cabys.has(c),
-    administradores: (Deno.env.get('ADMIN_EMAILS') ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean),
-    // @ts-ignore EdgeRuntime existe en el entorno de Supabase.
-    enSegundoPlano: (p) => (typeof EdgeRuntime !== 'undefined' ? EdgeRuntime.waitUntil(p) : p.catch(console.error)),
-  });
-  return json(r.status, r.cuerpo);
+    const cuerpo: unknown = await req.json().catch(() => null);
+    if (!cuerpo || typeof cuerpo !== 'object' || Array.isArray(cuerpo)) return json(400, { error: 'El cuerpo de la solicitud debe ser un objeto JSON.' });
+    const { accion, ...datos } = cuerpo as Record<string, unknown>;
+
+    const servicio = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+    const r = await ejecutar(String(accion ?? ''), datos, { id: auth.user.id, email: auth.user.email }, crearRepo(servicio), {
+      pausaMs: Number(Deno.env.get('SIMULADOR_PAUSA_MS') ?? 1500),
+      cabysValido: (c) => cabys.has(c),
+      administradores: (Deno.env.get('ADMIN_EMAILS') ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean),
+      // @ts-ignore EdgeRuntime existe en el entorno de Supabase.
+      enSegundoPlano: (p) => (typeof EdgeRuntime !== 'undefined' ? EdgeRuntime.waitUntil(p.catch(console.error)) : p.catch(console.error)),
+    });
+    return json(r.status, r.cuerpo);
+  } catch (e) {
+    console.error(e);
+    return json(500, { error: 'Error interno del servidor. Intente de nuevo.' });
+  }
 });

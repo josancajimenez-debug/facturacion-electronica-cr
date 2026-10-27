@@ -142,6 +142,30 @@ describe('LocalBackend: limpieza de datos', () => {
     expect((await b.usuarios()).every((u) => u.emisores === 0)).toBe(true);
     expect(await b.perfil()).toEqual({ administrador: true });
   });
+
+  it('con el almacenamiento lleno informa el error y no muestra datos que se perderían', async () => {
+    const b = new LocalBackend();
+    await b.registrar('c@demo.test', 'secreto123');
+    const emisorId = await b.sembrarDemo();
+    const borrador = {
+      tipo: 'FE' as const, emisorId, sucursal: '001', terminal: '00001', situacion: '1' as const, codigoActividadEmisor: '6920.0',
+      contraparte: { nombre: 'Distribuidora Ficticia del Valle S.A.', identificacion: { tipo: '02', numero: '3109999002' } },
+      condicionVenta: '01', moneda: 'CRC', tipoCambio: 1, otrosCargos: [], referencias: [], mediosPago: [{ tipo: '01' }],
+      lineas: [{ codigoCabys: '8222100000000', detalle: 'Servicios de contabilidad', cantidad: 1, unidadMedida: 'Sp', precioUnitario: 1000, descuentos: [], codigoTarifaIva: '08' }],
+    };
+    const lleno = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('cuota excedida', 'QuotaExceededError');
+    });
+    try {
+      await expect(b.emitir(emisorId, borrador)).rejects.toThrow('No se pudo guardar');
+      expect(await ultimo<Comprobante[]>((cb) => b.onComprobantes(emisorId, cb))).toHaveLength(0);
+    } finally {
+      lleno.mockRestore();
+    }
+    // Con espacio de nuevo, el consecutivo no se consumió.
+    const { clave } = await b.emitir(emisorId, borrador);
+    expect(clave.slice(21, 41)).toBe('00100001010000000001');
+  });
 });
 
 describe('formato CSV', () => {

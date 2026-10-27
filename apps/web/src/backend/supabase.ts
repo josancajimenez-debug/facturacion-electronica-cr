@@ -29,6 +29,7 @@ const traducirErrorAuth = (mensaje: string) => {
   return mensaje;
 };
 const nuevoId = () => crypto.randomUUID();
+const PAGINA = 1000;
 
 export class SupabaseBackend implements Backend {
   modo = 'supabase' as const;
@@ -69,6 +70,19 @@ export class SupabaseBackend implements Backend {
     const { data, error } = await consulta;
     if (error) throw new Error(error.message);
     return data as T;
+  }
+
+  /**
+   * PostgREST devuelve como máximo 1000 filas por consulta (max_rows en supabase/config.toml): las listas
+   * se piden por páginas para no perder en silencio las más antiguas. La consulta debe tener orden estable.
+   */
+  private async todas<T>(pedir: (desde: number, hasta: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>): Promise<T[]> {
+    const filas: T[] = [];
+    for (let desde = 0; ; desde += PAGINA) {
+      const pagina = ((await this.datos(pedir(desde, desde + PAGINA - 1))) ?? []) as T[];
+      filas.push(...pagina);
+      if (pagina.length < PAGINA) return filas;
+    }
   }
 
   private async api<T>(accion: string, cuerpo: Record<string, unknown>): Promise<T> {
@@ -149,7 +163,9 @@ export class SupabaseBackend implements Backend {
     return this.vivo(
       tabla,
       `emisor_id=eq.${emisorId}`,
-      async () => (await this.datos(this.sb.from(tabla).select('id, datos').eq('emisor_id', emisorId))).map((f) => ({ ...(f.datos as T), id: f.id })),
+      async () =>
+        (await this.todas<{ id: string; datos: T }>((d, h) => this.sb.from(tabla).select('id, datos').eq('emisor_id', emisorId).order('id').range(d, h)))
+          .map((f) => ({ ...f.datos, id: f.id })),
       cb,
     );
   }
@@ -189,7 +205,10 @@ export class SupabaseBackend implements Backend {
     return this.vivo(
       'comprobantes',
       `emisor_id=eq.${emisorId}`,
-      async () => (await this.datos(this.sb.from('comprobantes').select('datos').eq('emisor_id', emisorId).order('fecha_emision', { ascending: false }))).map((f) => f.datos as Comprobante),
+      async () =>
+        (await this.todas<{ datos: Comprobante }>((d, h) =>
+          this.sb.from('comprobantes').select('datos').eq('emisor_id', emisorId).order('fecha_emision', { ascending: false }).order('clave', { ascending: false }).range(d, h)))
+          .map((f) => f.datos),
       cb,
     );
   }
@@ -204,7 +223,10 @@ export class SupabaseBackend implements Backend {
     return this.vivo(
       'recibidos',
       `emisor_id=eq.${emisorId}`,
-      async () => (await this.datos(this.sb.from('recibidos').select('datos').eq('emisor_id', emisorId).order('fecha_emision', { ascending: false }))).map((f) => f.datos as Recibido),
+      async () =>
+        (await this.todas<{ datos: Recibido }>((d, h) =>
+          this.sb.from('recibidos').select('datos').eq('emisor_id', emisorId).order('fecha_emision', { ascending: false }).order('clave', { ascending: false }).range(d, h)))
+          .map((f) => f.datos),
       cb,
     );
   }

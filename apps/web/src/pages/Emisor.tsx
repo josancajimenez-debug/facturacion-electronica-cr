@@ -192,7 +192,11 @@ export function EmisorPagina() {
               <label className="check" style={{ marginBottom: 8 }}>
                 <input type="radio" name="principal" checked={!!a.principal} onChange={() => set({ actividades: form.actividades.map((x, j) => ({ ...x, principal: j === i })) })} /> Principal
               </label>
-              <button className="btn btn-ghost btn-icon btn-danger" aria-label="Eliminar actividad" onClick={() => set({ actividades: form.actividades.filter((_, j) => j !== i) })}><Trash2 /></button>
+              <button className="btn btn-ghost btn-icon btn-danger" aria-label="Eliminar actividad" onClick={() => {
+                // Si se elimina la principal, la primera de las restantes pasa a serlo.
+                const restantes = form.actividades.filter((_, j) => j !== i);
+                set({ actividades: restantes.some((x) => x.principal) ? restantes : restantes.map((x, j) => ({ ...x, principal: j === 0 })) });
+              }}><Trash2 /></button>
             </div>
           ))}
         </div>

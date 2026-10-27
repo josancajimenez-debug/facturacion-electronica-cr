@@ -185,6 +185,7 @@ input, select, textarea {
 }
 textarea { min-height: 80px; resize: vertical; }
 input:focus, select:focus, textarea:focus, .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; border-color: var(--primary); }
+.tabs button:focus-visible, .segmented button:focus-visible, .search-results button:focus-visible, .toast-cerrar:focus-visible, .nav-link:focus-visible, summary:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
 input[type='checkbox'], input[type='radio'] { width: auto; min-height: auto; accent-color: var(--primary); }
 .check { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text); }
 
@@ -239,10 +240,9 @@ tr.clickable { cursor: pointer; }
 .modal-foot { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--surface); }
 
 .toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 60; max-width: min(420px, calc(100vw - 32px)); }
-.toast { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); padding: 10px 12px; border-radius: 8px; }
+.toast { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); padding: 10px 12px; border-radius: 8px; }
 .toast.err { border-left-color: var(--err); }
 .toast.ok { border-left-color: var(--ok); }
-.toast { display: flex; gap: 10px; align-items: flex-start; }
 .toast > span { flex: 1; overflow-wrap: anywhere; }
 .toast-cerrar { border: 0; background: none; color: var(--text-2); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; }
 .cargando { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 48px 16px; color: var(--text-2); }
@@ -268,7 +268,6 @@ tr.clickable { cursor: pointer; }
 .login .card { width: min(420px, 100%); }
 .linea-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--surface-2); }
 .linea-card + .linea-card { margin-top: 10px; }
-.pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* ---------- Responsivo ---------- */
 @media (max-width: 1100px) {

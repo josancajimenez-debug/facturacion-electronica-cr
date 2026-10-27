@@ -15,6 +15,8 @@ export interface ComprobanteRecibido {
   totalImpuesto: number;
   totalComprobante: number;
   moneda?: string;
+  /** Tipo de cambio del comprobante respecto al colón (1 en colones). */
+  tipoCambio?: number;
   xml?: string;
 }
 
@@ -66,8 +68,18 @@ export function extraerDatosComprobante(xml: string): ComprobanteRecibido {
     totalImpuesto: montoTag(xml, 'TotalImpuesto'),
     totalComprobante: montoTag(xml, 'TotalComprobante'),
     moneda: valorTag(xml, 'CodigoMoneda'),
+    tipoCambio: valorTag(xml, 'TipoCambio') === undefined ? undefined : montoTag(xml, 'TipoCambio'),
     xml,
   };
+}
+
+/**
+ * Monto de un comprobante recibido expresado en colones. Devuelve null si está en otra moneda y no
+ * trae tipo de cambio (registros anteriores a que se leyera ese campo): sumarlo como colones sería un error.
+ */
+export function montoRecibidoEnColones(r: Pick<ComprobanteRecibido, 'moneda' | 'tipoCambio'>, monto: number): number | null {
+  if (!r.moneda || r.moneda === 'CRC') return monto;
+  return r.tipoCambio && r.tipoCambio > 0 ? monto * r.tipoCambio : null;
 }
 
 export interface SolicitudConfirmacion {

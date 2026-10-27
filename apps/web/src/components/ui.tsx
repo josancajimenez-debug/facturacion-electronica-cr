@@ -1,6 +1,6 @@
 import type { Codigo, Validacion } from '@fe-cr/core';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { Component, useEffect, useId, useRef, type ReactNode } from 'react';
 import { ETIQUETA_ESTADO } from '../lib/formato';
 
 export function Campo({ etiqueta, ayuda, error, children }: { etiqueta: string; ayuda?: ReactNode; error?: string; children: (id: string) => ReactNode }) {
@@ -128,6 +128,51 @@ export function Vacio({ icono, titulo, children }: { icono: ReactNode; titulo: s
       {children && <div style={{ marginTop: 6 }}>{children}</div>}
     </div>
   );
+}
+
+/** Error al descargar una página diferida: suele indicar que se publicó una versión nueva del sitio. */
+const esErrorDeCarga = (e: Error) => /dynamically imported module|Importing a module script failed|Loading chunk|module script/i.test(e.message);
+const CLAVE_RECARGA = 'fe-cr:recarga-por-version';
+
+/**
+ * Atrapa errores al dibujar una página para que no quede la pantalla en blanco. Si la falla es porque el
+ * navegador pide archivos de una versión anterior (tras publicar una nueva), recarga una sola vez.
+ */
+export class LimiteErrores extends Component<{ children: ReactNode; pantallaCompleta?: boolean }, { error: Error | null }> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error) {
+    if (!esErrorDeCarga(error)) return;
+    try {
+      // Una recarga por minuto como máximo: si el archivo de verdad no existe, no se entra en un ciclo.
+      const ultima = Number(sessionStorage.getItem(CLAVE_RECARGA) ?? 0);
+      if (Date.now() - ultima < 60_000) return;
+      sessionStorage.setItem(CLAVE_RECARGA, String(Date.now()));
+    } catch {
+      return;
+    }
+    location.reload();
+  }
+
+  render() {
+    const { error } = this.state;
+    if (!error) return this.props.children;
+    const carga = esErrorDeCarga(error);
+    const aviso = (
+      <Alerta tipo="err">
+        <strong>{carga ? 'No se pudo cargar esta página.' : 'Ocurrió un error al mostrar esta página.'}</strong>{' '}
+        {carga ? 'Es posible que se haya publicado una versión nueva o que no haya conexión.' : error.message}
+        <div className="row" style={{ marginTop: 8 }}>
+          <button className="btn btn-sm" onClick={() => (carga ? location.reload() : this.setState({ error: null }))}>Reintentar</button>
+        </div>
+      </Alerta>
+    );
+    return this.props.pantallaCompleta ? <div className="content">{aviso}</div> : aviso;
+  }
 }
 
 /** Resaltado ligero de sintaxis XML (etiquetas y comentarios). */

@@ -1,4 +1,4 @@
-import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion, periodoContable } from '@fe-cr/core';
+import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion, montoRecibidoEnColones, periodoContable } from '@fe-cr/core';
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -56,13 +56,16 @@ export function Reportes() {
     }
     const recMes = recibidos.filter((r) => r.fechaEmision.startsWith(mes));
     const confirmados = recMes.filter((r) => r.estado === 'aceptado' || r.estado === 'aceptado-parcial');
+    // Los recibidos en otra moneda se convierten con su propio tipo de cambio; sin él no se suman.
+    const impuestosRecibidos = confirmados.map((r) => montoRecibidoEnColones(r, r.totalImpuesto));
     return {
       tarifas: [...porTarifa.values()].sort((a, b) => a.clave.localeCompare(b.clave)),
       medios: [...porMedio.values()].sort((a, b) => b.base - a.base),
       tipos: [...porTipo.values()],
       compras, ivaCompras,
       recibidosConfirmados: confirmados.length,
-      creditoRecibidos: confirmados.reduce((s, r) => s + r.totalImpuesto, 0),
+      creditoRecibidos: impuestosRecibidos.reduce<number>((s, m) => s + (m ?? 0), 0),
+      recibidosSinTipoCambio: impuestosRecibidos.filter((m) => m === null).length,
       pendientes: recMes.filter((r) => r.estado === 'pendiente').length,
       imputadosAqui,
       imputadosOtro,
@@ -148,6 +151,7 @@ export function Reportes() {
             <div className="row" style={{ justifyContent: 'space-between' }}><span>Compras respaldadas con FEC</span><span className="num">{dinero(datos.compras)}</span></div>
             <div className="row" style={{ justifyContent: 'space-between' }}><span>Comprobantes recibidos confirmados</span><span className="num">{datos.recibidosConfirmados}</span></div>
             <div className="row" style={{ justifyContent: 'space-between' }}><span>Impuesto en recibidos confirmados</span><span className="num">{dinero(datos.creditoRecibidos)}</span></div>
+            {datos.recibidosSinTipoCambio > 0 && <Alerta tipo="warn">{datos.recibidosSinTipoCambio} recibido(s) en otra moneda no traen tipo de cambio y no se sumaron al impuesto en colones.</Alerta>}
             {datos.pendientes > 0 && <Alerta tipo="warn">{datos.pendientes} comprobante(s) recibidos del período siguen pendientes de confirmar.</Alerta>}
           </div>
         </div>

@@ -20,7 +20,7 @@ import {
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useApp } from '../estado';
-import { Cargando } from './ui';
+import { Cargando, LimiteErrores } from './ui';
 
 const NAV = [
   { grupo: 'Operación' },
@@ -132,10 +132,13 @@ export function Layout() {
           </button>
         </header>
         <main className="content">
-          {/* Las páginas se cargan bajo demanda (App.tsx); el menú sigue visible mientras tanto. */}
-          <Suspense fallback={<Cargando />}>
-            <Outlet key={emisor?.id ?? ''} />
-          </Suspense>
+          {/* Las páginas se cargan bajo demanda (App.tsx); el menú sigue visible mientras tanto y también
+              si una página falla. El límite se reinicia al cambiar de página o de emisor. */}
+          <LimiteErrores key={`${ubicacion.pathname}|${emisor?.id ?? ''}`}>
+            <Suspense fallback={<Cargando />}>
+              <Outlet key={emisor?.id ?? ''} />
+            </Suspense>
+          </LimiteErrores>
         </main>
       </div>
     </div>
