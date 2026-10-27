@@ -25,7 +25,10 @@ export function Bienvenida() {
       <div className="page-head">
         <div>
           <h1>Bienvenida</h1>
-          <p>Para emitir comprobantes primero registre el obligado tributario emisor.</p>
+          <p>
+            Para emitir comprobantes primero registre el obligado tributario emisor. ¿Primera vez? Siga los{' '}
+            <Link to="/primeros-pasos">primeros pasos</Link>.
+          </p>
         </div>
       </div>
       <div className="grid grid-2">

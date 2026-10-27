@@ -32,6 +32,7 @@ Supabase (Auth, PostgreSQL con RLS, Realtime y función Edge) y publicación en 
 | [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Componentes, modelo de datos, separación de entornos y estructura del repositorio |
 | [docs/INSTALACION.md](docs/INSTALACION.md) | Instalación, Supabase y GitHub Pages |
 | [docs/PRUEBAS.md](docs/PRUEBAS.md) | Pruebas automatizadas y escenarios |
+| [docs/INSTRUCCIONES_PARTICIPANTES.md](docs/INSTRUCCIONES_PARTICIPANTES.md) | Hoja de primeros pasos para compartir con participantes |
 | [docs/GUIA_USUARIO.md](docs/GUIA_USUARIO.md) | Uso paso a paso |
 
 ## Pruebas

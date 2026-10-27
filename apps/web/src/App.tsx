@@ -20,6 +20,7 @@ const Escenarios = pagina(() => import('./pages/Escenarios'), 'Escenarios');
 const Glosario = pagina(() => import('./pages/Glosario'), 'Glosario');
 const NuevoComprobante = pagina(() => import('./pages/NuevoComprobante'), 'NuevoComprobante');
 const Normativa = pagina(() => import('./pages/Normativa'), 'Normativa');
+const PrimerosPasos = pagina(() => import('./pages/PrimerosPasos'), 'PrimerosPasos');
 const Productos = pagina(() => import('./pages/Productos'), 'Productos');
 const Receptores = pagina(() => import('./pages/Receptores'), 'Receptores');
 const Recepcion = pagina(() => import('./pages/Recepcion'), 'Recepcion');
@@ -39,6 +40,7 @@ export function App() {
           {emisores.length === 0 ? (
             <>
               <Route path="/emisor" element={<EmisorPagina />} />
+              <Route path="/primeros-pasos" element={<PrimerosPasos />} />
               <Route path="/normativa" element={<Normativa />} />
               <Route path="/glosario" element={<Glosario />} />
               <Route path="/configuracion" element={<Configuracion />} />
@@ -57,6 +59,7 @@ export function App() {
               <Route path="/reportes" element={<Reportes />} />
               <Route path="/bitacora" element={<Bitacora />} />
               <Route path="/escenarios" element={<Escenarios />} />
+              <Route path="/primeros-pasos" element={<PrimerosPasos />} />
               <Route path="/normativa" element={<Normativa />} />
               <Route path="/glosario" element={<Glosario />} />
               <Route path="/configuracion" element={<Configuracion />} />

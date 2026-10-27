@@ -1,6 +1,7 @@
-import { ShieldAlert } from 'lucide-react';
+import { ListChecks, ShieldAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Alerta, Texto } from '../components/ui';
+import { Pasos, RECORDATORIOS } from '../components/Instrucciones';
+import { Alerta, Modal, Texto } from '../components/ui';
 import { useApp } from '../estado';
 
 export function Login() {
@@ -10,6 +11,7 @@ export function Login() {
   const [clave, setClave] = useState('');
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [instrucciones, setInstrucciones] = useState(false);
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
@@ -51,6 +53,9 @@ export function Login() {
           <button className="btn btn-ghost" onClick={() => { setModo(modo === 'ingresar' ? 'registrar' : 'ingresar'); setError(''); }}>
             {modo === 'ingresar' ? '¿No tiene cuenta? Crear una' : 'Ya tengo cuenta'}
           </button>
+          <button className="btn btn-ghost" onClick={() => setInstrucciones(true)}>
+            <ListChecks /> Instrucciones para participantes
+          </button>
           <p className="small muted" style={{ margin: 0, display: 'flex', gap: 6 }}>
             <ShieldAlert size={14} style={{ flex: 'none', marginTop: 3 }} />
             {backend.descripcion}
@@ -58,6 +63,15 @@ export function Login() {
           </p>
         </div>
       </div>
+      {instrucciones && (
+        <Modal titulo="Primeros pasos" onCerrar={() => setInstrucciones(false)} pie={<button className="btn btn-primary" onClick={() => setInstrucciones(false)}>Entendido</button>}>
+          <Pasos />
+          <ul className="recordatorios">
+            {RECORDATORIOS.map((r) => <li key={r}>{r}</li>)}
+          </ul>
+          <p className="small muted" style={{ marginBottom: 0 }}>Con la sesión iniciada, estas instrucciones están en el menú Referencia › Primeros pasos.</p>
+        </Modal>
+      )}
     </div>
   );
 }

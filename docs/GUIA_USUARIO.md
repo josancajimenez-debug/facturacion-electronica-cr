@@ -7,6 +7,8 @@
 1. Cree una cuenta con correo y contraseña.
 2. Elija **Cargar datos ficticios** (recomendado) o **Registrar mi propio emisor**.
 
+La hoja de **Primeros pasos** resume el recorrido para participantes nuevos. Está en la pantalla de ingreso (**Instrucciones para participantes**) y en **Referencia › Primeros pasos**, con botones para copiar el enlace e imprimir o guardar en PDF. Quien tiene rol de administrador ve además indicaciones para compartir la herramienta. Versión en texto: [INSTRUCCIONES_PARTICIPANTES.md](INSTRUCCIONES_PARTICIPANTES.md).
+
 ## 2. Emisor y actividades económicas
 
 Menú **Emisor y actividades**.
