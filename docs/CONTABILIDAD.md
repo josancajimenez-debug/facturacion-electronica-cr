@@ -11,6 +11,9 @@ Cada comprobante electrónico **aceptado** genera su asiento de partida doble ba
 - **Sección 23 «Ingresos de Actividades Ordinarias Procedentes de Contratos con Clientes»:** modelo de cinco pasos; el ingreso se reconoce al transferir el control, con el comprobante aceptado como evidencia.
 - **Sección 8:** la Nota 3 revela «información material o con importancia relativa sobre políticas contables» (párrafos 8.4 a 8.6) e incluye juicios y estimaciones.
 - **Sección 10 «Políticas Contables, Cambios en las Estimaciones Contables y Errores»:** vida útil, deterioro e impuesto sobre la renta son estimaciones contables (cambios prospectivos).
+- **Alcance (Sección 1) y Grandes Contribuyentes Nacionales:** la NIIF para las PYMES no aplica a entidades con obligación pública de rendir cuentas. La DGT exige NIIF completas a los Grandes Contribuyentes Nacionales (oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025): si la política «Gran Contribuyente Nacional» está marcada, cada asiento lleva la alerta `MARCO_NIIF_COMPLETAS` y requiere revisión.
+- **Base fiscal:** los registros siguen el art. 128 del CNPT y los criterios de la Resolución DGT-R-029-2018 para las diferencias entre la base contable y la fiscal.
+- **Operaciones sin comprobante electrónico:** no se contabilizan aquí; se reportan en la D-270 (RES-0055-2025 y RES-0010-2026).
 
 > Los asientos son **propuestas en borrador**: no sustituyen el criterio ni la aprobación del contador responsable. Es un entorno de simulación.
 
@@ -68,6 +71,10 @@ Cada asiento indica si **requiere revisión** y por qué: `DESCUADRE_ARITMETICO`
 
 - Consejo de Normas Internacionales de Contabilidad (IASB). (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). IFRS Foundation. Secciones 2 a 8, 10, 11, 13, 17, 18, 20 a 23, 29, 30 y 32; Apéndice A (fecha de vigencia y transición).
 - Asamblea Legislativa de la República de Costa Rica. (1964). *Código de Comercio* (Ley N.° 3284), arts. 251 a 263.
+- Asamblea Legislativa de la República de Costa Rica. (1971). *Código de Normas y Procedimientos Tributarios* (Ley N.° 4755), art. 128.
 - Asamblea Legislativa de la República de Costa Rica. (1982). *Ley del Impuesto al Valor Agregado* (Ley N.° 6826), art. 27.
+- Asamblea Legislativa de la República de Costa Rica. (1988). *Ley del Impuesto sobre la Renta* (Ley N.° 7092), art. 4 (periodo fiscal).
+- Colegio de Contadores Públicos de Costa Rica. (2025, 2 de junio). *Comunicado DE-0028-2025* (oficio MH-DGT-OF-0201-2025: NIIF completas para los Grandes Contribuyentes Nacionales).
 - Dirección General de Tributación. (2018). *Criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria* (Resolución DGT-R-029-2018).
 - Dirección General de Tributación. (2024). *Anexos y estructuras para la emisión de comprobantes electrónicos* (Versión 4.4, con bitácora de ajustes al 22 de abril de 2026): notas 5, 6, 8, 9 y 18.
+- Dirección General de Tributación. (2025, 9 de octubre). *Formulario de la Declaración «Informativa Resumen Mensual de Clientes, Proveedores y Gastos Específicos que no estén amparados en un comprobante electrónico»* (Resolución MH-DGT-RES-0055-2025; plazos de la Resolución MH-DGT-RES-0010-2026).

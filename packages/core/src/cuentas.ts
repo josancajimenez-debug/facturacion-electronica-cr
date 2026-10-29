@@ -406,6 +406,13 @@ export const VIGENCIA_NIIF_2025 = '2027-01-01';
  */
 export const esAplicacionAnticipadaNiif = (inicioPeriodo: string): boolean => inicioPeriodo < VIGENCIA_NIIF_2025;
 
+/**
+ * Para efectos fiscales, la DGT exige NIIF completas a los Grandes Contribuyentes Nacionales (oficio
+ * MH-DGT-OF-0201-2025, divulgado en el comunicado DE-0028-2025 del Colegio de Contadores Públicos).
+ */
+export const AVISO_NIIF_COMPLETAS =
+  'Los Grandes Contribuyentes Nacionales deben respaldar sus declaraciones con registros conforme a las NIIF completas (oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025). Este módulo aplica la NIIF para las PYMES: revise cada registro con las NIIF completas.';
+
 /** Secciones 1 a 35 con su nombre en la traducción oficial de la tercera edición (índice de la Norma). */
 export const SECCIONES_NIIF: Record<number, string> = {
   1: 'Pequeñas y Medianas Entidades',

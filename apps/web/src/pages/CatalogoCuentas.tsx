@@ -1,8 +1,8 @@
-import { CATALOGO_CUENTAS, NOMBRE_EDICION_NIIF, SECCIONES_NIIF, VIGENCIA_NIIF_2025, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
+import { AVISO_NIIF_COMPLETAS, CATALOGO_CUENTAS, NOMBRE_EDICION_NIIF, SECCIONES_NIIF, VIGENCIA_NIIF_2025, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
 import { Download, Save } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Texto } from '../components/ui';
+import { Alerta, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { useContabilidad, type ConfigContable } from '../lib/contabilidad';
 import { csv, descargar, fecha } from '../lib/formato';
@@ -57,7 +57,13 @@ export function CatalogoCuentas() {
           <p className="small" style={{ margin: 0 }}>
             <strong>Marco contable:</strong> {NOMBRE_EDICION_NIIF}. Es obligatoria para los periodos que comienzan a partir del {fecha(VIGENCIA_NIIF_2025)};
             en periodos anteriores se aplica anticipadamente (lo permite el Apéndice A) y se revela en la Nota 2 de los estados financieros.
+            No la pueden usar las entidades con obligación pública de rendir cuentas (Sección 1).
           </p>
+          <label className="check">
+            <input type="checkbox" checked={!!p.granContribuyenteNacional} onChange={(e) => cambiar({ granContribuyenteNacional: e.target.checked })} />
+            La entidad está clasificada como Gran Contribuyente Nacional
+          </label>
+          {p.granContribuyenteNacional && <Alerta tipo="warn">{AVISO_NIIF_COMPLETAS} Cada asiento queda marcado «Requiere revisión».</Alerta>}
           <p className="small muted" style={{ margin: 0 }}>
             El asiento de apertura (aporte de capital o saldos del balance anterior) se registra en <Link to="/contabilidad/apertura">Balance de apertura</Link>.
           </p>

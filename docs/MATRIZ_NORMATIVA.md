@@ -29,6 +29,10 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | 15 | **División Territorial Administrativa 2022** (Registro Nacional – Instituto Geográfico Nacional), tabla por provincia, cantón y distrito, v3 | 2022 (archivo en la bibliografía) | Referencia oficial de la codificación territorial | 7 provincias, 83 cantones y 488 distritos con códigos de 1, 3 y 5 dígitos | Listas dependientes provincia → cantón → distrito; el XML usa los 2 últimos dígitos de cantón y distrito (nota 14); validación con advertencia |
 | 16 | **CodeSystem FHIR «drugs-presentation-code»** – Catálogo de formas farmacéuticas, Ministerio de Salud | Versión 1.1.0-ballot, estado *draft*; página generada el 22/10/2025 | Borrador publicado en la guía FHIR de receta electrónica | 91 formas farmacéuticas con códigos SNOMED CT (1 a 14 dígitos) | Catálogo de referencia del producto y de la línea; se imprime en el PDF. No se envía en el XML (ver sección 3) |
 | 17 | **API público del Ministerio de Hacienda** (`api.hacienda.go.cr/docs`) | Consulta del 23/10/2026 | En servicio; límites de 20 solicitudes/s en ráfaga y 10/s sostenidas (bloqueo de IP por 10 min) | `/fe/ae`, `/fe/ex`, `/fe/cabys`, `/indicadores/tc/dolar` | Consulta de actividades del emisor y tipo de cambio (solo lectura). **No** es el API de recepción de comprobantes |
+| 18 | **Norma de Contabilidad NIIF para las PYMES, tercera edición** (IASB, febrero de 2025) | Febrero de 2025; traducción oficial al español (IFRS Foundation) | Obligatoria para los periodos que comienzan a partir del 1/01/2027; aplicación anticipada permitida y revelada (Apéndice A). Único marco del módulo contable | Sección 1 alcance (excluye a las entidades con obligación pública de rendir cuentas); 3 a 8 presentación y notas; 10 políticas, estimaciones y errores; 11 instrumentos financieros con pérdida incurrida (11.21-11.26); 12 valor razonable; 13 inventarios; 17 PPE; 23 ingresos (cinco pasos); 29 impuesto a las ganancias | `core/cuentas.ts` (`SECCIONES_NIIF`, `seccionNiif`), fundamentos de asientos, ajustes y cierre, estados financieros y Notas 2 y 3 |
+| 19 | **Resolución DGT-R-029-2018**, criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria | 15/06/2018 | Vigente | Desarrolla el art. 128 del CNPT: registros con las NIIF adoptadas por el Colegio de Contadores Públicos, siempre que no se opongan a la ley tributaria; diferencias entre base contable y fiscal | Nota 2 de los estados financieros; marca de gasto no deducible en los asientos |
+| 20 | **Oficio MH-DGT-OF-0201-2025** (divulgado en el comunicado **DE-0028-2025** del Colegio de Contadores Públicos de Costa Rica) | Comunicado del 2/06/2025 | Criterio vigente de la DGT | Los Grandes Contribuyentes Nacionales deben fundamentar sus registros en las NIIF completas | Política «Gran Contribuyente Nacional»: alerta `MARCO_NIIF_COMPLETAS` y revisión obligatoria en cada asiento; aviso en los estados financieros |
+| 21 | **Resoluciones MH-DGT-RES-0055-2025** y **MH-DGT-RES-0010-2026** (Declaración informativa D-270) | RES-0055: 9/10/2025, Alcance 140, La Gaceta 206 (3/11/2025). RES-0010: Alcance 30, La Gaceta 55 (20/03/2026); comunicado CP-14-2026 | Vigentes. 2025 anual (junio 2026); 2026 mensual con plazo hasta enero 2027; desde 2027, 25 días naturales del mes siguiente | Resumen mensual de clientes, proveedores y gastos específicos no amparados en comprobante electrónico | Fuera del alcance: el módulo solo registra operaciones amparadas en comprobante electrónico |
 
 ## 2. Requisitos técnicos implementados
 
@@ -114,13 +118,19 @@ Banco Central de Costa Rica y Ministerio de Hacienda. (2025, 1 de abril). *Actua
 
 Colegio de Contadores Privados de Costa Rica. (2026, 22 de octubre). *Charla: Nuevos ajustes factura electrónica versión 4.4* [Video]. YouTube. https://www.youtube.com/watch?v=NmcMxtNwJHc
 
+Colegio de Contadores Públicos de Costa Rica. (2025, 2 de junio). *Comunicado DE-0028-2025: uso de la Norma de Contabilidad NIIF para las PYMES por los Grandes Contribuyentes Nacionales* (cita el oficio MH-DGT-OF-0201-2025) [Comunicado].
+
+Consejo de Normas Internacionales de Contabilidad. (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). IFRS Foundation.
+
+Delfino.cr. (2026, octubre). *Cámara de Pymes recuerda que cambios para corregir facturas electrónicas inician el 1 de noviembre*. https://delfino.cr/2026/10/camara-de-pymes-recuerda-que-cambios-para-corregir-facturas-electronicas-inician-el-1-de-noviembre
+
+Dirección General de Tributación. (2018, 15 de junio). *Criterios interpretativos sobre la aplicación de las Normas Internacionales de Información Financiera respecto a la normativa tributaria* (Resolución DGT-R-029-2018). Sistema Costarricense de Información Jurídica.
+
 Dirección General de Tributación. (2024a). *Anexos y estructuras para la emisión de comprobantes electrónicos* (Versión 4.4, con bitácora de ajustes al 22 de abril de 2026) [Documento técnico]. Ministerio de Hacienda. Oficina Virtual de TRIBU-CR. https://ovitribucr.hacienda.go.cr/comprobantes-electronicos
 
 Dirección General de Tributación. (2024b, 13 de noviembre). *Resolución general sobre las disposiciones técnicas de los comprobantes electrónicos para efectos tributarios* (Resolución MH-DGT-RES-0027-2024; versión 3 de 3). Sistema Costarricense de Información Jurídica. Recuperado el 26 de octubre de 2026, de https://sinalevi.go.cr/ResultadosNormativa/Informacion?param1=103276&param2=147532&param3=1
 
 Dirección General de Tributación. (2024c, 10 de junio). *Resolución general sobre el deber formal de declarar que les asiste a los obligados tributarios exentos en el impuesto sobre el valor agregado* (Resolución MH-DGT-RES-0013-2024).
-
-Delfino.cr. (2026, octubre). *Cámara de Pymes recuerda que cambios para corregir facturas electrónicas inician el 1 de noviembre*. https://delfino.cr/2026/10/camara-de-pymes-recuerda-que-cambios-para-corregir-facturas-electronicas-inician-el-1-de-noviembre
 
 Dirección General de Tributación. (2025a, 3 de febrero). *Modificación al Transitorio I de la resolución MH-DGT-RES-0027-2024* (Resolución MH-DGT-RES-0001-2025). *La Gaceta*, Alcance 20, N.° 29 (13 de febrero de 2025).
 
@@ -129,6 +139,8 @@ Dirección General de Tributación. (2025b, marzo). *Comprobantes electrónicos 
 Dirección General de Tributación. (2025c, 22 de julio). *Formularios y medio para la presentación de declaraciones del impuesto al valor agregado* (Resolución MH-DGT-RES-0033-2025).
 
 Dirección General de Tributación. (2025d, 27 de agosto). *Modificaciones a las resoluciones generales que implementan las distintas funcionalidades y formularios dentro del Sistema Integrado de Gestión Tributaria denominado «TRIBU-CR»* (Resolución MH-DGT-RES-0043-2025). *La Gaceta*, Alcance 114, N.° 166.
+
+Dirección General de Tributación. (2025e, 9 de octubre). *Resolución de alcance general para el uso del Formulario de la Declaración «Informativa Resumen Mensual de Clientes, Proveedores y Gastos Específicos que no estén amparados en un comprobante electrónico»* (Resolución MH-DGT-RES-0055-2025). *La Gaceta*, Alcance 140, N.° 206 (3 de noviembre de 2025).
 
 Dirección General de Tributación. (2026). *Actualización de los Anexos y Estructuras versión 4.4 y validación de comprobantes electrónicos* [Comunicado]. Ministerio de Hacienda.
 
@@ -151,6 +163,8 @@ Instituto Geográfico Nacional y Registro Nacional. (2022). *Tabla por provincia
 KPMG Costa Rica. (2024, noviembre). *NewsFlash: Reglamento de Comprobantes Electrónicos para efectos tributarios*. https://kpmg.com/cr/es/home/tendencias/2024/11/newsflash-noviembre-2024-2.html
 
 KPMG. (2026, 11 de mayo). *Costa Rica: Changes to annexes and structures of electronic receipts* (Tax News Flash). https://kpmg.com/kpmg-us/content/dam/kpmg/taxnewsflash/pdf/2026/05/tnf-costa-rica-may-11-2026.pdf
+
+Ministerio de Hacienda. (2026, 26 de marzo). *Dirección General de Tributación amplía plazo para presentación de la «Declaración 270»* (Comunicado CP-14-2026; Resolución MH-DGT-RES-0010-2026) [Comunicado de prensa].
 
 Ministerio de Hacienda de Costa Rica. (s. f.). *API Hacienda* [Documentación de API]. Recuperado el 23 de octubre de 2026, de https://api.hacienda.go.cr/docs
 

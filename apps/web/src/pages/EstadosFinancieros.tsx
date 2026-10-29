@@ -1,4 +1,4 @@
-import { NOMBRE_EDICION_NIIF, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, esAplicacionAnticipadaNiif, estadosFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
+import { AVISO_NIIF_COMPLETAS, NOMBRE_EDICION_NIIF, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, esAplicacionAnticipadaNiif, estadosFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
 import { Download, Printer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -157,6 +157,7 @@ export function EstadosFinancieros() {
         </div>
       </div>
 
+      {config.politicas.granContribuyenteNacional && <Alerta tipo="err">{AVISO_NIIF_COMPLETAS}</Alerta>}
       {!cierre?.cerrado && (
         <Alerta tipo="warn">
           Los asientos de {cierre?.ajustesAutomaticos ? 'cierre' : 'ajuste y de cierre'} del periodo {corte.slice(0, 4)} no están registrados: estas cifras son preliminares.{' '}
@@ -289,6 +290,10 @@ export function EstadosFinancieros() {
                   La entidad la aplica anticipadamente en este periodo, como lo permite la Norma (Apéndice A, Fecha de vigencia), y revela este hecho.
                 </p>
               )}
+              <p>
+                Los registros contables se llevan conforme al artículo 128 del Código de Normas y Procedimientos Tributarios; las diferencias entre la base contable y la fiscal
+                se tratan según los criterios interpretativos de la Resolución DGT-R-029-2018.
+              </p>
             </div>
             <div>
               <h3>Nota 3. Información material o con importancia relativa sobre políticas contables (Sección 8)</h3>

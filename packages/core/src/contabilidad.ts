@@ -9,7 +9,7 @@ import Decimal from 'decimal.js';
 import { asientoAperturaBalance, type AperturaContable } from './apertura';
 import { ESQUEMA_XML, NOMBRE_COMPROBANTE, type TipoComprobante } from './catalogos';
 import { esCabysServicio } from './calculos';
-import { cuenta, seccionNiif } from './cuentas';
+import { AVISO_NIIF_COMPLETAS, cuenta, seccionNiif } from './cuentas';
 import { desescaparXml, type ComprobanteRecibido } from './recepcion';
 import type { Comprobante, Emisor } from './tipos';
 
@@ -70,6 +70,8 @@ export interface PoliticasContables {
   umbralCapitalizacion: number;
   /** Prefijos CAByS adicionales que se tratan como mercadería para la venta. */
   prefijosInventario: string[];
+  /** Gran Contribuyente Nacional: la DGT le exige NIIF completas, no la NIIF para las PYMES. */
+  granContribuyenteNacional?: boolean;
 }
 
 /** El umbral es una política de cada entidad; el valor es solo un punto de partida. */
@@ -430,6 +432,7 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
   const P = new Partidas(doc.tipoCambio || 1);
 
   // Paso 1 — validación del documento.
+  if (ctx.politicas.granContribuyenteNacional) alerta('MARCO_NIIF_COMPLETAS', AVISO_NIIF_COMPLETAS);
   if (doc.version && doc.version !== '4.4' && doc.tipo !== 'NC' && doc.tipo !== 'ND') {
     alerta(fecha >= '2025-10-06' ? 'VERSION_NO_VIGENTE' : 'VERSION_PRORROGA_EXCEPCIONAL', `XML v${doc.version}; desde el 1/09/2025 solo se admite la v4.4 (Anexos y Estructuras v4.4; RES-0043-2025 art. 21).`);
   }

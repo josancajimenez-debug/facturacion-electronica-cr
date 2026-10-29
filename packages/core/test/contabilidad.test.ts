@@ -89,6 +89,14 @@ describe('Catálogo de cuentas y manual', () => {
     // Toda cuenta del catálogo cita una sección existente.
     for (const c of CATALOGO_CUENTAS) if (c.niif) expect(SECCIONES_NIIF[c.niif]).toBeTruthy();
   });
+
+  it('Gran Contribuyente Nacional: cada asiento exige revisión con NIIF completas (MH-DGT-OF-0201-2025)', () => {
+    const doc = documentoDesdeComprobante(emitir(borrador({ mediosPago: [{ tipo: '06' }] })));
+    const a = generarAsiento(doc, { ...contexto(), politicas: { ...POLITICAS_PREDETERMINADAS, granContribuyenteNacional: true } });
+    expect(a.requiereRevision).toBe(true);
+    expect(a.alertas[0]).toMatch(/^MARCO_NIIF_COMPLETAS: .*MH-DGT-OF-0201-2025/);
+    expect(generarAsiento(doc, contexto()).alertas.join()).not.toMatch(/MARCO_NIIF_COMPLETAS/);
+  });
 });
 
 describe('Asientos de ventas', () => {
