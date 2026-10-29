@@ -1,6 +1,10 @@
 import { diaCR, type TipoComprobante } from '@fe-cr/core';
 
+/** Redondea a los decimales mostrados y quita el signo del cero: Intl mostraría «-₡0,00» para -0 o -0,001. */
+const sinCeroNegativo = (valor: number, decimales: number) => Number(valor.toFixed(decimales)) || 0;
+
 export function dinero(valor: number, moneda = 'CRC'): string {
+  valor = sinCeroNegativo(valor, 2);
   try {
     return new Intl.NumberFormat('es-CR', { style: 'currency', currency: moneda, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
   } catch {
@@ -9,7 +13,7 @@ export function dinero(valor: number, moneda = 'CRC'): string {
 }
 
 export function numero(valor: number, decimales = 2): string {
-  return new Intl.NumberFormat('es-CR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }).format(valor);
+  return new Intl.NumberFormat('es-CR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }).format(sinCeroNegativo(valor, decimales));
 }
 
 /** Muestra una fecha RFC 3339 en hora de Costa Rica. */

@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { csv, limpiarIdentificacion } from './formato';
+import { csv, dinero, limpiarIdentificacion, numero } from './formato';
 
 describe('formato', () => {
+  it('el cero nunca se muestra con signo negativo', () => {
+    expect(dinero(-0)).toBe(dinero(0));
+    expect(dinero(-0.001)).toBe(dinero(0));
+    expect(numero(-0.004)).toBe(numero(0));
+    expect(dinero(-1500)).toMatch(/^-/);
+  });
+
   it('la cédula jurídica conserva letras (actualización v4.4) y las pasa a mayúsculas', () => {
     expect(limpiarIdentificacion('02', '3-a01-b23456')).toBe('3A01B23456');
     expect(limpiarIdentificacion('01', '1-0234-0567')).toBe('102340567');

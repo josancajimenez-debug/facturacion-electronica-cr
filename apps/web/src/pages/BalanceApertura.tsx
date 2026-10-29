@@ -1,4 +1,4 @@
-import { CUENTAS_BALANCE, esCabysServicio, leerBalanceCsv, totalesApertura, validarApertura, type AperturaContable, type ExistenciaInicial, type SaldoApertura } from '@fe-cr/core';
+import { CATALOGO_CUENTAS, CUENTAS_BALANCE, esCabysServicio, nivelCuenta, leerBalanceCsv, totalesApertura, validarApertura, type AperturaContable, type ExistenciaInicial, type SaldoApertura } from '@fe-cr/core';
 import { Download, Paperclip, Plus, Save, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -9,7 +9,12 @@ import { csv, descargar, dinero } from '../lib/formato';
 
 type Modo = 'capital' | 'saldos';
 
-const saldoVacio = (): SaldoApertura => ({ cuenta: '', debe: 0, haber: 0 });
+type Montos = Record<string, { debe: number; haber: number }>;
+
+/** Catálogo de balance completo (clases, grupos, cuentas y subcuentas) en el orden del plan de cuentas. */
+const CATALOGO_BALANCE = CATALOGO_CUENTAS.filter((c) => /^[123](.|$)/.test(c.codigo));
+
+const porCuenta = (saldos: SaldoApertura[] = []): Montos => Object.fromEntries(saldos.map((s) => [s.cuenta, { debe: s.debe, haber: s.haber }]));
 const existenciaVacia = (): ExistenciaInicial => ({ cabys: '', detalle: '', cantidad: 0, costo: 0 });
 const num = (v: string) => Number(v) || 0;
 
@@ -20,14 +25,23 @@ export function BalanceApertura() {
   const [modo, setModo] = useState<Modo>(inicial?.saldos?.length ? 'saldos' : 'capital');
   const [fecha, setFecha] = useState(inicial?.fecha ?? '');
   const [capital, setCapital] = useState(inicial?.capital ?? 0);
-  const [saldos, setSaldos] = useState<SaldoApertura[]>(inicial?.saldos?.length ? inicial.saldos : [saldoVacio(), saldoVacio()]);
+  const [montos, setMontos] = useState<Montos>(() => porCuenta(inicial?.saldos));
+  const [soloConSaldo, setSoloConSaldo] = useState(false);
   const [existencias, setExistencias] = useState<ExistenciaInicial[]>(inicial?.existencias ?? []);
   const [archivo, setArchivo] = useState(inicial?.archivo);
   const [pegado, setPegado] = useState('');
   const [erroresArchivo, setErroresArchivo] = useState<string[]>([]);
   const archivoRef = useRef<HTMLInputElement>(null);
 
-  const conMonto = saldos.filter((s) => s.cuenta || s.debe || s.haber);
+  // Solo se guardan las subcuentas con monto, en el orden del catálogo.
+  const conMonto: SaldoApertura[] = CUENTAS_BALANCE
+    .map((c) => ({ cuenta: c.codigo, debe: montos[c.codigo]?.debe ?? 0, haber: montos[c.codigo]?.haber ?? 0 }))
+    .filter((s) => s.debe || s.haber);
+  /** Saldo de una cuenta o grupo con el signo de su naturaleza (suma de sus subcuentas). */
+  const saldoDe = (codigo: string, naturaleza: 'deudora' | 'acreedora') => {
+    const neto = conMonto.filter((s) => s.cuenta === codigo || s.cuenta.startsWith(`${codigo}.`)).reduce((t, s) => t + s.debe - s.haber, 0);
+    return naturaleza === 'deudora' ? neto : -neto;
+  };
   const borrador: AperturaContable = modo === 'capital'
     ? { fecha, capital }
     : { fecha, saldos: conMonto, existencias: existencias.filter((e) => e.cabys || e.cantidad || e.costo), archivo };
@@ -40,7 +54,7 @@ export function BalanceApertura() {
     const r = leerBalanceCsv(texto);
     setErroresArchivo(r.errores);
     if (!r.saldos.length) return avisar('No se cargaron saldos: revise el formato del archivo.', 'err');
-    setSaldos(r.saldos);
+    setMontos(porCuenta(r.saldos));
     setArchivo(nombre);
     setModo('saldos');
     avisar(`Se cargaron ${r.saldos.length} saldos${nombre ? ` de ${nombre}` : ''}. Revíselos y guarde.`, r.errores.length ? 'info' : 'ok');
@@ -53,7 +67,8 @@ export function BalanceApertura() {
   const plantilla = () =>
     descargar('plantilla-balance-apertura.csv', csv([['Código', 'Cuenta', 'Debe', 'Haber'], ...CUENTAS_BALANCE.map((c) => [c.codigo, c.nombre, '', ''])]), 'text/csv');
 
-  const cambiarSaldo = (i: number, s: Partial<SaldoApertura>) => setSaldos(saldos.map((x, j) => (j === i ? { ...x, ...s } : x)));
+  const cambiarMonto = (codigo: string, lado: 'debe' | 'haber', valor: number) =>
+    setMontos((m) => ({ ...m, [codigo]: { ...(m[codigo] ?? { debe: 0, haber: 0 }), [lado]: valor } }));
   const cambiarExistencia = (i: number, e: Partial<ExistenciaInicial>) => setExistencias(existencias.map((x, j) => (j === i ? { ...x, ...e } : x)));
   const elegirProducto = (i: number, cabys: string) => {
     const p = productos.find((x) => x.codigoCabys === cabys);
@@ -69,7 +84,7 @@ export function BalanceApertura() {
     if (!guardarConfig({ ...config, apertura: undefined })) return;
     setFecha('');
     setCapital(0);
-    setSaldos([saldoVacio(), saldoVacio()]);
+    setMontos({});
     setExistencias([]);
     setArchivo(undefined);
     avisar('Se quitó el asiento de apertura.', 'ok');
@@ -129,34 +144,61 @@ export function BalanceApertura() {
 
             <div className="card">
               <div className="card-head">
-                <h2>3. Saldos por cuenta</h2>
+                <h2>3. Saldos por cuenta del catálogo</h2>
                 <span className={`badge ${t.cuadra && t.debe > 0 ? 'ok' : 'warn'}`}>{t.cuadra && t.debe > 0 ? 'Cuadrado' : `Diferencia ${dinero(t.debe - t.haber)}`}</span>
               </div>
               <div className="card-body stack">
+                <div className="row" style={{ justifyContent: 'space-between' }}>
+                  <span className="small muted">
+                    {CUENTAS_BALANCE.length} subcuentas de activo, pasivo y patrimonio · {conMonto.length} con saldo. Digite el saldo en la columna de su naturaleza.
+                  </span>
+                  <label className="check small">
+                    <input type="checkbox" checked={soloConSaldo} onChange={(e) => setSoloConSaldo(e.target.checked)} /> Mostrar solo las cuentas con saldo
+                  </label>
+                </div>
                 <div className="table-wrap">
                   <table className="tabla-editable">
-                    <thead><tr><th>Cuenta</th><th className="right" style={{ width: 170 }}>Debe</th><th className="right" style={{ width: 170 }}>Haber</th><th /></tr></thead>
+                    <thead><tr><th style={{ width: 110 }}>Código</th><th>Cuenta</th><th className="right" style={{ width: 170 }}>Debe</th><th className="right" style={{ width: 170 }}>Haber</th></tr></thead>
                     <tbody>
-                      {saldos.map((s, i) => (
-                        <tr key={i}>
-                          <td>
-                            <select aria-label={`Cuenta de la línea ${i + 1}`} value={s.cuenta} onChange={(e) => cambiarSaldo(i, { cuenta: e.target.value })} style={{ width: '100%' }}>
-                              <option value="">Elija la cuenta…</option>
-                              {CUENTAS_BALANCE.map((c) => <option key={c.codigo} value={c.codigo}>{c.codigo} – {c.nombre}</option>)}
-                            </select>
-                          </td>
-                          <td><input aria-label={`Debe de la línea ${i + 1}`} type="number" min={0} step="0.01" value={s.debe || ''} onChange={(e) => cambiarSaldo(i, { debe: num(e.target.value) })} /></td>
-                          <td><input aria-label={`Haber de la línea ${i + 1}`} type="number" min={0} step="0.01" value={s.haber || ''} onChange={(e) => cambiarSaldo(i, { haber: num(e.target.value) })} /></td>
-                          <td><button className="btn btn-ghost btn-icon btn-danger" aria-label={`Quitar línea ${i + 1}`} onClick={() => setSaldos(saldos.filter((_, j) => j !== i))}><Trash2 /></button></td>
-                        </tr>
-                      ))}
-                      <tr><th>Totales</th><th className="num">{dinero(t.debe)}</th><th className="num">{dinero(t.haber)}</th><th /></tr>
+                      {CATALOGO_BALANCE.map((c) => {
+                        const nivel = nivelCuenta(c.codigo);
+                        const saldo = saldoDe(c.codigo, c.naturaleza);
+                        if (soloConSaldo && !conMonto.some((s) => s.cuenta === c.codigo || s.cuenta.startsWith(`${c.codigo}.`))) return null;
+                        if (!c.imputable) {
+                          // Clase, grupo o cuenta de mayor: encabezado con el subtotal de sus subcuentas.
+                          return (
+                            <tr key={c.codigo} style={{ fontWeight: nivel <= 2 ? 700 : 600, background: nivel === 1 ? 'var(--surface-2)' : undefined }}>
+                              <td className="mono small">{c.codigo}</td>
+                              <td style={{ paddingLeft: 12 + (nivel - 1) * 16 }}>{c.nombre}</td>
+                              <td colSpan={2} className="num muted">{saldo ? dinero(saldo) : ''}</td>
+                            </tr>
+                          );
+                        }
+                        const m = montos[c.codigo] ?? { debe: 0, haber: 0 };
+                        // Saldo del lado contrario a la naturaleza de la cuenta: casi siempre es un error de digitación.
+                        const contrario = c.naturaleza === 'deudora' ? m.haber > m.debe : m.debe > m.haber;
+                        return (
+                          <tr key={c.codigo}>
+                            <td className="mono small">{c.codigo}</td>
+                            <td style={{ paddingLeft: 12 + (nivel - 1) * 16 }}>
+                              {c.nombre}
+                              <div className="small muted">Saldo {c.naturaleza === 'deudora' ? 'deudor' : 'acreedor'}{contrario && <span style={{ color: 'var(--warn)' }}> · contrario a su naturaleza, revíselo</span>}</div>
+                            </td>
+                            <td><input aria-label={`Debe de ${c.codigo} ${c.nombre}`} type="number" min={0} step="0.01" value={m.debe || ''} onChange={(e) => cambiarMonto(c.codigo, 'debe', num(e.target.value))} /></td>
+                            <td><input aria-label={`Haber de ${c.codigo} ${c.nombre}`} type="number" min={0} step="0.01" value={m.haber || ''} onChange={(e) => cambiarMonto(c.codigo, 'haber', num(e.target.value))} /></td>
+                          </tr>
+                        );
+                      })}
+                      <tr><th colSpan={2}>Totales</th><th className="num">{dinero(t.debe)}</th><th className="num">{dinero(t.haber)}</th></tr>
+                      <tr>
+                        <td colSpan={2} className="small">Activo {dinero(saldoDe('1', 'deudora'))} = Pasivo {dinero(saldoDe('2', 'acreedora'))} + Patrimonio {dinero(saldoDe('3', 'acreedora'))}</td>
+                        <td colSpan={2} className="right small">{t.cuadra ? 'Ecuación contable cumplida' : `Diferencia ${dinero(t.debe - t.haber)}`}</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
-                <div><button className="btn" onClick={() => setSaldos([...saldos, saldoVacio()])}><Plus /> Agregar cuenta</button></div>
                 <p className="small muted" style={{ margin: 0 }}>
-                  Solo cuentas de activo, pasivo y patrimonio: el resultado del periodo anterior va en 3.3.01.01 Utilidades acumuladas. Las cuentas de valuación (depreciación acumulada,
+                  Las cuentas de ingresos, costos y gastos no llevan saldo de apertura: el resultado del periodo anterior va en 3.3.01.01 Utilidades acumuladas. Las cuentas de valuación (depreciación acumulada,
                   estimación de incobrables) llevan saldo acreedor. La depreciación automática del cierre toma el costo de apertura como adquirido en esta fecha; si el activo ya tiene vida transcurrida, ajuste la vida útil o regístrela con un ajuste manual.
                 </p>
               </div>
