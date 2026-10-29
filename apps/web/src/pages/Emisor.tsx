@@ -93,8 +93,13 @@ export function EmisorPagina() {
     try {
       const id = await backend.guardarEmisor({ ...form, correos: form.correos.filter(Boolean) });
       seleccionarEmisor(id);
-      setCreando(false);
-      avisar('Emisor guardado.', 'ok');
+      if (creando) {
+        // Ya quedó en la base de datos: se limpia el formulario para registrar otro emisor.
+        setForm(nuevoEmisor());
+        avisar('Emisor creado. El formulario quedó en blanco para registrar otro.', 'ok');
+      } else {
+        avisar('Emisor guardado.', 'ok');
+      }
     } catch (e) {
       avisar((e as Error).message, 'err');
     } finally {
