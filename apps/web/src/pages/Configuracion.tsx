@@ -5,6 +5,7 @@ import { FRASE_LIMPIAR_TODO, type ResultadoLimpieza, type UsuarioResumen } from 
 import { Alerta, Campo, Texto } from '../components/ui';
 import { config } from '../config';
 import { useApp } from '../estado';
+import { borrarConfigContable } from '../lib/contabilidad';
 
 const resumenLimpieza = (r: ResultadoLimpieza) =>
   `${r.emisoresEliminados} emisor(es) eliminado(s)${r.emisoresCompartidos ? `; se retiró al usuario de ${r.emisoresCompartidos} emisor(es) compartido(s)` : ''}. Las cuentas se conservan.`;
@@ -14,7 +15,7 @@ const resumenLimpieza = (r: ResultadoLimpieza) =>
  * otro usuario o de todos solo se muestra si el servidor confirma que la cuenta es de administrador.
  */
 function Limpieza() {
-  const { backend, usuario, avisar } = useApp();
+  const { backend, usuario, emisores, avisar } = useApp();
   const [admin, setAdmin] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioResumen[]>([]);
   const [elegido, setElegido] = useState('');
@@ -44,11 +45,14 @@ function Limpieza() {
     };
   }, [backend, cargarUsuarios]);
 
-  const limpiar = async (pregunta: string, accion: () => Promise<ResultadoLimpieza>) => {
+  /** `contable`: emisores cuya configuración contable (apertura, ajustes, cierres) se borra de este navegador; `'todos'` la borra completa. */
+  const limpiar = async (pregunta: string, accion: () => Promise<ResultadoLimpieza>, contable: string[] | 'todos' = []) => {
     if (!confirm(pregunta)) return;
     setOcupado(true);
     try {
-      avisar(`Listo: ${resumenLimpieza(await accion())}`, 'ok');
+      const resultado = await accion();
+      borrarConfigContable(contable === 'todos' ? undefined : contable);
+      avisar(`Listo: ${resumenLimpieza(resultado)}`, 'ok');
       setFrase('');
       if (admin) await cargarUsuarios();
     } catch (e) {
@@ -70,7 +74,7 @@ function Limpieza() {
           <strong>Mis datos</strong>
           <span className="small muted">Solo los datos de {usuario?.email}. Si comparte un emisor con otros usuarios, ese emisor se conserva para ellos y solo se le retira a usted.</span>
           <div>
-            <button className="btn btn-danger" disabled={ocupado} onClick={() => limpiar(`¿Borrar todos sus datos de práctica (${usuario?.email})? Su cuenta se conserva.`, () => backend.limpiarMisDatos())}>
+            <button className="btn btn-danger" disabled={ocupado} onClick={() => limpiar(`¿Borrar todos sus datos de práctica (${usuario?.email})? Su cuenta se conserva.`, () => backend.limpiarMisDatos(), emisores.map((e) => e.id))}>
               Limpiar mis datos
             </button>
           </div>
@@ -98,7 +102,7 @@ function Limpieza() {
               <Texto etiqueta={`Escriba «${FRASE_LIMPIAR_TODO}» para confirmar`} valor={frase} onCambio={setFrase}
                 ayuda={`Borra los datos de práctica de las ${usuarios.length} cuenta(s) registradas. Las cuentas se conservan.`} />
               <div>
-                <button className="btn btn-danger" disabled={ocupado || frase !== FRASE_LIMPIAR_TODO} onClick={() => limpiar('¿Borrar los datos de práctica de TODOS los usuarios? No se puede deshacer.', () => backend.limpiarTodo(frase))}>
+                <button className="btn btn-danger" disabled={ocupado || frase !== FRASE_LIMPIAR_TODO} onClick={() => limpiar('¿Borrar los datos de práctica de TODOS los usuarios? No se puede deshacer.', () => backend.limpiarTodo(frase), 'todos')}>
                   Limpiar todo
                 </button>
               </div>

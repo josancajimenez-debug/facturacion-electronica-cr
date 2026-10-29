@@ -31,7 +31,8 @@ export function BalanceApertura() {
   const borrador: AperturaContable = modo === 'capital'
     ? { fecha, capital }
     : { fecha, saldos: conMonto, existencias: existencias.filter((e) => e.cabys || e.cantidad || e.costo), archivo };
-  const errores = modo === 'saldos' ? [...validarApertura(borrador), ...(conMonto.length ? [] : ['Anexe el balance o registre los saldos por cuenta.'])] : [!fecha && capital > 0 && 'Indique la fecha del asiento de apertura.'].filter((x): x is string => !!x);
+  const errores = validarApertura(borrador);
+  const conDatos = !!fecha || capital > 0 || conMonto.length > 0;
   const t = totalesApertura(conMonto);
   const inventario = conMonto.find((s) => s.cuenta === '1.1.03.01');
 
@@ -62,11 +63,10 @@ export function BalanceApertura() {
 
   const guardar = () => {
     if (errores.length) return avisar(errores[0], 'err');
-    guardarConfig({ ...config, apertura: borrador });
-    avisar('Balance de apertura guardado. Los libros se recalcularon.', 'ok');
+    if (guardarConfig({ ...config, apertura: borrador })) avisar('Balance de apertura guardado. Los libros se recalcularon.', 'ok');
   };
   const quitar = () => {
-    guardarConfig({ ...config, apertura: undefined });
+    if (!guardarConfig({ ...config, apertura: undefined })) return;
     setFecha('');
     setCapital(0);
     setSaldos([saldoVacio(), saldoVacio()]);
@@ -134,7 +134,7 @@ export function BalanceApertura() {
               </div>
               <div className="card-body stack">
                 <div className="table-wrap">
-                  <table>
+                  <table className="tabla-editable">
                     <thead><tr><th>Cuenta</th><th className="right" style={{ width: 170 }}>Debe</th><th className="right" style={{ width: 170 }}>Haber</th><th /></tr></thead>
                     <tbody>
                       {saldos.map((s, i) => (
@@ -170,7 +170,7 @@ export function BalanceApertura() {
                 </p>
                 {existencias.length > 0 && (
                   <div className="table-wrap">
-                    <table>
+                    <table className="tabla-editable">
                       <thead><tr><th>Artículo (CAByS)</th><th>Descripción</th><th className="right" style={{ width: 120 }}>Cantidad</th><th className="right" style={{ width: 160 }}>Costo total</th><th /></tr></thead>
                       <tbody>
                         {existencias.map((e, i) => (
@@ -202,7 +202,7 @@ export function BalanceApertura() {
           </>
         )}
 
-        {errores.length > 0 && (modo === 'capital' ? capital > 0 : t.debe > 0 || t.haber > 0) && <Alerta tipo="warn">{errores.join(' ')}</Alerta>}
+        {errores.length > 0 && conDatos && <Alerta tipo="warn">{errores.join(' ')}</Alerta>}
         <div className="row">
           <button className="btn btn-primary" onClick={guardar} disabled={errores.length > 0}><Save /> Guardar balance de apertura</button>
           {inicial && <button className="btn btn-danger" onClick={quitar}><Trash2 /> Quitar apertura</button>}

@@ -41,8 +41,8 @@ export function LibroMayor() {
           <p>Movimientos y saldo de cada cuenta a partir del libro diario, y balance de comprobación de sumas y saldos al cierre del período.</p>
         </div>
         <div className="row" style={{ alignItems: 'flex-end' }}>
-          <div style={{ width: 160 }}><Texto etiqueta="Desde" tipo="month" valor={desde} onCambio={(v) => v && setDesde(v)} /></div>
-          <div style={{ width: 160 }}><Texto etiqueta="Hasta" tipo="month" valor={hasta} onCambio={(v) => v && setHasta(v)} /></div>
+          <div style={{ width: 160 }}><Texto etiqueta="Desde" tipo="month" valor={desde} onCambio={(v) => { if (!v) return; setDesde(v); if (v > hasta) setHasta(v); }} /></div>
+          <div style={{ width: 160 }}><Texto etiqueta="Hasta" tipo="month" valor={hasta} onCambio={(v) => { if (!v) return; setHasta(v); if (v < desde) setDesde(v); }} /></div>
           <button className="btn" onClick={exportar} disabled={mayor.length === 0}><Download /> CSV</button>
         </div>
       </div>

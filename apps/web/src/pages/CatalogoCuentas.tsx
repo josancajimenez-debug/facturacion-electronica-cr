@@ -27,8 +27,7 @@ export function CatalogoCuentas() {
   const guardar = () => {
     if (!(p.umbralCapitalizacion >= 0)) return avisar('El umbral de capitalización debe ser un monto válido.', 'err');
     // La apertura se edita en su propia página: se conserva la guardada.
-    guardarConfig({ ...borrador, apertura: config.apertura });
-    avisar('Políticas contables guardadas. Los libros se recalcularon.', 'ok');
+    if (guardarConfig({ ...borrador, apertura: config.apertura })) avisar('Políticas contables guardadas. Los libros se recalcularon.', 'ok');
   };
 
   const exportar = () =>

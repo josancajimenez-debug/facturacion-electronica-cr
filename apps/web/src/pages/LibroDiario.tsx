@@ -37,13 +37,13 @@ export function LibroDiario() {
       <div className="page-head">
         <div>
           <h1>Libro diario</h1>
-          <p>Asientos generados automáticamente de cada comprobante aceptado, en orden cronológico. Son propuestas en borrador hasta que el contador los apruebe.</p>
+          <p>Asientos en orden cronológico: apertura, los generados de cada comprobante aceptado o confirmado, y los de ajuste y cierre. Son propuestas en borrador hasta que el contador los apruebe.</p>
         </div>
         <div className="row" style={{ alignItems: 'flex-end' }}>
           {!clave && (
             <>
-              <div style={{ width: 160 }}><Texto etiqueta="Desde" tipo="month" valor={desde} onCambio={(v) => v && setDesde(v)} /></div>
-              <div style={{ width: 160 }}><Texto etiqueta="Hasta" tipo="month" valor={hasta} onCambio={(v) => v && setHasta(v)} /></div>
+              <div style={{ width: 160 }}><Texto etiqueta="Desde" tipo="month" valor={desde} onCambio={(v) => { if (!v) return; setDesde(v); if (v > hasta) setHasta(v); }} /></div>
+              <div style={{ width: 160 }}><Texto etiqueta="Hasta" tipo="month" valor={hasta} onCambio={(v) => { if (!v) return; setHasta(v); if (v < desde) setDesde(v); }} /></div>
             </>
           )}
           <button className="btn" onClick={exportar} disabled={asientos.length === 0}><Download /> CSV</button>

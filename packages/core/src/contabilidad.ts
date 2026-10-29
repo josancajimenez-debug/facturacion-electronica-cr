@@ -692,7 +692,10 @@ export function generarLibroDiario(e: EntradaLibroDiario): LibroDiario {
   const docs: DocumentoContable[] = [];
   const vistos = new Set<string>();
   const agregar = (d: DocumentoContable) => {
-    if (vistos.has(d.clave)) return omitidos.push({ clave: d.clave, documento: NOMBRE_COMPROBANTE[d.tipo], motivo: 'Duplicado: la clave ya está contabilizada.' });
+    if (vistos.has(d.clave)) {
+      omitidos.push({ clave: d.clave, documento: NOMBRE_COMPROBANTE[d.tipo], motivo: 'Duplicado: la clave ya está contabilizada.' });
+      return;
+    }
     vistos.add(d.clave);
     docs.push(d);
   };

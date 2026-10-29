@@ -61,6 +61,22 @@ function notasDeDetalle(filas: RenglonEstado[]) {
   return notas;
 }
 
+/** Encabezado formal de cada estado: entidad, nombre del estado, fecha o periodo y moneda. */
+function Encabezado({ entidad, titulo, cuando }: { entidad: string; titulo: string; cuando: string }) {
+  return (
+    <div className="card-head" style={{ display: 'block', textAlign: 'center' }}>
+      <strong>{entidad}</strong>
+      <h2 style={{ margin: '2px 0' }}>{titulo}</h2>
+      <span className="small muted">{cuando} · En colones costarricenses</span>
+    </div>
+  );
+}
+
+/** Todas las secciones se dibujan (para imprimir el juego completo); en pantalla solo se ve la activa. */
+function Seccion({ visible, children }: { visible: boolean; children: ReactNode }) {
+  return <section className={`ef-seccion${visible ? '' : ' ef-oculta'}`}>{children}</section>;
+}
+
 export function EstadosFinancieros() {
   const { comprobantesListos, emisor } = useApp();
   const { libro, config } = useContabilidad();
@@ -91,17 +107,6 @@ export function EstadosFinancieros() {
   const notas = notasDeDetalle([...s.activo, ...s.pasivo, ...s.patrimonio]);
   const cierre = config.cierres?.[corte.slice(0, 4)];
 
-  /** Encabezado formal de cada estado: entidad, nombre del estado, fecha o periodo y moneda. */
-  const Encabezado = ({ titulo, cuando }: { titulo: string; cuando: string }) => (
-    <div className="card-head" style={{ display: 'block', textAlign: 'center' }}>
-      <strong>{emisor.nombre}</strong>
-      <h2 style={{ margin: '2px 0' }}>{titulo}</h2>
-      <span className="small muted">{cuando} · En colones costarricenses</span>
-    </div>
-  );
-  const Seccion = ({ id, children }: { id: Vista; children: ReactNode }) => (
-    <section className={`ef-seccion${vista === id ? '' : ' ef-oculta'}`}>{children}</section>
-  );
 
   const exportar = () =>
     descargar(`estados-financieros-${corte}.csv`, csv([
@@ -168,8 +173,8 @@ export function EstadosFinancieros() {
           ))}
         </div>
 
-        <Seccion id="situacion">
-          <Encabezado titulo="Estado de situación financiera" cuando={`Al ${fecha(hasta)}`} />
+        <Seccion visible={vista === 'situacion'}>
+          <Encabezado entidad={emisor.nombre} titulo="Estado de situación financiera" cuando={`Al ${fecha(hasta)}`} />
           <div className="table-wrap">
             <table>
               <tbody>
@@ -188,8 +193,8 @@ export function EstadosFinancieros() {
           </p>
         </Seccion>
 
-        <Seccion id="resultados">
-          <Encabezado titulo="Estado del resultado integral" cuando={`Periodo ${periodo}`} />
+        <Seccion visible={vista === 'resultados'}>
+          <Encabezado entidad={emisor.nombre} titulo="Estado del resultado integral" cuando={`Periodo ${periodo}`} />
           <div className="table-wrap">
             <table>
               <tbody>
@@ -212,8 +217,8 @@ export function EstadosFinancieros() {
           </p>
         </Seccion>
 
-        <Seccion id="patrimonio">
-          <Encabezado titulo="Estado de cambios en el patrimonio" cuando={`Periodo ${periodo}`} />
+        <Seccion visible={vista === 'patrimonio'}>
+          <Encabezado entidad={emisor.nombre} titulo="Estado de cambios en el patrimonio" cuando={`Periodo ${periodo}`} />
           <div className="table-wrap">
             <table>
               <thead><tr><th>Concepto</th><th className="right">Capital social</th><th className="right">Reservas</th><th className="right">Resultados acumulados</th><th className="right">Resultado del periodo</th><th className="right">Total</th></tr></thead>
@@ -236,8 +241,8 @@ export function EstadosFinancieros() {
           </p>
         </Seccion>
 
-        <Seccion id="flujos">
-          <Encabezado titulo="Estado de flujos de efectivo" cuando={`Periodo ${periodo} · Método indirecto`} />
+        <Seccion visible={vista === 'flujos'}>
+          <Encabezado entidad={emisor.nombre} titulo="Estado de flujos de efectivo" cuando={`Periodo ${periodo} · Método indirecto`} />
           <div className="table-wrap">
             <table>
               <tbody>
@@ -262,8 +267,8 @@ export function EstadosFinancieros() {
           </p>
         </Seccion>
 
-        <Seccion id="notas">
-          <Encabezado titulo="Notas a los estados financieros" cuando={`Al ${fecha(hasta)}`} />
+        <Seccion visible={vista === 'notas'}>
+          <Encabezado entidad={emisor.nombre} titulo="Notas a los estados financieros" cuando={`Al ${fecha(hasta)}`} />
           <div className="card-body stack notas-ef">
             <div>
               <h3>Nota 1. Información general</h3>
@@ -313,8 +318,8 @@ export function EstadosFinancieros() {
           </div>
         </Seccion>
 
-        <Seccion id="inventario">
-          <Encabezado titulo="Inventario de mercadería" cuando={`Al ${fecha(hasta)} · Costo promedio ponderado (Sección 13)`} />
+        <Seccion visible={vista === 'inventario'}>
+          <Encabezado entidad={emisor.nombre} titulo="Inventario de mercadería" cuando={`Al ${fecha(hasta)} · Costo promedio ponderado (Sección 13)`} />
           <div className="table-wrap">
             <table>
               <thead><tr><th>Artículo</th><th>CAByS</th><th className="right">Cantidad</th><th className="right">Costo promedio</th><th className="right">Costo total</th></tr></thead>

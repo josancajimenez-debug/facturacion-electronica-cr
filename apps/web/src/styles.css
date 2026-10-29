@@ -201,6 +201,9 @@ input[type='checkbox'], input[type='radio'] { width: auto; min-height: auto; acc
 
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
+/* Tablas con controles (asientos y saldos): anchos mínimos para que en móvil se desplacen en lugar de aplastar los campos. */
+.tabla-editable select { min-width: 240px; }
+.tabla-editable input { min-width: 120px; }
 th, td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
 th { font-size: 12px; font-weight: 600; color: var(--text-2); background: var(--surface-2); white-space: nowrap; }
 tbody tr:hover { background: var(--surface-2); }

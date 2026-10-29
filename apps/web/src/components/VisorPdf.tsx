@@ -23,18 +23,22 @@ export function VisorPdf({ url }: { url: string }) {
       const lienzos: HTMLCanvasElement[] = [];
       // Resolución alta para que el texto se lea nítido en pantallas de alta densidad.
       const escala = 2;
-      for (let n = 1; n <= doc.numPages; n++) {
-        const pagina = await doc.getPage(n);
-        const vista = pagina.getViewport({ scale: escala });
-        const lienzo = document.createElement('canvas');
-        lienzo.width = vista.width;
-        lienzo.height = vista.height;
-        lienzo.className = 'pdf-pagina';
-        lienzo.setAttribute('aria-label', `Página ${n} de ${doc.numPages}`);
-        await pagina.render({ canvasContext: lienzo.getContext('2d')!, viewport: vista }).promise;
-        lienzos.push(lienzo);
+      try {
+        // Se deja de dibujar si el usuario sale de la pestaña; el documento se libera siempre.
+        for (let n = 1; n <= doc.numPages && !cancelado; n++) {
+          const pagina = await doc.getPage(n);
+          const vista = pagina.getViewport({ scale: escala });
+          const lienzo = document.createElement('canvas');
+          lienzo.width = vista.width;
+          lienzo.height = vista.height;
+          lienzo.className = 'pdf-pagina';
+          lienzo.setAttribute('aria-label', `Página ${n} de ${doc.numPages}`);
+          await pagina.render({ canvasContext: lienzo.getContext('2d')!, viewport: vista }).promise;
+          lienzos.push(lienzo);
+        }
+      } finally {
+        await doc.destroy();
       }
-      await doc.destroy();
       if (cancelado || !destino) return;
       destino.replaceChildren(...lienzos);
       setEstado('listo');

@@ -54,6 +54,7 @@ export function validarApertura(a: AperturaContable): string[] {
   const errores: string[] = [];
   if (!a.fecha) errores.push('Indique la fecha del balance de apertura.');
   const saldos = a.saldos ?? [];
+  if (!saldos.length && !((a.capital ?? 0) > 0)) errores.push('Registre el capital aportado o los saldos del balance.');
   for (const s of saldos) {
     if (!ES_BALANCE.has(s.cuenta)) errores.push(`La cuenta ${s.cuenta || '(vacía)'} no es una subcuenta de activo, pasivo o patrimonio del catálogo.`);
     if (s.debe < 0 || s.haber < 0) errores.push(`${s.cuenta}: los montos no pueden ser negativos.`);

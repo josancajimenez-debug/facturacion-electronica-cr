@@ -10,6 +10,7 @@ import {
   type PoliticasContables,
 } from '@fe-cr/core';
 import { useCallback, useMemo, useState } from 'react';
+import { ERROR_ALMACENAMIENTO } from '../backend/local';
 import { useApp } from '../estado';
 
 export interface ConfigContable {
@@ -19,7 +20,21 @@ export interface ConfigContable {
   cierres?: Record<string, ConfigCierre>;
 }
 
-const clave = (emisorId: string) => `fe-cr:contabilidad:${emisorId}`;
+const PREFIJO = 'fe-cr:contabilidad:';
+const clave = (emisorId: string) => `${PREFIJO}${emisorId}`;
+
+/**
+ * Borra la configuración contable guardada en este navegador para los emisores indicados (o para todos
+ * si se omite la lista). Se usa al limpiar los datos de práctica para no dejar datos huérfanos.
+ */
+export function borrarConfigContable(emisorIds?: string[]): void {
+  try {
+    const claves = emisorIds ? emisorIds.map(clave) : Object.keys(localStorage).filter((k) => k.startsWith(PREFIJO));
+    claves.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* sin almacenamiento */
+  }
+}
 
 function leer(emisorId: string | undefined): ConfigContable {
   try {
@@ -38,20 +53,24 @@ function leer(emisorId: string | undefined): ConfigContable {
 export function useContabilidad(): {
   libro: (LibroDiario & { cierres: Record<string, DetalleCierre> }) | null;
   config: ConfigContable;
-  guardarConfig: (c: ConfigContable) => void;
+  /** Devuelve false (y avisa) si no se pudo guardar en el navegador. */
+  guardarConfig: (c: ConfigContable) => boolean;
 } {
-  const { emisor, comprobantes, recibidos, productos } = useApp();
+  const { emisor, comprobantes, recibidos, productos, avisar } = useApp();
   const [config, setConfig] = useState(() => leer(emisor?.id));
   const guardarConfig = useCallback(
     (c: ConfigContable) => {
       setConfig(c);
       try {
         if (emisor) localStorage.setItem(clave(emisor.id), JSON.stringify(c));
+        return true;
       } catch {
-        /* sin almacenamiento */
+        // Sin espacio o almacenamiento bloqueado: el cambio queda solo en esta pantalla.
+        avisar(ERROR_ALMACENAMIENTO, 'err');
+        return false;
       }
     },
-    [emisor],
+    [emisor, avisar],
   );
   const base = useMemo(
     () =>

@@ -39,7 +39,7 @@ export function AjustesCierre() {
   const c = config.cierres?.[anio];
   const detalle = libro.cierres[anio];
   const anios = [...new Set([...libro.asientos.map((a) => a.fecha.slice(0, 4)), hoyCR().slice(0, 4), ...Object.keys(config.cierres ?? {})])].sort().reverse();
-  const guardar = (cambio: Partial<ConfigCierre>) => c && guardarConfig({ ...config, cierres: { ...config.cierres, [anio]: { ...c, ...cambio } } });
+  const guardar = (cambio: Partial<ConfigCierre>) => !!c && guardarConfig({ ...config, cierres: { ...config.cierres, [anio]: { ...c, ...cambio } } });
   const preparar = () =>
     guardarConfig({ ...config, cierres: { ...config.cierres, [anio]: { ajustesAutomaticos: false, cerrado: false, manuales: [], parametros: parametrosPredeterminados(emisor.identificacion.tipo) } } });
   const bloqueado = !!c?.cerrado;
@@ -57,8 +57,8 @@ export function AjustesCierre() {
   ].filter((x): x is string => !!x);
   const cambiarLinea = (i: number, l: Partial<LineaManual>) => setLineas(lineas.map((x, j) => (j === i ? { ...x, ...l } : x)));
   const registrarManual = () => {
-    if (!c) return;
-    guardar({ manuales: [...c.manuales, { id: crypto.randomUUID(), fecha, glosa: glosa.trim(), lineas: lineas.filter((l) => l.cuenta && (l.debe || l.haber)) }] });
+    // Si no se pudo guardar se conserva lo digitado para reintentar.
+    if (!guardar({ manuales: [...(c?.manuales ?? []), { id: crypto.randomUUID(), fecha, glosa: glosa.trim(), lineas: lineas.filter((l) => l.cuenta && (l.debe || l.haber)) }] })) return;
     setGlosa('');
     setLineas([lineaVacia(), lineaVacia()]);
     avisar('Asiento de ajuste registrado en el libro diario.', 'ok');
@@ -77,7 +77,7 @@ export function AjustesCierre() {
         <div className="row" style={{ alignItems: 'flex-end' }}>
           <div className="field" style={{ width: 140 }}>
             <label htmlFor="anio-cierre">Periodo fiscal</label>
-            <select id="anio-cierre" value={anio} onChange={(e) => setAnio(e.target.value)}>
+            <select id="anio-cierre" value={anio} onChange={(e) => { setAnio(e.target.value); setFechaAjuste(''); }}>
               {anios.map((a) => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
@@ -120,7 +120,7 @@ export function AjustesCierre() {
                     <Texto etiqueta="Fecha" tipo="date" valor={fecha} onCambio={setFechaAjuste} />
                   </div>
                   <div className="table-wrap">
-                    <table>
+                    <table className="tabla-editable">
                       <thead><tr><th>Cuenta</th><th className="right" style={{ width: 160 }}>Debe</th><th className="right" style={{ width: 160 }}>Haber</th><th /></tr></thead>
                       <tbody>
                         {lineas.map((l, i) => (
@@ -203,7 +203,7 @@ export function AjustesCierre() {
                     {c.cerrado ? (
                       <button className="btn" onClick={() => guardar({ cerrado: false })}><LockOpen /> Reabrir el periodo {anio}</button>
                     ) : (
-                      <button className="btn btn-primary" onClick={() => { guardar({ cerrado: true }); avisar(`Periodo ${anio} cerrado. Los resultados pasaron a utilidades acumuladas.`, 'ok'); }}>
+                      <button className="btn btn-primary" onClick={() => { if (guardar({ cerrado: true })) avisar(`Periodo ${anio} cerrado. Los resultados pasaron a utilidades acumuladas.`, 'ok'); }}>
                         <Lock /> Registrar el cierre de {anio}
                       </button>
                     )}

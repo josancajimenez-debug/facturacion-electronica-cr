@@ -73,6 +73,11 @@ describe('Balance de apertura', () => {
     expect(new Kardex().existencias()).toEqual([]);
   });
 
+  it('exige fecha y capital o saldos', () => {
+    expect(validarApertura({ fecha: '', capital: 0 })).toEqual(['Indique la fecha del balance de apertura.', 'Registre el capital aportado o los saldos del balance.']);
+    expect(validarApertura({ fecha: '2026-01-01', capital: 1000 })).toEqual([]);
+  });
+
   it('sin saldos conserva el aporte de capital en efectivo', () => {
     expect(asientoAperturaBalance({ fecha: '2026-01-01', capital: 1000 })).toMatchObject({ totalDebe: 1000, glosa: expect.stringMatching(/aporte de capital/) });
     expect(asientoAperturaBalance({ fecha: '2026-01-01' })).toBeNull();
