@@ -89,6 +89,17 @@ export interface Receptor {
   actividadEconomica?: string;
   exoneracion?: Exoneracion;
   notas?: string;
+  /** Si se le compra con Factura Electrónica de Compra: régimen del vendedor y su verificación. */
+  proveedor?: DatosProveedor;
+}
+
+/** Régimen del vendedor en la FEC (Decreto 44739-H, art. 2 inc. 13 y art. 7). */
+export type RegimenVendedor = 'simplificado' | 'agropecuario' | 'no-inscrito' | 'no-domiciliado' | 'otro-no-obligado' | 'no-confirmante' | 'general';
+
+export interface DatosProveedor {
+  regimen: RegimenVendedor;
+  /** Constancia de la última consulta al API de Hacienda (padrón y registro agropecuario del MAG). */
+  verificacion?: { fecha: string; detalle: string };
 }
 
 export interface ImpuestoAdicional {
@@ -202,6 +213,8 @@ export interface BorradorComprobante {
    * en la FEC es el vendedor, que se consigna en el nodo <Emisor>.
    */
   contraparte?: Contraparte;
+  /** Solo FEC: régimen del vendedor, que define si procede la FEC y qué referencia exige. No viaja en el XML. */
+  regimenVendedor?: RegimenVendedor;
   condicionVenta: string;
   condicionVentaOtros?: string;
   plazoCredito?: number;

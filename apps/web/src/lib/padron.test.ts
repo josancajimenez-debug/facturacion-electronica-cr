@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { consultable, consultarPadron, tipoSegunNumero } from './padron';
+import { consultable, consultarPadron, consultarRegistroMag, tipoSegunNumero } from './padron';
 
 const responder = (status: number, cuerpo?: unknown) =>
   vi.stubGlobal('fetch', vi.fn(async () => new Response(cuerpo === undefined ? null : JSON.stringify(cuerpo), { status })));
@@ -48,6 +48,16 @@ describe('padrón de Hacienda', () => {
     expect(await consultarPadron('112340567')).toEqual({ inscrito: false, numero: '112340567' });
     responder(429);
     await expect(consultarPadron('112340567')).rejects.toThrow(/Límite de consultas/);
+  });
+
+  it('registro agropecuario del MAG: toma el activo y trata el «Not Found» con estado 200 como sin registro', async () => {
+    responder(200, { listaDatosMAG: [
+      { nombreMAG: 'Finca A', indicadorActivoMAG: false, fechaBajaMAG: '2023-06-17', fuenteMAG: 'MAG' },
+      { nombreMAG: 'Finca A', indicadorActivoMAG: true, fechaBajaMAG: '2029-06-17', fuenteMAG: 'SFE Viveros' },
+    ] });
+    expect(await consultarRegistroMag('112340567')).toEqual({ activo: true, nombre: 'Finca A', fuente: 'SFE Viveros', vence: '2029-06-17' });
+    responder(200, { title: 'Not Found', status: 404 });
+    expect(await consultarRegistroMag('112340567')).toBeNull();
   });
 
   it('en el navegador el 404 llega como error de red: si Hacienda responde, no está inscrito', async () => {

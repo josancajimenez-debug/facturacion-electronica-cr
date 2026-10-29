@@ -22,6 +22,7 @@ Menú **Emisor y actividades**.
 ## 3. Receptores y productos
 
 - **Receptores**: nombre, identificación, correo, actividad económica y, si aplica, **exoneración** (tipo de documento, número, institución, tarifa exonerada y fecha). Las exoneraciones se aplican automáticamente a las líneas.
+- **Proveedores (FEC)**: vendedores a los que usted les documenta la compra con una **Factura Electrónica de Compra** (Decreto 44739-H, art. 2 inc. 13). Indique el régimen del vendedor: *Régimen de Tributación Simplificada*, *Régimen Especial Agropecuario*, persona física no inscrita, proveedor no domiciliado u otro no obligado del art. 7. **Verificar en Hacienda** consulta el padrón y el registro agropecuario del MAG, sugiere el régimen y guarda la constancia con la fecha. Si el vendedor es del régimen simplificado pero está inscrito como **emisor receptor no confirmante**, o es del régimen general, la FEC **no procede**: él debe emitirle la factura y usted la registra en *Recepción*. El botón **Emitir FEC** abre el comprobante con el vendedor, el régimen y la referencia exigida ya puestos (tipo 14 en el régimen especial, 16 en el no domiciliado); solo falta anotar el número del comprobante que le entregó el vendedor y las líneas.
 - **Productos y servicios**: busque el código en el **CAByS 2025** por palabra o número. El sistema sugiere la tarifa del IVA del catálogo; confírmela según su operación. Elija unidad de medida (nota 15) y precio sin IVA.
 
 ## 4. Emitir un comprobante

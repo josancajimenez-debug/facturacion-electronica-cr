@@ -24,11 +24,13 @@ import {
   actualizacionVigente,
 } from './actualizacion';
 import { REGEX_CLAVE } from './clave';
+import { validarRegimenVendedor } from './compras';
 import { REGEX_FECHA_RFC3339 } from './fechas';
 import { verificarUbicacion } from './ubicacion';
 import type { BorradorComprobante, Emisor, Identificacion, LineaCalculada, Referencia, Resumen, Validacion } from './tipos';
 
 const ANEXO = 'Anexos y Estructuras v4.4';
+const FUENTE_FEC = 'Decreto 44739-H, art. 2 inc. 13 y art. 7';
 const FUENTE_DTA = 'División Territorial Administrativa 2022 (Registro Nacional – IGN); nota 14';
 
 /** Expresión regular de correo electrónico publicada en el Anexo 1 v4.4 (campo CorreoElectronico). */
@@ -143,6 +145,7 @@ export function validarBorrador(
   if (!cond) err('condicionVenta', 'Condición de venta no válida (nota 5).');
   if (b.condicionVenta === '12' && b.tipo !== 'FE') err('condicionVenta', 'El código 12 solo se permite en Factura Electrónica.');
   if (b.condicionVenta === '13' && b.tipo !== 'FEC') err('condicionVenta', 'El código 13 solo se permite en Factura Electrónica de Compra.');
+  validarRegimenVendedor(b, (campo, m) => err(campo, m, FUENTE_FEC), (campo, m) => adv(campo, m, FUENTE_FEC));
   if (['09', '11'].includes(b.condicionVenta) !== (b.tipo === 'REP')) {
     err('condicionVenta', 'Los códigos 09 y 11 son exclusivos (y los únicos permitidos) del Recibo Electrónico de Pago.');
   }

@@ -153,7 +153,7 @@ export const TERMINOS: Termino[] = [
   },
   {
     termino: 'Factura electrónica de compra (FEC)',
-    definicion: 'Documento que emite el adquirente de un bien o servicio cuando el vendedor no está obligado a emitir comprobantes, está en el régimen especial agropecuario, es un proveedor no domiciliado o es una persona física no inscrita. No aplica a compras al régimen simplificado, a los no confirmantes, al transporte público ni a pagos al Estado por sus actividades habituales.',
+    definicion: 'Documento que emite el adquirente de un bien o servicio cuando el vendedor no está obligado a emitir comprobantes, está en el régimen especial agropecuario, es un proveedor no domiciliado o es una persona física no inscrita. Procede, por ejemplo, con el régimen de tributación simplificada (no obligado a emitir, art. 7 inc. 1) y con el régimen especial agropecuario, referenciando el comprobante que entregó el vendedor (tipo 14). No aplica a contribuyentes del régimen simplificado inscritos como emisores receptores no confirmantes (ellos emiten su comprobante), al transporte público ni a pagos al Estado por sus actividades habituales.',
     fuente: `(${D}, art. 2, inc. 13)`,
   },
   {

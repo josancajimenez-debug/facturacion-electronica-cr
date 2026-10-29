@@ -58,7 +58,7 @@ export function Receptores() {
               <tbody>
                 {lista.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.nombre}</td>
+                    <td>{r.nombre}{r.proveedor && <> <span className="badge" title="Registrado en Proveedores (FEC)">Proveedor FEC</span></>}</td>
                     <td className="nowrap">{r.identificacion ? `${descripcion(TIPO_IDENTIFICACION, r.identificacion.tipo)} · ${r.identificacion.numero}` : '—'}</td>
                     <td>{r.correo ?? '—'}</td>
                     <td className="mono">{r.actividadEconomica ?? '—'}</td>

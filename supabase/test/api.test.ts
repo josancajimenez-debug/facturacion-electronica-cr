@@ -1,6 +1,6 @@
 // Lógica de la función Edge "api" contra PostgreSQL (PGlite) con el esquema real.
 // El repositorio replica en SQL lo que index.ts hace con supabase-js y la llave de servicio.
-import { resumenDocumento, type Comprobante, type Emisor, type Receptor } from '@fe-cr/core';
+import { RECEPTORES_DEMO, resumenDocumento, type Comprobante, type Emisor, type Receptor } from '@fe-cr/core';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ejecutar, procesarEnvio, type ComprobanteGuardado, type Opciones, type Recibido, type Repo } from '../functions/api/logica';
 import { crearBase } from './pg';
@@ -97,7 +97,7 @@ describe('función Edge api', () => {
     const r = await ejecutar('sembrarDemo', {}, ana, repo, op);
     expect(r.status).toBe(200);
     emisorId = r.cuerpo.emisorId as string;
-    expect(await como(ANA, 'select id from receptores')).toHaveLength(4);
+    expect(await como(ANA, 'select id from receptores')).toHaveLength(RECEPTORES_DEMO.length);
   });
 
   it('emite una FE, la procesa y queda aceptada con su historial', async () => {

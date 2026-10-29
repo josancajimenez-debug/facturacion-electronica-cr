@@ -29,6 +29,7 @@ const Normativa = pagina(() => import('./pages/Normativa'), 'Normativa');
 const PrimerosPasos = pagina(() => import('./pages/PrimerosPasos'), 'PrimerosPasos');
 const Productos = pagina(() => import('./pages/Productos'), 'Productos');
 const Receptores = pagina(() => import('./pages/Receptores'), 'Receptores');
+const Proveedores = pagina(() => import('./pages/Proveedores'), 'Proveedores');
 const Recepcion = pagina(() => import('./pages/Recepcion'), 'Recepcion');
 const Reportes = pagina(() => import('./pages/Reportes'), 'Reportes');
 
@@ -61,6 +62,7 @@ export function App() {
               <Route path="/recepcion" element={<Recepcion />} />
               <Route path="/emisor" element={<EmisorPagina />} />
               <Route path="/receptores" element={<Receptores />} />
+              <Route path="/proveedores" element={<Proveedores />} />
               <Route path="/productos" element={<Productos />} />
               <Route path="/contabilidad/catalogo" element={<CatalogoCuentas />} />
               <Route path="/contabilidad/apertura" element={<BalanceApertura />} />

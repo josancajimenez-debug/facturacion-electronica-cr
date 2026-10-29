@@ -22,6 +22,7 @@ import {
   Settings,
   ShieldAlert,
   SunMoon,
+  Truck,
   Users,
 } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
@@ -38,6 +39,7 @@ const NAV = [
   { grupo: 'Registros' },
   { a: '/emisor', texto: 'Emisor y actividades', icono: Building2 },
   { a: '/receptores', texto: 'Receptores', icono: Users },
+  { a: '/proveedores', texto: 'Proveedores (FEC)', icono: Truck },
   { a: '/productos', texto: 'Productos y servicios', icono: Package },
   { grupo: 'Contabilidad' },
   { a: '/contabilidad/catalogo', texto: 'Catálogo y manual', icono: ListTree },

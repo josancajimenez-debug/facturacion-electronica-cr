@@ -64,6 +64,21 @@ export const RECEPTORES_DEMO: Receptor[] = [
     otrasSenasExtranjero: '100 Demo Street, Example City, United States',
     correo: 'billing@foreign-demo.test',
   },
+  // Proveedores a los que se les compra con Factura Electrónica de Compra (Decreto 44739-H, art. 2 inc. 13).
+  {
+    id: 'prov-agropecuario',
+    nombre: 'Productor Ficticio Agropecuario',
+    identificacion: { tipo: '01', numero: '199990002' },
+    ubicacion: { provincia: '5', canton: '01', distrito: '01', otrasSenas: 'Finca de pruebas' },
+    proveedor: { regimen: 'agropecuario' },
+  },
+  {
+    id: 'prov-simplificado',
+    nombre: 'Pulpería Ficticia del Régimen Simplificado',
+    identificacion: { tipo: '01', numero: '199990003' },
+    ubicacion: { provincia: '1', canton: '01', distrito: '01', otrasSenas: 'Local de pruebas' },
+    proveedor: { regimen: 'simplificado' },
+  },
 ];
 
 export const PRODUCTOS_DEMO: Producto[] = [

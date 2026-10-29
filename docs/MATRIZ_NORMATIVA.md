@@ -49,6 +49,7 @@ Método: primero se consultaron los enlaces oficiales de SINALEVI (ficha de la n
 | Representación gráfica PDF; tipo, clave y consecutivo juntos; descripciones de códigos | RES-0027 art. 5; notas 1 y 7 | `web/lib/pdf.ts` |
 | Bitácora de cada transacción | RES-0027 art. 6 | Tabla `bitacora` escrita solo por la función Edge y triggers de PostgreSQL (RLS impide escribirla desde el cliente) |
 | Consulta por cédula, número, medio de pago, condición, fecha, montos, impuestos y estados | Decreto 44739-H art. 14 inc. 10 | Página «Comprobantes emitidos» |
+| FEC según el régimen del vendedor: procede con el régimen de tributación simplificada, el régimen especial agropecuario, otros no obligados del art. 7, personas físicas no inscritas y no domiciliados; no procede con el RTS inscrito como emisor receptor no confirmante ni con el régimen general. En el régimen especial exige la referencia tipo 14 y en el no domiciliado la 16 (con identificación 05) | Decreto 44739-H art. 2 inc. 13, art. 4 inc. 2 y art. 7 incs. 1-2; Anexo nota 10 (códigos 14 y 16); Decreto 41943-H-MAG | `core/compras.ts` (`validarRegimenVendedor`, `borradorFecPara`); página «Proveedores (FEC)», que verifica el padrón (`/fe/ae`) y el registro agropecuario del MAG (`/fe/agropecuario`) |
 | Separación de entornos y bloqueo del envío real | Requisito del encargo | `core/entorno.ts`; la función Edge fija el ambiente «simulacion» y no contiene código de envío real |
 
 ### 2.1 Actualización v4.4 vigente desde el 1/11/2026

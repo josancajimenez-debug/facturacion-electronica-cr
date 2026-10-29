@@ -8,6 +8,7 @@ import {
   MEDIO_PAGO,
   MONEDA,
   NOMBRE_COMPROBANTE,
+  REGIMEN_VENDEDOR,
   SITUACION,
   TARIFA_IVA,
   TIPO_DOC_REFERENCIA,
@@ -16,13 +17,16 @@ import {
   TIPO_OTROS_CARGOS,
   TIPO_TRANSACCION,
   UNIDAD_MEDIDA,
+  borradorFecPara,
   fechaEmisionCR,
+  infoRegimen,
   previsualizar,
   tarifaIva,
   type BorradorComprobante,
   type Contraparte,
   type LineaBorrador,
   type Receptor,
+  type RegimenVendedor,
   type TipoComprobante,
   type Validacion,
 } from '@fe-cr/core';
@@ -116,14 +120,30 @@ export function NuevoComprobante() {
   // La contraparte se toma del receptor seleccionado.
   useEffect(() => {
     if (receptor) {
-      set({
+      // Actualización funcional: al abrir una FEC prellenada, este efecto corre junto al del tipo y no
+      // debe pisar con un valor viejo la actividad propia que aquel acaba de asignar.
+      setB((x) => ({
+        ...x,
         contraparte: contraparteDesde(receptor),
-        codigoActividadReceptor: b.tipo === 'FEC' ? b.codigoActividadReceptor : SIN_ACTIVIDAD_RECEPTOR.includes(b.tipo) ? undefined : receptor.actividadEconomica,
-      });
+        codigoActividadReceptor: x.tipo === 'FEC' ? x.codigoActividadReceptor : SIN_ACTIVIDAD_RECEPTOR.includes(x.tipo) ? undefined : receptor.actividadEconomica,
+      }));
     } else if (receptorId === '') {
       set({ contraparte: undefined });
     }
   }, [receptorId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // FEC a un proveedor registrado: su régimen define si procede y qué referencia exige (Decreto 44739-H, art. 2 inc. 13).
+  useEffect(() => {
+    const regimen = receptor?.proveedor?.regimen;
+    if (b.tipo !== 'FEC' || !regimen) return;
+    const sugerido = borradorFecPara(regimen, receptor.identificacion?.tipo);
+    setB((x) => ({
+      ...x,
+      regimenVendedor: regimen,
+      referencias: [...x.referencias, ...(sugerido.referencias ?? []).filter((r) => !x.referencias.some((y) => y.tipoDoc === r.tipoDoc))],
+      condicionVenta: sugerido.condicionVenta ?? x.condicionVenta,
+    }));
+  }, [receptorId, b.tipo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const vista = useMemo(() => previsualizar(b, emisor!), [b, emisor]);
   // Los errores devueltos al emitir dejan de ser válidos en cuanto se modifica el borrador.
@@ -204,6 +224,7 @@ export function NuevoComprobante() {
   };
 
   const esFEC = b.tipo === 'FEC';
+  const regimen = infoRegimen(b.regimenVendedor);
   const requiereRef = ['NC', 'ND', 'FEC', 'REP'].includes(b.tipo);
   const credito = ['02', '10'].includes(b.condicionVenta);
 
@@ -271,7 +292,15 @@ export function NuevoComprobante() {
                 vacio={b.tipo === 'TE' ? '— Consumidor final sin identificar —' : '— Seleccione —'}
                 mostrarCodigo={false}
                 onCambio={setReceptorId}
-                opciones={[...receptores.map((x) => ({ codigo: x.id, descripcion: `${x.nombre}${x.identificacion ? ` (${x.identificacion.numero})` : ''}` })), { codigo: '__manual', descripcion: 'Ingresar datos manualmente…' }]}
+                opciones={[
+                  // En la FEC primero los proveedores registrados para compras, con su régimen.
+                  ...[...receptores].sort((x, y) => (esFEC ? Number(!!y.proveedor) - Number(!!x.proveedor) : 0)).map((x) => ({
+                    codigo: x.id,
+                    descripcion: `${x.nombre}${x.identificacion ? ` (${x.identificacion.numero})` : ''}${esFEC && x.proveedor ? ` · ${infoRegimen(x.proveedor.regimen)?.descripcion ?? ''}` : ''}`,
+                  })),
+                  { codigo: '__manual', descripcion: 'Ingresar datos manualmente…' },
+                ]}
+                ayuda={esFEC ? <>Registre sus proveedores del régimen simplificado o agropecuario en <Link to="/proveedores">Proveedores (FEC)</Link>.</> : undefined}
               />
               {receptorId === '__manual' && (
                 <div className="grid grid-2 linea-card">
@@ -292,6 +321,21 @@ export function NuevoComprobante() {
                     </div>
                   ))}
                 </div>
+              )}
+              {esFEC && (
+                <>
+                  <Selector etiqueta="Régimen del vendedor" valor={b.regimenVendedor} vacio="— Seleccione —" mostrarCodigo={false} requerido
+                    onCambio={(v) => {
+                      const sugerido = v ? borradorFecPara(v as RegimenVendedor, b.contraparte?.identificacion?.tipo) : {};
+                      set({
+                        regimenVendedor: (v || undefined) as RegimenVendedor | undefined,
+                        referencias: [...b.referencias, ...(sugerido.referencias ?? []).filter((r) => !b.referencias.some((y) => y.tipoDoc === r.tipoDoc))],
+                      });
+                    }}
+                    opciones={REGIMEN_VENDEDOR.map((x) => ({ codigo: x.codigo, descripcion: `${x.descripcion}${x.procedeFec ? '' : ' — no procede FEC'}` }))}
+                    ayuda={regimen ? `${regimen.ayuda} Fundamento: ${regimen.fundamento}.` : 'Define si la compra se documenta con FEC (Decreto 44739-H, art. 2 inc. 13).'} />
+                  {regimen?.procedeFec === false && <Alerta tipo="err">No procede la Factura Electrónica de Compra. {regimen.ayuda}</Alerta>}
+                </>
               )}
               {receptor?.exoneracion && b.tipo !== 'FEE' && (
                 <Alerta tipo="info">Este receptor tiene exoneración {receptor.exoneracion.numeroDocumento} ({receptor.exoneracion.tarifaExonerada}%). Se aplicará a las líneas que agregue.</Alerta>
@@ -479,7 +523,7 @@ export function NuevoComprobante() {
                   return (
                     <div key={i} className="linea-card grid grid-3">
                       <Selector etiqueta="Tipo de documento (nota 10)" valor={ref.tipoDoc} onCambio={(v) => upd({ tipoDoc: v })} opciones={TIPO_DOC_REFERENCIA} />
-                      <Campo etiqueta="Clave o número">{(id) => (
+                      <Campo etiqueta="Clave o número" ayuda={ref.tipoDoc === '14' ? 'Número del comprobante que le entregó el vendedor del régimen especial.' : ref.tipoDoc === '16' ? 'Número de la factura del proveedor no domiciliado.' : undefined}>{(id) => (
                         <input id={id} list="claves-emitidas" className="mono" value={ref.numero ?? ''} onChange={(e) => {
                           const numero = e.target.value.trim();
                           const c = comprobantes.find((x) => x.clave === numero);

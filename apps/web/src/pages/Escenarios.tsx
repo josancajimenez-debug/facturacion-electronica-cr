@@ -49,7 +49,7 @@ const ESCENARIOS: Escenario[] = [
   { id: 'fee', titulo: 'Factura de exportación de servicios', descripcion: 'Cliente extranjero no domiciliado (tipo 05). Sin exoneraciones ni base imponible.', esperado: 'aceptado', fuente: 'Notas 4 y 2; condiciones FEE',
     armar: (b) => ({ ...b, tipo: 'FEE', contraparte: rec('rec-extranjero'), mediosPago: [{ tipo: '04' }], lineas: [L({ codigoCabys: '8314300000000', detalle: 'Desarrollo de software a la medida (hora)', unidadMedida: 'h', precioUnitario: 25000, cantidad: 10 })] }) },
   { id: 'fec', titulo: 'Factura electrónica de compra', descripcion: 'Compra a un vendedor no obligado (régimen especial). El vendedor va en el nodo Emisor.', esperado: 'aceptado', fuente: 'Decreto 44739-H art. 2 inc. 13; Nota 10 código 14',
-    armar: (b, { emisor }) => ({ ...b, tipo: 'FEC', codigoActividadEmisor: undefined, codigoActividadReceptor: emisor.actividades[0].codigo,
+    armar: (b, { emisor }) => ({ ...b, tipo: 'FEC', regimenVendedor: 'agropecuario', codigoActividadEmisor: undefined, codigoActividadReceptor: emisor.actividades[0].codigo,
       contraparte: { nombre: 'Productor Ficticio Agropecuario', identificacion: { tipo: '01', numero: '199990002' }, ubicacion: { provincia: '5', canton: '01', distrito: '01', otrasSenas: 'Finca de pruebas' } },
       lineas: [L({ codigoCabys: '0231200000000', detalle: 'Huevos de gallina frescos (cajilla)', unidadMedida: 'Unid', precioUnitario: 3000, codigoTarifaIva: '02', cantidad: 10 })],
       referencias: [{ tipoDoc: '14', numero: 'RE-0001', fechaEmision: fechaEmisionCR(), codigo: '04', razon: 'Compra a contribuyente de régimen especial agropecuario' }] }) },

@@ -28,6 +28,27 @@ export function tipoSegunNumero(numero: string, actual: string): string {
 /** Números con la forma de una identificación que puede figurar en el padrón (9 a 12 caracteres). */
 export const consultable = (numero: string) => /^[0-9A-Z]{9,12}$/.test(numero);
 
+/** Registro de productores agropecuarios del MAG (GET /fe/agropecuario): respaldo del régimen especial agropecuario. */
+export interface RegistroMag {
+  activo: boolean;
+  /** Registro activo, o el más reciente si ninguno lo está. */
+  nombre?: string;
+  fuente?: string;
+  vence?: string;
+}
+
+export async function consultarRegistroMag(numero: string, señal?: AbortSignal): Promise<RegistroMag | null> {
+  const r = await fetch(`https://api.hacienda.go.cr/fe/agropecuario?identificacion=${encodeURIComponent(numero)}`, { signal: señal });
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`El API de Hacienda (registro agropecuario) respondió ${r.status}.`);
+  // Si no hay registro, el API responde 200 con un cuerpo de error y sin «listaDatosMAG».
+  const j = (await r.json()) as { listaDatosMAG?: { nombreMAG: string; indicadorActivoMAG: boolean; fechaBajaMAG?: string; fuenteMAG?: string }[] };
+  const lista = j.listaDatosMAG ?? [];
+  if (!lista.length) return null;
+  const vigente = lista.find((x) => x.indicadorActivoMAG) ?? lista[lista.length - 1];
+  return { activo: !!vigente.indicadorActivoMAG, nombre: vigente.nombreMAG, fuente: vigente.fuenteMAG, vence: vigente.fechaBajaMAG };
+}
+
 export async function consultarPadron(numero: string, señal?: AbortSignal): Promise<Padron> {
   let r: Response;
   try {
