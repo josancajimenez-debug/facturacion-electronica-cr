@@ -1,0 +1,3130 @@
+{
+ "fuente": "Ministerio de Hacienda – Listado de actividades económicas, correspondencia ATV (CIIU 3) – TRIBU-CR (CIIU 4), hacienda.go.cr/docs/CorrespondenciaATVCIIU3-TRIBUCRCIIU4-Completo.pdf (consultado el 29/10/2026)",
+ "total": 367,
+ "codigos": [
+  {
+   "codigo": "0000.1",
+   "descripcion": "Preoperativa",
+   "atv": [
+    "ACTIVIDADES PREOPERATIVAS O DE ORGANIZACIÓN"
+   ]
+  },
+  {
+   "codigo": "0000.2",
+   "descripcion": "Servicios digitales o de telecomunicaciones e intangibles prestados desde el exterior por proveedores",
+   "atv": [
+    "SERVICIOS DIGITALES O DE TELECOMUNICACIONES E INTANGIBLES PRESTADOS DESDE EL EXTERIOR PRESTADOS POR PROVEEDORES"
+   ]
+  },
+  {
+   "codigo": "0000.3",
+   "descripcion": "Servicios digitales o de telecomunicaciones e intangibles prestados desde el exterior por intermediarios"
+  },
+  {
+   "codigo": "0111.9",
+   "descripcion": "Cultivo de otros cereales, legumbres y semillas oleaginosas n.c.p",
+   "atv": [
+    "CULTIVO Y VENTA DE CEREALES, LEGUMBRES Y GRANOS BASICOS NO INCLUIDAS EN CANASTA BASICA",
+    "CULTIVO HORTALIZAS LEGUMBRES ESPECIALIDADES HORTICOLAS PRODUCTOS DE VIVERO EXCENTO DE VENTAS",
+    "CULTIVO HORTALIZAS LEGUMBRES ESPECIALIDADES HORTICOLAS PRODUCTOS VIVERO GRABADOS VENTAS",
+    "CULTIVO Y VENTA DE CEREALES, LEGUMBRES Y GRANOS BASICOS INCLUIDOS EN CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "0113.9",
+   "descripcion": "Cultivo de otras hortalizas, raíces o tubérculos n.c.p",
+   "atv": [
+    "CULTIVO DE TUBERCULOS",
+    "PRODUCCION DE MINIVEGETALES"
+   ]
+  },
+  {
+   "codigo": "0114.0",
+   "descripcion": "Cultivo de caña de azúcar",
+   "atv": [
+    "CULTIVO DE CANA DE AZUCAR"
+   ]
+  },
+  {
+   "codigo": "0115.0",
+   "descripcion": "Cultivo de tabaco",
+   "atv": [
+    "CULTIVO DE TABACO"
+   ]
+  },
+  {
+   "codigo": "0116.0",
+   "descripcion": "Cultivo de plantas de fibras",
+   "atv": [
+    "CULTIVO DE ALGODON"
+   ]
+  },
+  {
+   "codigo": "0119.1",
+   "descripcion": "Cultivo de Flores",
+   "atv": [
+    "CULTIVO DE FLORES DE TODO TIPO"
+   ]
+  },
+  {
+   "codigo": "0122.1",
+   "descripcion": "Cultivo de banano",
+   "atv": [
+    "CULTIVO DE BANANO"
+   ]
+  },
+  {
+   "codigo": "0122.3",
+   "descripcion": "Cultivo de piña",
+   "atv": [
+    "CULTIVO DE PINA"
+   ]
+  },
+  {
+   "codigo": "0122.9",
+   "descripcion": "Cultivo de otras frutas tropicales y subtropicales",
+   "atv": [
+    "CULTIVO DE FRUTAS"
+   ]
+  },
+  {
+   "codigo": "0125.0",
+   "descripcion": "Cultivo de otros frutos y nueces de árboles y arbustos",
+   "atv": [
+    "CULTIVO DE SEMILLAS COMESTIBLES Y GERMINACION DE SEMILLAS OLEAGINOSAS"
+   ]
+  },
+  {
+   "codigo": "0126.1",
+   "descripcion": "Cultivo de palma africana (aceitera)",
+   "atv": [
+    "CULTIVO DE PALMA AFRICANA Y OTROS FRUTOS OLEAGINOSOS"
+   ]
+  },
+  {
+   "codigo": "0127.1",
+   "descripcion": "Cultivo de café",
+   "atv": [
+    "CULTIVO DE CAFE"
+   ]
+  },
+  {
+   "codigo": "0127.9",
+   "descripcion": "Cultivo de otras plantas con las que se preparan bebidas, excepto el cultivo de café n.c.p",
+   "atv": [
+    "CULTIVO DE PLANTAS PARA PREPARAR BEBIDAS Y MEDICINAS",
+    "CULTIVO DE CACAO"
+   ]
+  },
+  {
+   "codigo": "0128.0",
+   "descripcion": "Cultivo de especies de plantas aromáticas, medicinales y farmacéuticas",
+   "atv": [
+    "CULTIVO DE ESPECIAS DE TODO TIPO"
+   ]
+  },
+  {
+   "codigo": "0130.0",
+   "descripcion": "Propagación de plantas",
+   "especialidades": [
+    "Otra propagación de plantas",
+    "Viveros"
+   ],
+   "atv": [
+    "CULTIVO Y COMERCIALIZACION DE CESPED",
+    "VIVEROS"
+   ]
+  },
+  {
+   "codigo": "0141.1",
+   "descripcion": "Cría de ganado Bovino (vacuno) para carne",
+   "atv": [
+    "CRIA Y VENTA DE GANADO BOVINO (VACUNO) Y BUFALO"
+   ]
+  },
+  {
+   "codigo": "0141.2",
+   "descripcion": "Cría de ganado Bovino (vacuno) para producción de leche cruda",
+   "atv": [
+    "PRODUCCION DE LECHE CRUDA Y OTROS PRODUCTOS LACTEOS SIN PROCESAMIENTO INCLUIDOS EN CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "0141.9",
+   "descripcion": "Cría de Búfalos y otra producción de ganado bovino (vacuno)",
+   "atv": [
+    "PRODUCCION DE SEMEN BOVINO, VENTA DE SEMEN CONGELADO Y DILUYENTE PARA SEMEN"
+   ]
+  },
+  {
+   "codigo": "0142.0",
+   "descripcion": "Cría de caballos y otros equinos",
+   "atv": [
+    "CRIA DE CABALLOS Y OTROS EQUINOS"
+   ]
+  },
+  {
+   "codigo": "0144.0",
+   "descripcion": "Cría de ovejas y cabras",
+   "atv": [
+    "CRIA DE ANIMALES DOMESTICOS COMO:OVEJAS Y CABRAS"
+   ]
+  },
+  {
+   "codigo": "0145.0",
+   "descripcion": "Cría de cerdos",
+   "atv": [
+    "CRIA DE CERDOS"
+   ]
+  },
+  {
+   "codigo": "0146.2",
+   "descripcion": "Actividades de granja para la producción de huevos de gallina",
+   "atv": [
+    "PRODUCCION DE HUEVOS DE GALLINA INCLUIDOS EN LA CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "0146.9",
+   "descripcion": "Cría de otras aves de corral, excepto pollos",
+   "atv": [
+    "CRIA DE ANIMALES DOMESTICADOS (AVES DE CORRAL)",
+    "PRODUCCION Y VENTA DE HUEVOS DE CUALQUIER TIPO, EXCEPTO LOS DE GALLINA"
+   ]
+  },
+  {
+   "codigo": "0149.0",
+   "descripcion": "Cría de otros animales",
+   "especialidades": [
+    "Cría de otros animales",
+    "Apicultura y producción de miel y cera de abeja"
+   ],
+   "atv": [
+    "CRIA DE MARIPOSAS",
+    "CRIA Y VENTA DE OTROS ANIMALES SEMIDOMESTICADOS O SALVAJES",
+    "APICULTURA Y PRODUCCION DE MIEL Y CERA DE ABEJA"
+   ]
+  },
+  {
+   "codigo": "0150.0",
+   "descripcion": "Cultivo de productos agrícolas en combinación con la cría de animales (explotación mixta)",
+   "atv": [
+    "CULTIVO DE PRODUCTOS AGRICOLAS EN COMBINACION CON LA CRIA DE ANIMALES (EXPLOTACI"
+   ]
+  },
+  {
+   "codigo": "0161.2",
+   "descripcion": "Servicios de fumigación y riego agrícola",
+   "atv": [
+    "FUMIGACION DE CULTIVOS",
+    "MANEJO E INSTALACION DE SISTEMAS DE RIEGO"
+   ]
+  },
+  {
+   "codigo": "0161.9",
+   "descripcion": "Otros servicios de apoyo a la agricultura",
+   "atv": [
+    "SERVICIO DE PLANTACION DE ARBOLES Y SIMILARES"
+   ]
+  },
+  {
+   "codigo": "0162.9",
+   "descripcion": "Otras actividades de apoyo a la ganadería",
+   "atv": [
+    "SERVICIO DE HERRADURA"
+   ]
+  },
+  {
+   "codigo": "0163.1",
+   "descripcion": "Beneficio de café",
+   "atv": [
+    "BENEFICIO O PROCESAMIENTO DE CAFE"
+   ]
+  },
+  {
+   "codigo": "0163.9",
+   "descripcion": "Otras actividades posteriores a la cosecha",
+   "atv": [
+    "RECOLECCION DE COSECHAS Y ACTIVIDADES CONEXAS"
+   ]
+  },
+  {
+   "codigo": "0170.0",
+   "descripcion": "Caza ordinaria, mediante trampas y actividades de servicio conexas",
+   "atv": [
+    "CAZA ORDINARIA MEDIANTE TRAMPAS, Y REPOBLACION DE ANIMALES DE CAZA, INCLUSO LAS ACTIVIDADES DE SERVICIOS CONEXAS."
+   ]
+  },
+  {
+   "codigo": "0210.0",
+   "descripcion": "Silvicultura y otras actividades forestales",
+   "atv": [
+    "VENTA DE ARBOLES EN PIE (ARBOLES DE REFORESTACION)",
+    "ACTIVIDADES DE CONSERVACION DE BOSQUES. (SERVICIOS AMBIENTALES, VENTA DE OXIGENO)."
+   ]
+  },
+  {
+   "codigo": "0220.0",
+   "descripcion": "Extracción de madera",
+   "atv": [
+    "EXTRACCION Y/O VENTA DE MADERA"
+   ]
+  },
+  {
+   "codigo": "0311.0",
+   "descripcion": "Pesca marítima",
+   "especialidades": [
+    "Pesca artesanal en pequeña escala",
+    "Pesca artesanal en mediana escala",
+    "Otra pesca marítima"
+   ],
+   "atv": [
+    "PESCADORES ARTESANALES EN PEQ. ESCALA",
+    "PESCADORES ARTESANALES MEDIOS",
+    "PESCADORES EN GRAN ESCALA"
+   ]
+  },
+  {
+   "codigo": "0321.0",
+   "descripcion": "Acuicultura marina",
+   "atv": [
+    "CRIADERO DE PECES, CRUSTACEOS O MOLUSCOS. COMERCIALIZACION DE LARVAS DE ESPECIES MARINAS"
+   ]
+  },
+  {
+   "codigo": "0510.0",
+   "descripcion": "Extracción de carbón de piedra",
+   "atv": [
+    "EXTRACCION Y AGLOMERACION DE CARBON DE PIEDRA"
+   ]
+  },
+  {
+   "codigo": "0620.0",
+   "descripcion": "Extracción de gas natural",
+   "atv": [
+    "EXTRACCION DE PETROLEO CRUDO Y GAS NATURAL"
+   ]
+  },
+  {
+   "codigo": "0721.0",
+   "descripcion": "Extracción de minerales metalíferos no ferrosos",
+   "atv": [
+    "EXTRACCION DE MINERALES DE URANIO Y TORIO"
+   ]
+  },
+  {
+   "codigo": "0810.0",
+   "descripcion": "Extracción de piedra, arena y arcilla",
+   "atv": [
+    "EXTRACCION DE PIEDRA, ARENA Y ARCILLA"
+   ]
+  },
+  {
+   "codigo": "0891.0",
+   "descripcion": "Extracción de minerales para la fabricación de abonos y productos químicos",
+   "atv": [
+    "EXTRACCION DE MINERALES Y SUSTANCIAS PARA LA FABRICACION DE ABONOS"
+   ]
+  },
+  {
+   "codigo": "0893.0",
+   "descripcion": "Extracción de sal",
+   "atv": [
+    "EXTRACCION DE SAL"
+   ]
+  },
+  {
+   "codigo": "0899.0",
+   "descripcion": "Explotación de otras minas y canteras n.c.p",
+   "atv": [
+    "EXPLOTACION DE MINAS Y CANTERAS N.C.P.",
+    "EXPLOTACION DE OTRAS MINAS Y CANTERAS N.C.P."
+   ]
+  },
+  {
+   "codigo": "1010.1",
+   "descripcion": "Elaboración y conservación de carne y embutidos de ganado vacuno y porcino",
+   "especialidades": [
+    "Producción de cueros y pieles sin curtir",
+    "Otra elaboración y conservación de carne y embutidos de ganado vacuno y porcino"
+   ],
+   "atv": [
+    "PRODUCCION DE CUEROS Y PIELES SIN CURTIR",
+    "PRODUCCION DE EMBUTIDOS EMPACADOS, ENVASADO Y ENLATADO"
+   ]
+  },
+  {
+   "codigo": "1010.9",
+   "descripcion": "Elaboración y conservación de otro tipo de carnes n.c.p",
+   "atv": [
+    "ELABORACION Y CONSERVACION DE CARNE Y EMBUTIDOS DE GANADO VACUNO, PORCINO Y DE AVES"
+   ]
+  },
+  {
+   "codigo": "1020.0",
+   "descripcion": "Elaboración y conservación de pescados, crustáceos y moluscos",
+   "atv": [
+    "ELABORACION Y CONSERVACION DE PESCADO Y SUS DERIVADOS"
+   ]
+  },
+  {
+   "codigo": "1030.0",
+   "descripcion": "Elaboración y conservación de frutas, legumbres y hortalizas (vegetales)",
+   "atv": [
+    "ELABORACION Y CONSERVACION DE FRUTAS, LEGUMBRES Y HORTALIZAS",
+    "PRODUCCION DE CONCENTRADOS PARA JUGOS (CITRICULTURA)"
+   ]
+  },
+  {
+   "codigo": "1040.0",
+   "descripcion": "Elaboración de aceites y grasas de origen vegetal y animal",
+   "atv": [
+    "ELABORACION DE ACEITES Y GRASAS DE ORIGEN VEGETAL Y ANIMAL"
+   ]
+  },
+  {
+   "codigo": "1050.0",
+   "descripcion": "Elaboración de productos lácteos",
+   "atv": [
+    "PRODUCCION DE PRODUCTOS LACTEOS Y SUS DERIVADOS INCLUIDOS EN CANASTA BASICA CON RECONOCIMIENTO DE CREDITOS FISCALES",
+    "PRODUCCION DE HELADOS Y OTROS PRODUCTOS SIMILARES",
+    "ELABORACION DE PRODUCTOS LACTEOS",
+    "ELABORACION Y VENTA DE PRODUCTOS LACTEOS INCLUIDOS EN CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "1061.1",
+   "descripcion": "Beneficio de arroz",
+   "atv": [
+    "BENEFICIO DE ARROZ"
+   ]
+  },
+  {
+   "codigo": "1061.9",
+   "descripcion": "Elaboración de productos de molinería excepto arroz",
+   "atv": [
+    "SERVICIO DE MOLIENDA",
+    "ELABORACION DE HARINAS PREMEZCLADAS Y PREPARADAS PARA LA FABRICACION DE PRODUCTOS DE PANADERIA Y REPOSTERIA",
+    "ELABORACION DE PRODUCTOS DE MOLINERIA INCLUIDOS EN CANASTA BASICA",
+    "ELABORACION DE PRODUCTOS DE MAIZ EXENTOS DE VENTAS",
+    "ELABORACION DE PRODUCTOS DE MAIZ GRAVADOS CON VENTAS"
+   ]
+  },
+  {
+   "codigo": "1062.0",
+   "descripcion": "Elaboración de almidones y productos derivados del almidón",
+   "atv": [
+    "ELABORACION DE PRODUCTOS DERIVADOS DE ALMIDON"
+   ]
+  },
+  {
+   "codigo": "1071.9",
+   "descripcion": "Elaboración de otros productos de panadería, excepto elaboración de galletas",
+   "especialidades": [
+    "Elaboración y venta de todo tipo de repostería y pastelería",
+    "Panaderías"
+   ],
+   "atv": [
+    "PASTELERIA, REPOSTERIA O AMBAS",
+    "VENTA DE PAN Y OTROS PRODUCTOS SIMILARES GRAVADOS CON IVA",
+    "ELABORACION Y VENTA DE PRODUCTOS DE PANADERIA INCLUIDOS EN CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "1072.0",
+   "descripcion": "Elaboración de azúcar y otros productos derivados de la caña de azúcar",
+   "atv": [
+    "ELABORACION Y VENTA DE AZUCAR Y PRODUCTOS DERIVADOS DE LA CANA DE AZUCAR",
+    "ELABORACION DE PRODUCTOS DERIVADOS DE LA CANA DE AZUCAR"
+   ]
+  },
+  {
+   "codigo": "1073.0",
+   "descripcion": "Elaboración de cacao, chocolate y productos de confitería",
+   "atv": [
+    "ELABORACION DE CACAO",
+    "ELABORACION DE CHOCOLATE",
+    "ELABORACION DE DULCES, GOLOSINAS Y CONSERVAS EN AZUCAR"
+   ]
+  },
+  {
+   "codigo": "1074.0",
+   "descripcion": "Elaboración de macarrones, fideos, alcuzcuz y productos farináceos similares",
+   "atv": [
+    "ELABORACION DE MACARRONES, FIDEOS, ALCUZCUZ Y PRODUCTOS FARINACEOS SIMILARES",
+    "ELABORACION DE MACARRONES, FIDEOS, ALCUZCUZ Y PRODUCTOS FARINACEOS SIMILARES INCLUIDOS EN CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "1079.9",
+   "descripcion": "Elaboración de otros productos alimenticios n.c.p",
+   "atv": [
+    "FABRICACION DE PRODUCTOS ALIMENTICIOS PREPARADOS N.C.P. (NOCONTEMPLADOS EN OTRA PARTE)",
+    "ELABORACION DE CONCENTRADO PARA BEBIDAS NATURALES Y GASEOSAS"
+   ]
+  },
+  {
+   "codigo": "1080.0",
+   "descripcion": "Elaboración de alimentos preparados para animales",
+   "atv": [
+    "ELABORACION DE ALIMENTOS PARA ANIMALES DOMESTICOS",
+    "ELABORACION DE PACAS DE HENO",
+    "ELABORACION DE ALIMENTOS PARA ANIMALES PARA EXPLOTACION AGROPECUARIA"
+   ]
+  },
+  {
+   "codigo": "1101.0",
+   "descripcion": "Destilación, rectificación y mezcla de bebidas alcohólicas",
+   "especialidades": [
+    "Destilación, rectificación y mezcla de bebidas alcohólicas",
+    "Sujeto al impuesto sobre las utilidades"
+   ],
+   "atv": [
+    "ELABORAC. RECTIFICAC MEZCLA BEBIDAS ALCOHOLICAS/PROD. DE ALCOHOL ETILICO (SUSTAN FERMENTADAS)",
+    "ELABORACION DE BEBIDAS CON PORCENTAJE DE ALCOHOL POR VOLUMEN MENOR AL 15%.",
+    "FABRICA NACIONAL DE LICORES"
+   ]
+  },
+  {
+   "codigo": "1103.0",
+   "descripcion": "Elaboración de bebidas malteadas y de malta",
+   "especialidades": [
+    "Fabricación de mercancías gravada con impuesto selectivo de consumo",
+    "Fabricación de mercancías no gravada con impuesto selectivo de consumo"
+   ],
+   "atv": [
+    "ELABORACION DE BEBIDAS MALTEADAS Y DE MALTA NO ARTESANALES",
+    "ELABORACION ARTESANAL DE BEBIDAS MALTEADAS Y DE MALTA"
+   ]
+  },
+  {
+   "codigo": "1104.0",
+   "descripcion": "Elaboración de bebidas no alcohólicas; producción de aguas minerales y otras aguas embotelladas",
+   "atv": [
+    "ELABORACION DE BEBIDAS NO ALCOHOLICAS / GASEOSAS / AGUA MINERAL Y DE MANANTIAL"
+   ]
+  },
+  {
+   "codigo": "1200.0",
+   "descripcion": "Elaboración de productos de tabaco",
+   "atv": [
+    "ELABORACION DE PRODUCTOS DE TABACO"
+   ]
+  },
+  {
+   "codigo": "1312.0",
+   "descripcion": "Tejedura de productos textiles",
+   "atv": [
+    "FABRICACION DE TODO TIPO DE TELAS Y/O HILOS"
+   ]
+  },
+  {
+   "codigo": "1313.0",
+   "descripcion": "Acabado de productos textiles",
+   "atv": [
+    "MAQUILA DE PRODUCTOS TEXTILES",
+    "HIDROFUGADO/IMPERMEABILIZADO",
+    "SERVICIO DE BORDADO A MANO O A MAQUINA",
+    "SERVICIO DE TENIDO DE PRENDAS DE VESTIR"
+   ]
+  },
+  {
+   "codigo": "1391.0",
+   "descripcion": "Fabricación de tejidos de punto y ganchillo",
+   "atv": [
+    "FABRICACION DE TEJDOS Y ARTICULOS DE PUNTO Y GANCHILLO"
+   ]
+  },
+  {
+   "codigo": "1392.0",
+   "descripcion": "Fabricación de artículos confeccionados con materiales textiles, excepto prendas de vestir",
+   "atv": [
+    "FABRICACION DE ARTICULOS CONFECCIONADOS DE MATERIALES TEXTILES, EXEPTO PRENDAS DE VESTIR"
+   ]
+  },
+  {
+   "codigo": "1393.0",
+   "descripcion": "Fabricación de tapices y alfombras",
+   "atv": [
+    "FABRICACION DE TAPICES Y ALFOMBRAS"
+   ]
+  },
+  {
+   "codigo": "1394.0",
+   "descripcion": "Fabricación de cuerdas, cordeles, bramantes y redes",
+   "atv": [
+    "FABRICACION DE CUERDAS, CORDELES,BRAMANTES Y REDES",
+    "FABRICACION DE HILOS Y CUERDAS PARA USO AGRICOLA Y PESCA"
+   ]
+  },
+  {
+   "codigo": "1410.9",
+   "descripcion": "Fabricación de otras prendas de vestir, excepto ropa interior y prendas de piel",
+   "atv": [
+    "SERVICIOS DE COSTURA Y SASTRERIA (COSTURERAS Y SASTRES)",
+    "FABRICACION DE PRENDAS DE VESTIR (ROPA DE TODO TIPO)"
+   ]
+  },
+  {
+   "codigo": "1511.0",
+   "descripcion": "Curtido y adobo de cueros; adobo y teñido de pieles",
+   "atv": [
+    "ADOBO Y TENIDO DE PIELES; FABRICACION DE ARTICULOS DE PIEL NATURAL O ARTIFICIAL"
+   ]
+  },
+  {
+   "codigo": "1512.0",
+   "descripcion": "Fabricación de maletas, bolsos de mano y de artículos similares, y artículos de talabartería o guarnicionería",
+   "atv": [
+    "FABRICACION DE MALETAS, BOLSOS DE MANO Y ARTICULOS SIMILARES"
+   ]
+  },
+  {
+   "codigo": "1520.0",
+   "descripcion": "Fabricación de calzado",
+   "atv": [
+    "FABRICACION DE TODO TIPO DE ZAPATOS EXEPTO EL ORTOPEDICO"
+   ]
+  },
+  {
+   "codigo": "1610.0",
+   "descripcion": "Aserrado y acepilladura de madera",
+   "atv": [
+    "ASERRADO Y ACEPILLADURA DE MADERA"
+   ]
+  },
+  {
+   "codigo": "1621.0",
+   "descripcion": "Fabricación de hojas de madera para enchapado y tableros a base de madera",
+   "atv": [
+    "FABRICACION DE HOJAS DE MADERA PARA ENCHAPADO Y TABLEROS COMO PLYWOOD, DURPANEL Y SIMILARES"
+   ]
+  },
+  {
+   "codigo": "1622.0",
+   "descripcion": "Fabricación de partes y piezas de carpimtería para edificios y construcciones",
+   "atv": [
+    "FABRICACION DE PARTES Y PIEZAS DE CARPINTERIA PARA EDIFICIOS Y CONSTRUCCIONES",
+    "FABRICACION DE TARIMAS"
+   ]
+  },
+  {
+   "codigo": "1701.0",
+   "descripcion": "Fabricación de pasta de madera, papel y cartón",
+   "atv": [
+    "FABRICACION DE PAPEL Y CARTON Y ENVASES DE PAPEL Y CARTON"
+   ]
+  },
+  {
+   "codigo": "1709.0",
+   "descripcion": "Fabricación de otros artículos del papel y cartón",
+   "atv": [
+    "FABRICACION DE OTROS ARTICULOS DE PAPEL Y CARTON"
+   ]
+  },
+  {
+   "codigo": "1811.0",
+   "descripcion": "Impresión",
+   "especialidades": [
+    "Otro tipo de impresión",
+    "Servicios de sublimación",
+    "Servicios de serigrafía"
+   ],
+   "atv": [
+    "TIPOGRAFIA Y/O LITOGRAFIA (IMPRENTA)",
+    "IMPRESION DIGITAL",
+    "SERIGRAFIA"
+   ]
+  },
+  {
+   "codigo": "1820.0",
+   "descripcion": "Reproducción de grabaciones",
+   "atv": [
+    "REPRODUCCION DE GRABACIONES"
+   ]
+  },
+  {
+   "codigo": "1920.0",
+   "descripcion": "Fabricación de los productos de la refinación del petróleo",
+   "especialidades": [
+    "Sujeto al impuesto único por tipo de combustible",
+    "Fabricación de productos diversos derivados del petróleo"
+   ],
+   "atv": [
+    "REFINERIAS DE PETROLEO",
+    "FABRICACION DE PRODUCTOS DIVERSOS DERIVADOS DEL PETROLEO"
+   ]
+  },
+  {
+   "codigo": "2011.0",
+   "descripcion": "Fabricación de sustancias químicas básicas",
+   "atv": [
+    "ELABORACION DE BIOCOMBUSTIBLES",
+    "FABRICACION DE SUSTANCIAS QUIMICAS Y GASES INDUSTRIALES EXCEPTO ABONOS"
+   ]
+  },
+  {
+   "codigo": "2012.0",
+   "descripcion": "Fabricación abonos y compuestos de nitrógeno",
+   "atv": [
+    "FABRICACION DE ABONOS Y COMPUESTOS DE NITROGENO (ORGANICOS Y QUIMICOS)"
+   ]
+  },
+  {
+   "codigo": "2013.0",
+   "descripcion": "Fabricación de plásticos y de caucho sintético en formas primarias",
+   "atv": [
+    "FABRICACION DE PLASTICOS Y CAUCHO SINTETICO EN FORMAS PRIMARIAS",
+    "FABRICACION DE RESINAS"
+   ]
+  },
+  {
+   "codigo": "2021.0",
+   "descripcion": "Fabricación de plaguicidas y de otros productos químicos de uso agropecuario",
+   "atv": [
+    "FABRICACION DE PLAGUICIDAS Y OTROS PRODUCTOS QUIMICOS DE USO AGROPECUARIO"
+   ]
+  },
+  {
+   "codigo": "2022.0",
+   "descripcion": "Fabricación de pinturas, barnices y productos de revestimiento similares, tintas de imprenta y masillas",
+   "especialidades": [
+    "Fabricación de mercancías gravada con impuesto selectivo de consumo",
+    "Fabricación de mercancías no gravada con impuesto selectivo de consumo"
+   ],
+   "atv": [
+    "FABRICACION DE PINTURAS, BARNICES Y PRODUCTOS DE REVESTIMIENTO SIMILARES",
+    "FABRICACION DE TINTAS DE IMPRENTAS"
+   ]
+  },
+  {
+   "codigo": "2023.1",
+   "descripcion": "Fabricación de jabones y detergentes, preparados para limpiar y pulir",
+   "especialidades": [
+    "Fabricación de mercancías gravada con impuesto selectivo de consumo",
+    "Fabricación de mercancías no gravada con impuesto selectivo de consumo"
+   ],
+   "atv": [
+    "FABRICACION JABONES, DETERGENTES, PREPARADOS DE TOCADOR, PARA LIMPIAR PULIR Y PERFUMES",
+    "FABRICACION DE JABONES PARA LAVAR (EXCEPTO PREPARACIONES TENSO ACTIVAS USADAS COMO JABON)",
+    "FABRICACION DE CERAS, ABRILLANTADORES, LUSTRADORES Y PREPARACIONES SIMILARES"
+   ]
+  },
+  {
+   "codigo": "2023.2",
+   "descripcion": "Fabricación de perfumes y preparados de tocador",
+   "atv": [
+    "FABRICACION DE JABONES DE TOCADOR"
+   ]
+  },
+  {
+   "codigo": "2029.0",
+   "descripcion": "Fabricación de otros productos químicos n.c.p",
+   "atv": [
+    "FABRICACION DE OTROS PRODUCTOS QUIMICOS.",
+    "FABRICACION DE PEGAMENTOS Y ADHESIVOS"
+   ]
+  },
+  {
+   "codigo": "2030.0",
+   "descripcion": "Fabricación de fibras artificiales",
+   "atv": [
+    "FABRICACION DE FIBRAS SINTETICAS"
+   ]
+  },
+  {
+   "codigo": "2100.0",
+   "descripcion": "Fabricación de productos farmacéuticos, sustancias químicas medicinales y de productos botánicos de uso farmacéutico",
+   "atv": [
+    "FABRICACION PRODUCTOS FARMACEUTICOS, SUSTANCIAS QUIMICAS YPRODUCTOS BOTANICOS"
+   ]
+  },
+  {
+   "codigo": "2211.0",
+   "descripcion": "Fabricación de cubiertas y cámaras de caucho; recauchutado y renovación de cubiertas de caucho",
+   "especialidades": [
+    "Fabricación de mercancías gravada con impuesto selectivo de consumo",
+    "Fabricación de mercancías no gravada con impuesto selectivo de consumo"
+   ],
+   "atv": [
+    "FABRICACION DE LLANTAS Y CUBIERTAS PARA EQUIPO Y MAQUINARIAMOVIL",
+    "REENCAUCHADORA DE LLANTAS"
+   ]
+  },
+  {
+   "codigo": "2219.0",
+   "descripcion": "Fabricación de otros productos de caucho",
+   "atv": [
+    "FABRICACION DE OTROS PRODUCTOS DE CAUCHO"
+   ]
+  },
+  {
+   "codigo": "2220.9",
+   "descripcion": "Fabricación de otros productos de plástico",
+   "atv": [
+    "FABRICACION DE ARTICULOS DE PLASTICO"
+   ]
+  },
+  {
+   "codigo": "2310.0",
+   "descripcion": "Fabricación de vidrio y de productos de vidrio",
+   "atv": [
+    "FABRICACION DE VIDRIO Y PRODUCTOS DE VIDRIO"
+   ]
+  },
+  {
+   "codigo": "2391.0",
+   "descripcion": "Fabricación de productos refractarios",
+   "atv": [
+    "FABRICACION DE PRODUCTOS DE CERAMICA REFRACTARIA"
+   ]
+  },
+  {
+   "codigo": "2392.0",
+   "descripcion": "Fabricación de material de arcilla para la construcción",
+   "atv": [
+    "FABRICACION DE PRODUCTOS DE ARCILLA Y CERAMICA NO REFRACTARIAS PARA USO ESTRUCTURAL"
+   ]
+  },
+  {
+   "codigo": "2393.0",
+   "descripcion": "Fabricación de otros productos de cerámica y porcelana",
+   "atv": [
+    "FABRICACION PRODUCTOS DE CERAMICA BARRO LOZA Y/O PORCELANANO REFRACTARIA USO NO ESTRUCTURAL"
+   ]
+  },
+  {
+   "codigo": "2394.0",
+   "descripcion": "Fabricación de cemento, de la cal y del yeso",
+   "especialidades": [
+    "Fabricación de cal y/o yeso",
+    "Fabricación de cemento, venta y autoconsumo"
+   ],
+   "atv": [
+    "FABRICACION DE CAL O YESO",
+    "FABRICACION DE CEMENTO"
+   ]
+  },
+  {
+   "codigo": "2395.0",
+   "descripcion": "Fabricación de artículos de hormigón, de cemento y de yeso",
+   "atv": [
+    "FABRICACION DE ARTICULOS DE CEMENTO, YESO Y HORMIGON PARA LA CONSTRUCCION"
+   ]
+  },
+  {
+   "codigo": "2396.0",
+   "descripcion": "Corte, tallado y acabado de la piedra",
+   "atv": [
+    "CORTE, TALLADO Y ACABADO DE LA PIEDRA"
+   ]
+  },
+  {
+   "codigo": "2399.0",
+   "descripcion": "Fabricación de otros productos minerales no metálicos n.c.p",
+   "atv": [
+    "FABRICACION DE OTROS PRODUCTOS MINERALES NO METALICOS N.C.P."
+   ]
+  },
+  {
+   "codigo": "2410.0",
+   "descripcion": "Industrias básicas de hierro y acero",
+   "atv": [
+    "INDUSTRIAS BASICAS DE HIERRO Y ACERO"
+   ]
+  },
+  {
+   "codigo": "2420.0",
+   "descripcion": "Fabricación de productos primarios de metales preciosos y metales no ferrosos",
+   "atv": [
+    "FABRICACION DE PRODUCTOS PRIMARIOS DE METALES PRECIOSOS Y METALES NO FERROSOS"
+   ]
+  },
+  {
+   "codigo": "2431.0",
+   "descripcion": "Fundición de hierro y acero",
+   "atv": [
+    "FUNDICION DE HIERRO Y ACERO"
+   ]
+  },
+  {
+   "codigo": "2432.0",
+   "descripcion": "Fundición de metales no ferrosos",
+   "atv": [
+    "FUNDICION DE METALES NO FERROSOS"
+   ]
+  },
+  {
+   "codigo": "2511.0",
+   "descripcion": "Fabricación de productos metálicos para uso estructural",
+   "atv": [
+    "FABRICACION DE PRODUCTOS METALICOS PARA USO ESTRUCTURAL"
+   ]
+  },
+  {
+   "codigo": "2512.0",
+   "descripcion": "Fabricación de tanques, depósitos y recipientes de metal",
+   "atv": [
+    "FABRICACION DE TANQUES, DEPOSITOS Y RECIPIENTES DE METAL"
+   ]
+  },
+  {
+   "codigo": "2513.0",
+   "descripcion": "Fabricación de los generadores del vapor, excepto calderas de agua caliente para calefacción central",
+   "atv": [
+    "FABRICACION GENERADORES DE VAPOR, EXCEPTO CALDERAS DE AGUA CALIENTE PARA CALEFACION CENTRAL"
+   ]
+  },
+  {
+   "codigo": "2520.0",
+   "descripcion": "Fabricación de armas y municiones",
+   "atv": [
+    "FABRICACION DE ARMAS Y MUNICIONES"
+   ]
+  },
+  {
+   "codigo": "2592.0",
+   "descripcion": "Tratamiento y revestimiento de metales",
+   "atv": [
+    "SERVICIOS DE SOLDADURA",
+    "SERVICIO DE TRATAMIENTO Y REVESTIMIENTO DE TODO TIPO DE MATERIALES",
+    "HOJALATERIA",
+    "TALLER DE MECANICA DE PRECISION",
+    "SERVICIOS DE TORNO (MECANICA DE PRECISION)"
+   ]
+  },
+  {
+   "codigo": "2599.0",
+   "descripcion": "Fabricación de otros productos de metal n.c.p",
+   "atv": [
+    "FABRICACION DE PIEZAS, ARTICULOS Y ACCESORIOS DE METAL INCLUYE LAS CERRAJERIAS.",
+    "FABRICACION DE OTROS PRODUCTOS ELABORADOS DE METAL N.C.P."
+   ]
+  },
+  {
+   "codigo": "2610.0",
+   "descripcion": "Fabricación de componentes y tableros electrónicos",
+   "atv": [
+    "MANUFACTURA O FABRICACION DE OTROS COMPONENTES ELECTRONICOS",
+    "DISENO DE COMPONENTES ELECTRONICOS"
+   ]
+  },
+  {
+   "codigo": "2630.0",
+   "descripcion": "Fabricación de equipos de comunicaciones"
+  },
+  {
+   "codigo": "2651.0",
+   "descripcion": "Fabricación de equipos de medición, prueba, verificación, navegación y de equipo de control",
+   "atv": [
+    "FABRICACION DE EQUIPOS PARA MEDIR, VERIFICAR, Y NAVEGAR Y DE EQUIPOS DE CONTROL"
+   ]
+  },
+  {
+   "codigo": "2652.0",
+   "descripcion": "Fabricación de relojes",
+   "atv": [
+    "FABRICACION DE RELOJES DE TODO TIPO"
+   ]
+  },
+  {
+   "codigo": "2670.0",
+   "descripcion": "Fabricación de instrumentos ópticos de equipo fotográfico",
+   "atv": [
+    "FABRICACION DE INSTRUMENTOS OPTICOS Y EQUIPO FOTOGRAFICO"
+   ]
+  },
+  {
+   "codigo": "2710.0",
+   "descripcion": "Fabricación de motores eléctricos, generadores, transformadores eléctricos y aparatos de distribución y control de la energía eléctrica",
+   "atv": [
+    "FABRICACION DE MOTORES, GENERADORES Y TRANSFORMADORES ELECTRICOS, PARTES Y ACCES",
+    "FABRICACION, ENSAMBLE Y VENTA DE SISTEMAS PARA EL APROVECHAMIENTO DE ENERGIAS RENOBABLES"
+   ]
+  },
+  {
+   "codigo": "2720.0",
+   "descripcion": "Fabricación de baterias y acumuladores",
+   "atv": [
+    "FABRICACION DE PILAS, BATERIAS Y ACUMULADORES"
+   ]
+  },
+  {
+   "codigo": "2732.0",
+   "descripcion": "Fabricación de otros hilos y cables eléctricos",
+   "atv": [
+    "FABRICACION DE HILOS Y CABLES AISLADOS"
+   ]
+  },
+  {
+   "codigo": "2740.0",
+   "descripcion": "Fabricación de equipos de iluminación eléctricos",
+   "atv": [
+    "FABRICACION DE LAMPARAS ELECTRICAS Y EQUIPO DE ILUMINACION"
+   ]
+  },
+  {
+   "codigo": "2750.0",
+   "descripcion": "Fabricación de aparatos de uso doméstico",
+   "atv": [
+    "FABRICACION DE APARATOS DE USO DOMESTICO N.C.P."
+   ]
+  },
+  {
+   "codigo": "2790.0",
+   "descripcion": "Fabricación de otro equipo eléctrico",
+   "atv": [
+    "FABRICACION DE OTROS TIPOS DE EQUIPO ELECTRICO N.C.P."
+   ]
+  },
+  {
+   "codigo": "2811.0",
+   "descripcion": "Fabricación de motores y turbinas, excepto motores para aeronaves, vehículos automotores y motocicletas",
+   "atv": [
+    "FABRICACION DE MOTORES Y TURBINAS, EXCEPTO MOTORES PARA AERONAVES, VEHICULOS AUTOMOTORES Y MOTOCICLETAS"
+   ]
+  },
+  {
+   "codigo": "2813.0",
+   "descripcion": "Fabricación de otras bombas, compresores, grifos y válvulas",
+   "atv": [
+    "FABRICACION DE BOMBAS, COMPRESORES, GRIFOS Y VALVULAS"
+   ]
+  },
+  {
+   "codigo": "2815.0",
+   "descripcion": "Fabricación de hornos, hogueras y quemadores",
+   "atv": [
+    "FABRICACION DE HORNOS Y QUEMADORES"
+   ]
+  },
+  {
+   "codigo": "2817.0",
+   "descripcion": "Fabricación de maquinaria y equipo de oficina (excepto computadoras y equipos periféricos)",
+   "atv": [
+    "FABRICACION DE MAQUINARIA DE OFICINA, CONTABILIDAD E INFORMATICA"
+   ]
+  },
+  {
+   "codigo": "2821.0",
+   "descripcion": "Fabricación de maquinaria agropecuaria y forestal",
+   "atv": [
+    "FABRICACION DE MAQUINARIA AGRICOLA"
+   ]
+  },
+  {
+   "codigo": "2822.0",
+   "descripcion": "Fabricación de maquinarias para la conformación de metales y de máquinas herramienstas",
+   "atv": [
+    "FABRICACION DE MAQUINAS HERRAMIENTA"
+   ]
+  },
+  {
+   "codigo": "2823.0",
+   "descripcion": "Fabricación de maquinaria para metalúrgica",
+   "atv": [
+    "FABRICACION DE MAQUINARIA METALURGICA"
+   ]
+  },
+  {
+   "codigo": "2824.0",
+   "descripcion": "Fabricación de maquinaria para explotación de minas y canteras y para obras de construcción",
+   "atv": [
+    "FABRICACION DE MAQUINARIA PARA LA EXPLOTACION DE MINAS Y CANTERAS Y PARA OBRAS DE CONSTRUCCION"
+   ]
+  },
+  {
+   "codigo": "2825.0",
+   "descripcion": "Fabricación de maquinaria para la elaboración de alimentos, bebidas y tabaco",
+   "atv": [
+    "FABRICACION DE MAQUINARIA PARA LA ELABORACION DE ALIMENTOS,BEBIDAS Y TABACO"
+   ]
+  },
+  {
+   "codigo": "2826.0",
+   "descripcion": "Fabricación de maquinaria para la elaboración de productos textiles, prendas de vestir y cueros",
+   "atv": [
+    "FABRICACION MAQUINARIA PARA LA ELABORACION DE PRODUCTOS TEXTILES, PRENDAS DE VESTIR Y CUEROS"
+   ]
+  },
+  {
+   "codigo": "2829.0",
+   "descripcion": "Fabricación de otros tipos de maquinaria de uso especial",
+   "atv": [
+    "FABRICACION DE OTROS TIPOS DE MAQUINARIA DE USO ESPECIAL"
+   ]
+  },
+  {
+   "codigo": "2910.0",
+   "descripcion": "Fabricación de vehículos automotores",
+   "atv": [
+    "FABRICACION DE VEHICULOS AUTOMOTORES"
+   ]
+  },
+  {
+   "codigo": "2920.0",
+   "descripcion": "Fabricación de carrocerias para vehículos automotores; fabricación de remolques y semiremolques",
+   "especialidades": [
+    "Fabricación de mercancías gravada con impuesto selectivo de consumo",
+    "Fabricación de mercancías no gravada con impuesto selectivo de consumo"
+   ],
+   "atv": [
+    "FABRICACION DE CARROCERIAS PARA VEHICULOS AUTOMOTORES, REMOLQUES Y SEMIREMOLQUES",
+    "FABRICACION DE CARROCERIAS PARA CAMIONES DE LAS PARTIDAS ARANCELARIAS 870790002 Y 870790500029"
+   ]
+  },
+  {
+   "codigo": "2930.0",
+   "descripcion": "Fabricación de partes y accesorios para motores de vehículos",
+   "atv": [
+    "FABRICACION DE PARTES, PIEZAS Y ACCESORIOS PARA VEHICULOS AUTOMOTORES"
+   ]
+  },
+  {
+   "codigo": "3012.0",
+   "descripcion": "Construcción de embarcaciones de recreo y deporte",
+   "atv": [
+    "CONSTRUCCION DE EMBARCACIONES Y ESTRUCTURAS FLOTANTES"
+   ]
+  },
+  {
+   "codigo": "3020.0",
+   "descripcion": "Fabricación de locomotoras y de material rodante",
+   "atv": [
+    "FABRICACION DE LOCOMOTORAS Y MATERIAL RODANTE PARA FERROCARRILES Y TRANVIAS"
+   ]
+  },
+  {
+   "codigo": "3030.0",
+   "descripcion": "Fabricación de aeronaves y naves espaciales y de maquinaria conexa",
+   "atv": [
+    "FABRICACION DE AERONAVES Y NAVES ESPACIALES Y MAQUINARIA CONEXA"
+   ]
+  },
+  {
+   "codigo": "3091.0",
+   "descripcion": "Fabricación de motocicletas",
+   "atv": [
+    "FABRICACION DE MOTOCICLETAS, PARTES, PIEZAS Y SUS ACCESORIOS"
+   ]
+  },
+  {
+   "codigo": "3092.0",
+   "descripcion": "Fabricación de bicicletas y sillas de ruedas para personas con discapacidad",
+   "atv": [
+    "FABRICACION DE BICICLETAS Y SILLAS DE RUEDAS, PARTES, PIEZAS Y SUS ACCESORIOS"
+   ]
+  },
+  {
+   "codigo": "3099.0",
+   "descripcion": "Fabricación de otros tipos de equipo de transporte n.c.p",
+   "atv": [
+    "FABRICACION DE OTROS TIPOS DE EQUIPO DE TRANSPORTE N.C.P."
+   ]
+  },
+  {
+   "codigo": "3100.1",
+   "descripcion": "Fabricación de muebles de madera",
+   "atv": [
+    "FABRICACION Y/O REPARACION DE MUEBLES Y ACCESORIOS (INCLUYECOLCHONES)"
+   ]
+  },
+  {
+   "codigo": "3100.9",
+   "descripcion": "Fabricación de muebles de otro tipo de material (excepto de madera, piedra, cemento o cerámica)",
+   "atv": [
+    "MAQUILA DE MUEBLES"
+   ]
+  },
+  {
+   "codigo": "3211.0",
+   "descripcion": "Fabricación de joyas y artículos conexos",
+   "atv": [
+    "FABRICACION DE JOYAS, BISUTERIA Y ARTICULOS CONEXOS"
+   ]
+  },
+  {
+   "codigo": "3212.0",
+   "descripcion": "Fabricación de bisutería y artículos conexos"
+  },
+  {
+   "codigo": "3220.0",
+   "descripcion": "Fabricación de Instrumentos musicales",
+   "atv": [
+    "FABRICACION DE INSTRUMENTOS MUSICALES, PARTES Y PIEZAS Y SUS ACCESORIOS"
+   ]
+  },
+  {
+   "codigo": "3230.0",
+   "descripcion": "Fabricación de artículos de deporte",
+   "atv": [
+    "FABRICACION DE ARTICULOS DE DEPORTE"
+   ]
+  },
+  {
+   "codigo": "3240.0",
+   "descripcion": "Fabricación de juegos y juguetes",
+   "atv": [
+    "FABRICACION DE JUEGOS Y JUGUETES"
+   ]
+  },
+  {
+   "codigo": "3250.0",
+   "descripcion": "Fabricación de instrumentos y suministros médicos y odontológicos",
+   "especialidades": [
+    "Otra fabricación de instrumentos y suministros médicos y odontológicos",
+    "Fabricación artesanal y reparación de calzado ortopédico"
+   ],
+   "atv": [
+    "FABRICACION DE PROTESIS EN GENERAL",
+    "FABRICACION Y COMERCIALIZACION DE EQUIPO MEDICO",
+    "FABRICACION Y COMERCIALIZACION DE ZAPATOS ORTOPEDICOS"
+   ]
+  },
+  {
+   "codigo": "3290.0",
+   "descripcion": "Otras industrias manufactureras n.c.p",
+   "atv": [
+    "FABRICACION Y/O VENTA DE ATAUDES (CAJAS MORTUORIAS, FERETROS).",
+    "FABRICACION DE ESCOBAS",
+    "FABRICACION DE VELAS (CANDELAS) EXCEPTO LAS PERFUMADAS, COLOREADAS Y DECORADAS.",
+    "FABRICACION DE VELAS COLOREADAS, PERFUMADAS Y DECORADAS",
+    "FABRICACION DE SELLOS DE MANO, METAL O HULE (CAUCHO)",
+    "TRABAJOS DE MANUALIDADES"
+   ]
+  },
+  {
+   "codigo": "3311.0",
+   "descripcion": "Reparación de productos elaborados de metal",
+   "atv": [
+    "REPARACION DE ARMAS DE FUEGO"
+   ]
+  },
+  {
+   "codigo": "3312.0",
+   "descripcion": "Reparación de maquinaria",
+   "atv": [
+    "SERVICIO DE REPARACION DE MAQUINARIA Y EQUIPO.",
+    "SERVICIO DE MANTENIMIENTO DE MAQUINARIA Y EQUIPO.",
+    "REPARACION DE EQUIPO DE REFRIGERACION Y CONGELACION",
+    "INSTALACION Y/O MANTENIMIENTO DE EQUIPO DE REFRIGERACION Y CONGELACION",
+    "MANTENIMIENTO DE EXTINTORES",
+    "REPARACION CAJAS REGISTRADORAS, CALCULADORAS, MAQUINAS DE CONTABILIDAD Y EQUIPO DE OFICINA",
+    "MANTENIMIENTO DE CAJAS REGISTRADORAS, CALCULADORAS, MAQUINAS DE CONTABILIDAD"
+   ]
+  },
+  {
+   "codigo": "3314.0",
+   "descripcion": "Reparación de equipo eléctrico",
+   "atv": [
+    "REPARACION DE PORTONES ELECTRICOS"
+   ]
+  },
+  {
+   "codigo": "3315.0",
+   "descripcion": "Reparación de equipo de transporte, excepto los vehículos automotores",
+   "atv": [
+    "SERVICIO DE REPARACION DE EMBARCACIONES Y SUS PARTES Y/O ESTRUCTURAS FLOTANTES"
+   ]
+  },
+  {
+   "codigo": "3510.0",
+   "descripcion": "Generación, transmisión y distribución de energía eléctrica",
+   "atv": [
+    "GENERACION Y/O DISTRIBUCION DE ENERGIA ELECTRICA (HIDRAULICA,CONVENCIONAL, TERMICO, ETC)"
+   ]
+  },
+  {
+   "codigo": "3520.0",
+   "descripcion": "Fabricación de gas; distribución de combustibles gaseosos por tuberías",
+   "atv": [
+    "FABRICACION DE GAS; DISTRIBUCION DE COMBUSTIBLES GASEOSOS POR TUBERIAS"
+   ]
+  },
+  {
+   "codigo": "3530.0",
+   "descripcion": "Suministro de vapor y aire acondicionado",
+   "atv": [
+    "FABRICACION DE HIELO"
+   ]
+  },
+  {
+   "codigo": "3600.0",
+   "descripcion": "Captación, tratamiento y distribución de agua",
+   "atv": [
+    "CAPTACION, TRATAMIENTO Y DISTRIBUCION DE AGUA",
+    "ASOCIACIONES ADMINISTRADORAS DE LOS SISTEMAS DE ACUEDUCTOS Y ALCANTARILLADOS (ASADAS)."
+   ]
+  },
+  {
+   "codigo": "3700.0",
+   "descripcion": "Evacuación de aguas residuales",
+   "atv": [
+    "LIMPIEZA DE TANQUES SEPTICOS Y AGUAS REDISUALES"
+   ]
+  },
+  {
+   "codigo": "3811.0",
+   "descripcion": "Recolección de desechos no peligrosos",
+   "atv": [
+    "ASESORAMIENTO Y ELIMINACION DE DESPERDICIOS, SANEAMIENTO (EXCEPTO LIMPIEZA DE TANQUES SEPTICOS)"
+   ]
+  },
+  {
+   "codigo": "3830.0",
+   "descripcion": "Recuperación de materiales",
+   "atv": [
+    "RECICLAJE DE OTRO TIPO DE MATERIALES N.C.P.",
+    "RECICLAJE DE PAPEL Y PLASTICO Y MATERIALES RELACIONADOS"
+   ]
+  },
+  {
+   "codigo": "4100.0",
+   "descripcion": "Construcción de edificios",
+   "atv": [
+    "CONSTRUCCION DE EDIFICIOS, APARTAMENTOS, CONDOMINIOS Y CASAS DE HABITACION"
+   ]
+  },
+  {
+   "codigo": "4210.0",
+   "descripcion": "Construcción de carreteras y vías férreas",
+   "atv": [
+    "CONSTRUCCION Y MANTENIMIENTO DE CARRETERAS Y OTRAS VIAS"
+   ]
+  },
+  {
+   "codigo": "4311.0",
+   "descripcion": "Demolición",
+   "atv": [
+    "DEMOLICION DE EDIFICIOS Y OTRAS ESTRUCTURAS"
+   ]
+  },
+  {
+   "codigo": "4312.0",
+   "descripcion": "Preparación del terreno",
+   "atv": [
+    "PREPARACION DE TERRENOS"
+   ]
+  },
+  {
+   "codigo": "4321.0",
+   "descripcion": "Instalación eléctrica y de telecomunicaciones",
+   "atv": [
+    "VENTA E INSTALACION DE ALARMAS Y OTROS SISTEMAS ELECTRICOS",
+    "REPARACION DE CABLEADO DE COMUNICACIONES",
+    "INSTALACION DE ALARMAS Y OTROS SISTEMAS DE SEGURIDAD",
+    "INSTALACION Y MANTENIMIENTO DE CABLEADO DE COMUNICACIONES Y/O ENERGIA ELECTRICA",
+    "INSTALACION Y MANTENIMIENTO DE CONMUTADORES Y OTROS SISTEMAS PARA TELECOMUNICACIONES",
+    "ELECTRICISTA, SERVICIOS"
+   ]
+  },
+  {
+   "codigo": "4322.0",
+   "descripcion": "Instalación de fontanería e instalación de calefacción y aire acondicionado",
+   "atv": [
+    "REPARACION DE AIRE ACONDICIONADO",
+    "INSTALACION Y MANTENIMIENTO DE AIRE ACONDICIONADO"
+   ]
+  },
+  {
+   "codigo": "4329.0",
+   "descripcion": "Otro tipo de instalaciones de construcción",
+   "atv": [
+    "REPARACION DE ASCENSORES(ELEVADORES)",
+    "INSTALACION Y MANTENIMIENTO DE ASCENSORES (ELEVADORES)",
+    "INSTALACION Y MANTENIMIENTO DE PORTONES ELECTRICOS"
+   ]
+  },
+  {
+   "codigo": "4330.0",
+   "descripcion": "Terminación y acabados de edificios",
+   "atv": [
+    "MANTENIMIENTO, REPARACION Y AMPLIACIONES DE EDIFICIOS, APARTAMENTOS, CONDOMINIOS Y CASAS",
+    "SERVICIOS DE TERMINACION Y ACABADO DE EDIFICIOS",
+    "INSTALACION Y MANTENIMIENTO DE PERSIANAS Y CORTINAS"
+   ]
+  },
+  {
+   "codigo": "4390.0",
+   "descripcion": "Otras actividades especializadas de la construcción",
+   "especialidades": [
+    "Otras actividades especializadas de la construcción",
+    "Alquiler de equipo de construcción"
+   ],
+   "atv": [
+    "PERFORACION DE POZOS",
+    "ACTIVIDADES DE CONSTRUCCION ESPECIALES",
+    "INSTALACION Y MANTENIMIENTO DE PISCINAS,JACUZZIS Y SIMILARES",
+    "ALQUILER DE EQUIPO DE CONSTRUCCION O DEMOLICION CON OPERADORES"
+   ]
+  },
+  {
+   "codigo": "4510.0",
+   "descripcion": "Venta de vehículos automotores",
+   "atv": [
+    "VENTA AL POR MAYOR Y MENOR DE VEHICULOS NUEVOS Y/O USADOS (PARTIDAS ARANCELARIAS 8703 Y 8711)",
+    "VENTA AL POR MAYOR Y MENOR DE VEHICULOS NUEVOS Y/O USADOS, EXCEPTO PARTIDAS ARANCELARIAS 8702 Y 8704"
+   ]
+  },
+  {
+   "codigo": "4520.0",
+   "descripcion": "Mantenimiento y reparación de vehículos automotores",
+   "atv": [
+    "LAVADO, ENCERADO Y PULIDO DE AUTOMOVILES (LAVA CAR)",
+    "SERVICIOS DE ALINEAMIENTO Y REPARACION DE LLANTAS",
+    "SERVICIO DE REPARACION DE TODA CLASE DE VEHICULOS Y SUS PARTES",
+    "SERVICIO DE ENDEREZADO Y PINTURA PARA TODA CLASE DE VEHICULO",
+    "AUTODECORACION"
+   ]
+  },
+  {
+   "codigo": "4530.0",
+   "descripcion": "Venta de partes, piezas y accesorios de vehículos automotores",
+   "atv": [
+    "VENTA DE REPUESTOS NUEVOS PARA AUTOMOVILES",
+    "COMERCIALIZACION DE LLANTAS (NEUMATICAS) PARA VEHICULOS AUTOMOTORES"
+   ]
+  },
+  {
+   "codigo": "4540.0",
+   "descripcion": "Venta, mantenimiento y reparación de motocicletas y de sus partes, piezas y accesorios",
+   "especialidades": [
+    "Mantenimiento y reparación de motocicletas, sus partes, piezas y accesorios",
+    "Venta de motocicletas, sus partes, piezas y accesorios"
+   ],
+   "atv": [
+    "SERVICIO DE REPARACION DE TODA CLASE DE MOTOCICLETAS Y SUS PARTES",
+    "VENTA DE MOTOCICLETAS",
+    "VENTA DE PARTES O ACCESORIOS DE MOTOCICLETAS"
+   ]
+  },
+  {
+   "codigo": "4610.0",
+   "descripcion": "Venta al por mayor a cambio de una retribución o por contrato",
+   "atv": [
+    "COMISIONISTAS, AGENTES DE VENTAS, ORGANIZADORES DE SUBASTAS,TIQUETERAS, ETC."
+   ]
+  },
+  {
+   "codigo": "4620.0",
+   "descripcion": "Venta al por mayor de materias primas agropecuarias y animales vivos",
+   "atv": [
+    "VENTA AL POR MAYOR DE FLORES Y PLANTAS DE TODO TIPO",
+    "VENTA AL POR MAYOR DE POLEN Y/O SEMILLAS PARA USO AGRICOLA",
+    "COMERCIO AL POR MENOR DE ANIMALES DOMESTICOS PARA CONSUMO HUMANO",
+    "VENTA AL POR MENOR Y MAYOR DE PRODUCTOS E INSUMOS AGROPECUARIOS",
+    "VENTA AL POR MAYOR DE FLORES Y PLANTAS"
+   ]
+  },
+  {
+   "codigo": "4630.3",
+   "descripcion": "Venta al por mayor de frutas y verduras frescas",
+   "atv": [
+    "VENTA AL POR MAYOR DE FRUTAS Y VERDURAS FRESCAS INCLUIDAS O NO EN CANASTA BASICA",
+    "VENTA AL POR MAYOR DE FRUTAS Y VERDURAS FRESCAS"
+   ]
+  },
+  {
+   "codigo": "4630.4",
+   "descripcion": "Venta al por mayor de licores, bebidas y tabaco",
+   "atv": [
+    "COMERCIO AL POR MAYOR DE PRODUCTOS DE TABACO",
+    "COMERCIO AL POR MAYOR DE BEBIDAS CON CONTENIDO ALCOHOLICO (IMPORTADORES)",
+    "COMERCIO AL POR MAYOR DE BEBIDAS GASEOSAS Y CARBONATADAS",
+    "COMERCIO AL POR MAYOR DE VINOS. BEBIDAS FERMENTADAS Y NO FERMENTADAS",
+    "COMERCIO AL POR MAYOR DE BEBIDAS NO ALCOHOLICAS (JUGOS DEFRUTAS, VEGETALES) Y AGUA EMBOTELLADA",
+    "COMERCIO AL POR MAYOR DE CERVEZA IMPORTADA"
+   ]
+  },
+  {
+   "codigo": "4630.9",
+   "descripcion": "Venta al por mayor de otros alimentos",
+   "atv": [
+    "COMERCIO AL POR MAYOR DE ALIMENTOS, GRANOS BASICOS, CARNES Y DEMAS COMESTIBLES Y ARTICULOS DE LA CANASTA BASICA",
+    "COMERCIO AL POR MAYOR DE PRODUCTOS LACTEOS",
+    "COMERCIO AL POR MAYOR DE PRODUCTOS DE CONFITERIA",
+    "COMERCIO AL POR MAYOR DE OTROS ALIMENTOS N.C.P. GRABADOS CON VENTAS",
+    "VENTA AL POR MAYOR DE CAFE (EXCEPTO EL ENVASADO, ENLATADO, SOLUBLE, DESCAFEINADO)",
+    "COMERCIO AL POR MAYOR DE CAFE EMPACADO, ENVASADO, ENLATADO, SOLUBLE Y DESCAFEINADO",
+    "COMERCIO AL POR MAYOR DE PRODUCTOS SUSTITUTOS DEL AZUCAR",
+    "COMERCIO AL POR MAYOR DE CARNES DE TODO TIPO (PREPARADAS SAZONADAS CONDIMENTADAS EMPANIZADAS)",
+    "COMERCIO AL POR MAYOR DE ALIMENTOS Y PRODUCTOS N.C.P. EXCENTOS DE VENTAS",
+    "COMERCIALIZACION Y DISTRIBUCION AL POR MAYOR DE ALIMENTOS PREPARADOS PARA ANIMALES DOMESTICOS",
+    "COMERCIALIZACION AL POR MAYOR DE SUPLEMENTOS ALIMENTICIOS"
+   ]
+  },
+  {
+   "codigo": "4641.1",
+   "descripcion": "Venta al por mayor de productos textiles y prendas de vestir",
+   "atv": [
+    "VENTA AL POR MAYOR DE CALZADO, PRODUCTOS TEXTILES; PRENDASDE VESTIR;"
+   ]
+  },
+  {
+   "codigo": "4649.1",
+   "descripcion": "Venta al por mayor de aparatos, artículos y equipo de uso doméstico",
+   "atv": [
+    "VENTA AL POR MAYOR DE ARTICULOS, ARTEFACTOS, DISCOS Y MUEBLES PARA EL HOGAR"
+   ]
+  },
+  {
+   "codigo": "4649.2",
+   "descripcion": "Venta al por mayor de productos farmacéuticos, veterinarios y artículos de tocador",
+   "atv": [
+    "VENTA AL POR MAYOR DE PRODUCTOS VETERINARIOS GRAVADOS CON IVA",
+    "VENTA AL POR MAYOR DE EQUIPO, ARTICULOS Y ACCESORIOS DE BELLEZA, COSMETICOS E HIGIENE PERSONAL"
+   ]
+  },
+  {
+   "codigo": "4649.3",
+   "descripcion": "Venta al por mayor de juegos, juguetes, artículos deportivos y de esparcimiento",
+   "atv": [
+    "VENTA AL POR MAYOR DE EQUIPO PARA CAMPO DE JUEGOS (PLAY)",
+    "COMERCIO AL POR MAYOR DE EQUIPO Y ACCESORIOS PARA PESCA DEPORTIVA O ARTESANAL"
+   ]
+  },
+  {
+   "codigo": "4649.9",
+   "descripcion": "Venta al por mayor de otros enseres domésticos n.c.p",
+   "atv": [
+    "VENTA AL POR MAYOR DE PREPARADOS Y/O ARTICULOS PARA LA LIMPIEZA DE USO GENERAL",
+    "VENTA AL POR MAYOR DE LIBROS Y TEXTOS EDUCATIVOS",
+    "VENTA AL POR MAYOR DE SUMINISTROS Y ARTICULOS DE LIBRERIA",
+    "VENTA AL POR MAYOR DE DISCOS COMPACTOS Y OTROS DISPOSITIVOSDE GRABACION"
+   ]
+  },
+  {
+   "codigo": "4651.0",
+   "descripcion": "Venta al por mayor de computadoras, equipo informático periférico y programas informáticos",
+   "atv": [
+    "VENTA AL POR MAYOR DE EQUIPO DE COMPUTO, SUS PARTES Y ACCESORIOS"
+   ]
+  },
+  {
+   "codigo": "4652.0",
+   "descripcion": "Venta al por mayor de equipo, partes y piezas electrónicas y de telecomunicaciones",
+   "atv": [
+    "VENTA AL POR MAYOR DE ARTICULOS Y ACCESORIOS ELECTRONICOS"
+   ]
+  },
+  {
+   "codigo": "4653.0",
+   "descripcion": "Venta al por mayor de maquinaria, equipo y materiales agropecuarios",
+   "atv": [
+    "VENTA AL POR MAYOR DE REPUESTOS Y/O ACCESORIOS PARA MAQUINARIA Y EQUIPO AGROPECUARIO",
+    "VENTA AL POR MAYOR DE MAQUINARIA Y EQUIPO AGROPECUARIO"
+   ]
+  },
+  {
+   "codigo": "4659.0",
+   "descripcion": "Venta al por mayor de otro tipo de maquinaria y equipo",
+   "atv": [
+    "VENTA DE BOMBAS DE AGUA",
+    "VENTA AL POR MAYOR EQUIPO MEDICO ACCESORIOS MEDICAMENTOS PRODUC FARMACEUTICO EXENTOS DE VENTAS",
+    "VENTA AL POR MAYOR EQUIPO MEDICO ACCESORIO MEDICAMENTO PRODUC FARMACEUTICO GRABADOS CON VENTAS",
+    "VENTA AL POR MAYOR DE MAQUINARIA Y EQUIPO INDUSTRIAL, DE CONSTRUCCION, INGENIERIA CIVIL Y OTROS, ASI COMO SUS ACCESORIOS",
+    "VENTA AL POR MAYOR DE EQUIPO Y SUMINISTROS DE OFICINA"
+   ]
+  },
+  {
+   "codigo": "4661.0",
+   "descripcion": "Venta al por mayor de combustibles sólidos, líquidos y gaseosos y de productos conexos",
+   "atv": [
+    "VENTA AL POR MAYOR DE COMBUSTIBLES SOLIDOS (LENA Y SIMILARES)",
+    "VENTA AL POR MAYOR DE COMBUSTIBLES SOLIDOS (CARBON)"
+   ]
+  },
+  {
+   "codigo": "4662.0",
+   "descripcion": "Venta al por mayor de metales y de minerales metalíferos",
+   "atv": [
+    "VENTA AL POR MAYOR DE METALES Y MINERALES METALIFEROS"
+   ]
+  },
+  {
+   "codigo": "4663.0",
+   "descripcion": "Venta al por mayor de materiales de construcción, articulos de ferretería y equipo y materiales de fontanería y calefacción",
+   "atv": [
+    "VENTA AL POR MAYOR DE EQUIPO DE AIRE ACONDICIONADO Y CALENTADORES (ELECTRICOS, SOLARES, ETC.)"
+   ]
+  },
+  {
+   "codigo": "4669.1",
+   "descripcion": "Venta al por mayor de fertilizantes y productos agroquímicos",
+   "atv": [
+    "VENTA AL POR MAYOR DE PRODUCTOS PARA USO AGROPECUARIO Y VENTA DESECHOS ORGANICOS E INORGANICOS"
+   ]
+  },
+  {
+   "codigo": "4669.9",
+   "descripcion": "Venta al por mayor de basura, desechos y otros productos n.c.p",
+   "atv": [
+    "RECICLAJE DE DESPERDICIOS Y DESECHOS METALICOS",
+    "ACTIVIDADES DE DESARME DE VEHICULOS Y VENTA DE REPUESTOS",
+    "VENTA AL POR MAYOR DE PRODUCTOS,SUSTANCIAS O REACTIVOS QUIMICOS Y SOLVENTES EN GENERAL",
+    "VENTA AL POR MAYOR Y AL POR MENOR DE CHATARRA",
+    "DISTRIBUCION Y COMERCIALIZACION AL POR MAYOR DE MATERIAL DEEMPAQUE"
+   ]
+  },
+  {
+   "codigo": "4690.0",
+   "descripcion": "Venta al por mayor de otros productos no especializada",
+   "atv": [
+    "VENTA DE ASFALTO/MEZCLA ASFALTICA",
+    "VENTA AL POR MAYOR DE TODO TIPO DE ARTICULOS POR CATALOGO",
+    "VENTA AL POR MAYOR DE EXTINTORES Y EQUIPO SIMILAR",
+    "VENTA AL POR MAYOR DE OTROS PRODUCTOS NO ESPECIALIZADOS"
+   ]
+  },
+  {
+   "codigo": "4711.1",
+   "descripcion": "Venta al por menor en supermercados, almacenes y similares",
+   "atv": [
+    "SUPERMERCADOS Y ALMACENES DE ABARROTES EN CADENA"
+   ]
+  },
+  {
+   "codigo": "4711.2",
+   "descripcion": "Venta al por menor en minisuper, pulperias y similares",
+   "atv": [
+    "ABASTECEDORES, PULPERIAS O MINI-SUPER",
+    "PULPERIAS ( MINI-SUPER)(SIN CANTINA)"
+   ]
+  },
+  {
+   "codigo": "4719.1",
+   "descripcion": "Venta al por menor en tiendas por departamentos",
+   "atv": [
+    "TIENDAS O ALMACENES POR DEPARTAMENTOS"
+   ]
+  },
+  {
+   "codigo": "4719.9",
+   "descripcion": "Venta al por menor en bazares y otros establecimientos no especializados n.c.p",
+   "atv": [
+    "BAZARES"
+   ]
+  },
+  {
+   "codigo": "4721.1",
+   "descripcion": "Venta al por menor de carne de bovino, porcino y sus derivados",
+   "atv": [
+    "VENTA DE CARNES (RES, POLLO,CERDO) INCLUIDAS EN LA CANASTA BASICA",
+    "VENTA DE EMBUTIDOS Y CARNES (RES, POLLO, CERDO)INCLUIDAS ENLA CANASTA BASICA",
+    "VENTA DE EMBUTIDOS Y CARNES (RES, POLLO, CERDO, CABALLO,ETC) GRAVADAS CON IVA"
+   ]
+  },
+  {
+   "codigo": "4721.3",
+   "descripcion": "Venta al por menor de pescados y mariscos",
+   "atv": [
+    "VENTA DE MARISCOS Y/O PESCADO (PESCADERIAS O MARISQUERIAS)INCLUIDOS EN LA CANASTA BASICA",
+    "VENTA DE PESCADOS Y/O MARISCOS (PESCADERIAS O MARISQUERIAS) GRAVADOS EN VENTAS"
+   ]
+  },
+  {
+   "codigo": "4721.4",
+   "descripcion": "Venta al por menor de frutas y verduras frescas",
+   "atv": [
+    "VENTA DE VERDURAS Y FRUTAS",
+    "VENTA DE FRUTAS GRAVADAS CON IVA",
+    "VENTA DE FRUTAS INCLUIDAS EN LA NUEVA CANASTA BASICA"
+   ]
+  },
+  {
+   "codigo": "4721.9",
+   "descripcion": "Venta al por menor de otros alimentos",
+   "atv": [
+    "VENTA AL POR MENOR DE ESPECIAS, SALSAS Y CONDIMENTOS",
+    "COMERCIO AL POR MENOR DE CONFITES Y OTROS PRODUCTOS RELACIONADOS (CONFITERIA)",
+    "VENTA AL POR MENOR DE HUEVOS DE GALLINA INCLUIDOS EN LA CANASTA BASICA",
+    "VENTA AL POR MENOR DE OTROS ALIMENTOS NO INCLUIDOS EN CANASTA BASICA",
+    "COMERCIO AL POR MENOR DE ALIMENTOS Y PRODUCTOS N.C.P. INCLUIDOS EN CANASTA BASICA",
+    "VENTA AL POR MENOR DE CAFE (EXCEPTO EL ENVASADO, ENLATADO, SOLUBLE, DESCAFEINADO)",
+    "VENTA AL POR MENOR DE POLEN Y SEMILLAS"
+   ]
+  },
+  {
+   "codigo": "4722.0",
+   "descripcion": "Venta al por menor de bebidas en comercios especializados",
+   "atv": [
+    "LICORERIAS Y/O DEPOSITO DE LICORES (VENTA AL POR MENOR)",
+    "COMERCIO AL POR MENOR DE BEBIDAS GASEOSAS Y CARBONATADAS",
+    "COMERCIO AL POR MENOR DE AGUA EMBOTELLADA"
+   ]
+  },
+  {
+   "codigo": "4723.0",
+   "descripcion": "Venta al por menor de tabaco en comercios especializados",
+   "atv": [
+    "COMERCIO AL POR MENOR DE PRODUCTOS DE TABACO"
+   ]
+  },
+  {
+   "codigo": "4730.0",
+   "descripcion": "Venta al por menor de combustibles para vehículos automotores en comercios especializados",
+   "especialidades": [
+    "Venta de combustibles (conocidas como gasolineras o bombas)",
+    "Venta de combustible sin punto fijo y/o venta de lubricantes y otros"
+   ],
+   "atv": [
+    "VENTA DE COMBUSTIBLES (CONOCIDAS COMO GASOLINERAS O BOMBAS)",
+    "VENTA DE LUBRICANTES, ACEITES, GRASAS Y PRODUCTOS DE LIMPIEZA PARA AUTOMOTORES",
+    "COMERCIO DE COMBUSTIBLE SIN PUNTO FIJO (PEDDLER)"
+   ]
+  },
+  {
+   "codigo": "4741.0",
+   "descripcion": "Venta al por menor de computadoras, equipo periféricos, programas de información y telecomunicaciones en comercios especializados",
+   "especialidades": [
+    "Venta al por menor de computadoras, equipo periféricos, programas de información y telecomunicaciones",
+    "Venta al por menor de teléfonos celulares y sus accesorios"
+   ],
+   "atv": [
+    "VENTA AL POR MENOR DE ARTICULOS ELECTRONICOS, ELECTRICOS Y SIMILARES",
+    "COMERCIO AL POR MENOR DE COMPUTADORAS, ACCESORIOS, MICROCOMPONENTES Y PAQUETES DE COMPUTO",
+    "VENTA AL POR MENOR CELULARES ACCESORIOS EQUIPO Y ART PARA COMUNICACIONES INCLUYE LA REPARACION"
+   ]
+  },
+  {
+   "codigo": "4742.0",
+   "descripcion": "Venta al por menor de equipo de audio y video en comercios especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE EQUIPO DE AUDIO Y VIDEO"
+   ]
+  },
+  {
+   "codigo": "4751.0",
+   "descripcion": "Venta al por menor de productos textiles en comercios especializados",
+   "atv": [
+    "PASAMANERIAS",
+    "VENTA AL POR MENOR DE PRODUCTOS TEXTILES (TELAS)"
+   ]
+  },
+  {
+   "codigo": "4752.1",
+   "descripcion": "Venta al por menor de artículos de ferretería y pinturas en comercios especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE DEPOSITO DE MADERA",
+    "VENTA AL POR MENOR ARTICULOS DE FERRETERIA PINTURAS MADERA Y MATERIALES PARA LA CONSTRUCCION",
+    "VENTA DE PINTURAS",
+    "VENTA AL POR MENOR DE MATERIALES PARA LA CONSTRUCCION",
+    "VENTA AL POR MENOR DE PLYWOOD"
+   ]
+  },
+  {
+   "codigo": "4752.2",
+   "descripcion": "Venta al por menor de productos de vidrio en comercios especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE VIDRIO PARA LA CONSTRUCCION"
+   ]
+  },
+  {
+   "codigo": "4753.0",
+   "descripcion": "Venta al por menor de tapices, alfombras, cubrimientos para paredes y pisos en comercios especializados",
+   "atv": [
+    "VENTA DE ALFOMBRAS Y TAPICES"
+   ]
+  },
+  {
+   "codigo": "4759.0",
+   "descripcion": "Venta al por menor de aparatos eléctricos de uso doméstico, muebles, equipos de iluminación y otros enseres domésticos en comercios especializados",
+   "atv": [
+    "COMERCIO AL POR MENOR DE OBJETOS DE CERAMICA Y PORCELANA",
+    "VENTA AL POR MENOR DE CRISTALERIA",
+    "VENTA AL POR MENOR DE ELECTRODOMESTICOS, MUEBLES Y ARTICULOS PARA EL HOGAR",
+    "VENTA AL POR MENOR DE INSTRUMENTOS MUSICALES, PARTES Y ACCESORIOS",
+    "VENTA AL POR MENOR REALIZADA DENTRO DEL DEPOSITO LIBRE COMERCIAL DE GOLFITO.",
+    "VENTA AL POR MENOR DE PURIFICADORES DE AGUA, SUS PARTES Y REPUESTOS"
+   ]
+  },
+  {
+   "codigo": "4761.0",
+   "descripcion": "Venta al por menor de libros, periódicos y artículos de papelería en comercios especializados",
+   "atv": [
+    "LIBRERIAS",
+    "VENTA AL POR MENOR DE REVISTAS/PERIODICOS EN PUESTOS DE VENTAS O MERCADOS",
+    "VENTA AL POR MENOR DE LIBROS Y TEXTOS EDUCATIVOS",
+    "VENTA AL POR MENOR DE SUMINISTROS Y/0 EQUIPO DE OFICINA"
+   ]
+  },
+  {
+   "codigo": "4762.0",
+   "descripcion": "Venta al por menor de grabaciones musicales y videográficas en comercios especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE DISCOS, CDS Y OTROS SIMILARES",
+    "VENTA AL POR MENOR DE DISCOS, GRABACIONES DE MUSICA Y DE VIDEO"
+   ]
+  },
+  {
+   "codigo": "4763.0",
+   "descripcion": "Venta al por menor de artículos de deporte en comercios especializados",
+   "atv": [
+    "VENTA DE EMBARCACIONES DE MOTOR Y VELA",
+    "VENTA AL POR MENOR DE ARTICULOS DEPORTIVOS",
+    "VENTA AL POR MENOR DE BICICLETAS Y SUS ACCESORIOS"
+   ]
+  },
+  {
+   "codigo": "4764.0",
+   "descripcion": "Venta al por menor de juegos y de juguetes en almacenes especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE JUGUETES Y/O ARTICULOS DE ESPARCIMIENTO"
+   ]
+  },
+  {
+   "codigo": "4771.1",
+   "descripcion": "Venta al por menor de prendas de vestir y artículos de cuero en almacenes especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE ROPA (BOUTIQUE)",
+    "VENTA AL POR MENOR DE PRENDAS DE VESTIR, ROPA Y ZAPATOS (TIENDAS)",
+    "VENTA AL POR MENOR DE ARTICULOS DE CUERO (EXCEPTO CALZADO)"
+   ]
+  },
+  {
+   "codigo": "4771.2",
+   "descripcion": "Venta al por menor de zapatos en comercios especializados",
+   "atv": [
+    "VENTA AL POR MENOR DE CALZADO (ZAPATAERIAS)"
+   ]
+  },
+  {
+   "codigo": "4772.0",
+   "descripcion": "Venta al por menor de productos farmacéuticos y medicinales, cosméticos y artículos de tocador en comercios especializados",
+   "atv": [
+    "MACROBIOTICAS",
+    "FARMACIAS",
+    "VENTA AL POR MENOR DE COSMETICOS Y PERFUMERIA",
+    "VENTA AL POR MENOR DE ARTICULOS Y ACCESORIOS ORTOPEDICOS"
+   ]
+  },
+  {
+   "codigo": "4773.0",
+   "descripcion": "Otra venta al por menor de otros productos nuevos en comercios especializados",
+   "atv": [
+    "VENTA DE CUADROS PINTURAS HECHAS POR PINTORES NACIONALES Y EXTRANJEROS PRODUCIDOS EN EL PAIS",
+    "VENTA DE PERROS ENTRENADOS PARA SEGURIDAD",
+    "INSTALACION Y VENTA DE TANQUES PARA GAS",
+    "VENTA AL POR MENOR DE ARMAS (ARMERIAS)",
+    "VENTA AL POR MENOR DE CAJAS REGISTRADORAS, CALCULADORAS O MAQUINAS DE CONTABILIDAD",
+    "VENTA AL POR MENOR DE EXTINTORES",
+    "VENTA AL POR MENOR DE MATERIALES PARA CALZADO",
+    "VENTA AL POR MENOR DE MAQUINARIA Y EQUIPO DE TODO TIPO Y ARTICULOS CONEXOS",
+    "VENTA AL POR MENOR DE REPUESTOS NUEVOS PARA MAQUINARIA, EQUIPO Y OTROS",
+    "VENTA AL POR MENOR DE OTROS PRODUCTOS EN ALMACENES ESPECIALIZADOS",
+    "VENTA AL POR MENOR DE FLORES",
+    "VENTA AL POR MENOR DE JOYERIA, RELOJERIA Y BISUTERIA",
+    "VENTA AL POR MENOR DE PANALES DESECHABLES, ARTICULOS DE LIMPIEZA Y OTROS (PANALERA)",
+    "VENTA AL POR MENOR DE ANIMALES DOMESTICOS/MASCOTAS, ALIMENTOS Y ACCESORIOS",
+    "VENTA AL POR MENOR DE PRODUCTOS PARA USO AGROPECUARIO",
+    "VENTA AL POR MENOR DE ANTEOJOS Y ARTICULOS OPTICOS (OPTICA)",
+    "VENTA AL POR MENOR DE REPUESTOS PARA ELECTRODOMESTICOS",
+    "VENTA AL POR MENOR DE OTROS PRODUCTOS NUEVOS EN COMERCIOS ESPECIALIZADOS NO INCLUIDOS EN CANASTA BASICA.",
+    "VENTA DE PRODUCTOS DE ARTESANIA Y SOUVENIR",
+    "DISTRIBUCION Y VENTA DE GAS EN CILINDRO",
+    "VENTA DE MONEDAS, BILLETES,ESTAMPILLAS (NUEVAS Y USADAS) PARA COLECCION Y ESPECIES FISCALES",
+    "FLORISTERIA"
+   ]
+  },
+  {
+   "codigo": "4774.0",
+   "descripcion": "Venta al por menor de artículos de segunda mano",
+   "especialidades": [
+    "Venta al por menor de antigüedades",
+    "Venta al por menor de repuestos usados para maquinaria, equipo y otros",
+    "Venta de todo tipo de artículos usados",
+    "Venta de repuestos usados para automóviles",
+    "Venta de libros usados",
+    "Venta al por menor de ropa usada",
+    "Venta al por menor de maquinaria industrial usada"
+   ],
+   "atv": [
+    "VENTA AL POR MENOR DE ANTIGUEDADES",
+    "VENTA AL POR MENOR DE REPUESTOS USADOS PARA MAQUINARIA, EQUIPO Y OTROS",
+    "VENTA DE TODO TIPO DE ARTICULOS USADOS",
+    "VENTA DE REPUESTOS USADOS PARA AUTOMOVILES",
+    "VENTA DE LIBROS USADOS",
+    "VENTA AL POR MENOR DE ROPA USADA",
+    "VENTA AL POR MENOR DE MAQUINARIA INDUSTRIAL USADA"
+   ]
+  },
+  {
+   "codigo": "4781.0",
+   "descripcion": "Venta al por menor en puestos de venta y mercados de: alimentos, bebidas y de productos del tabaco",
+   "especialidades": [
+    "Pequeños productores agrícolas con venta exclusiva al consumidor final en ferias del agricultor",
+    "Otra venta al por menor en puestos de venta y mercados de: alimentos, bebidas y de productos del tabaco"
+   ],
+   "atv": [
+    "PEQUENOS PRODUCTORES AGRICOLAS (FERIAS DEL AGRICULTOR)",
+    "PEQUENOS PRODUCTORES AGRICOLAS"
+   ]
+  },
+  {
+   "codigo": "4799.0",
+   "descripcion": "Otros tipos de venta al por menor no realizada en comercios, puestos de venta o mercados",
+   "especialidades": [
+    "Venta por catálogo (vendedor o afiliado)",
+    "Otros tipos de venta al por menor no realizada en comercios, puestos de venta o mercados"
+   ],
+   "atv": [
+    "VENTA AL POR MENOR DE TODO TIPO DE ARTICULOS POR CATALOGO",
+    "VENTA AL POR MENOR DE PIEZAS DE BAMBU",
+    "VENTA DE REVISTAS/PERIODICOS (PUESTOS CALLEJEROS)",
+    "VENTA AMBULANTE DE ARTICULOS PARA EL HOGAR",
+    "VENTA DE LIBROS A DOMICILIO"
+   ]
+  },
+  {
+   "codigo": "4911.0",
+   "descripcion": "Transporte de pasajeros por ferrocarril",
+   "atv": [
+    "SERVICIO DE TRANSPORTE POR VIA FERREA"
+   ]
+  },
+  {
+   "codigo": "4921.0",
+   "descripcion": "Transporte terrestre de pasajeros del área urbana, suburbana por vía terrestre",
+   "atv": [
+    "SERVICIO DE TRANSPORTE REGULAR DE PERSONAS POR VIA TERRESTRE"
+   ]
+  },
+  {
+   "codigo": "4922.1",
+   "descripcion": "Transporte terrestre de estudiantes y de empleados",
+   "atv": [
+    "TRANSPORTE REGULAR DE ESTUDIANTES Y EMPLEADOS POR VIA TERRESTRE"
+   ]
+  },
+  {
+   "codigo": "4922.2",
+   "descripcion": "Servicios de taxi",
+   "especialidades": [
+    "Transporte terrestre remunerado de personas mediante la modalidad de taxi",
+    "Otros servicios de transporte terrestre de personas"
+   ],
+   "atv": [
+    "SERVICIO DE TAXI",
+    "SERVICIO ESPECIAL ESTABLE DE TAXI"
+   ]
+  },
+  {
+   "codigo": "4922.3",
+   "descripcion": "Transporte terrestre no regular de pasajeros, en buses",
+   "atv": [
+    "TRANSPORTE NO REGULAR DE PASAJEROS POR VIA TERRESTRE(EXCURSIONES)"
+   ]
+  },
+  {
+   "codigo": "4923.1",
+   "descripcion": "Transporte terrestre local e internacional de contenedores",
+   "atv": [
+    "SERVICIO DE MUDANZA INTERNACIONAL"
+   ]
+  },
+  {
+   "codigo": "4923.9",
+   "descripcion": "Otro transporte de carga n.c.p",
+   "atv": [
+    "SERVICIO DE TRANSPORTE DE CARGA POR VIA TERRESTRE",
+    "TRANSPORTE DE PRODUCTOS DERIVADOS DEL PETROLEO",
+    "SERVICIO DE ACARREO Y DISTRIBUCION DE TODO TIPO DE MERCANCIA (INCLUYE LA MUDANZA NACIONAL)"
+   ]
+  },
+  {
+   "codigo": "4930.0",
+   "descripcion": "Transporte por tuberías",
+   "atv": [
+    "SERVICIO DE TRANSPORTE POR TUBERIAS"
+   ]
+  },
+  {
+   "codigo": "5012.0",
+   "descripcion": "Transporte marítimo y de cabotaje de carga",
+   "atv": [
+    "TRANSPORTE DE CARGA POR VIA ACUATICA"
+   ]
+  },
+  {
+   "codigo": "5110.0",
+   "descripcion": "Transporte de pasajeros por vía aérea",
+   "atv": [
+    "SERVICIO DE TRANSPORTE AEREO REGULADO DE PASAJEROS (LINEAS AEREAS)",
+    "SERVICIO DE TRANSPORTE AEREO NO REGULAR DE PASAJEROS"
+   ]
+  },
+  {
+   "codigo": "5120.0",
+   "descripcion": "Transporte de carga por vía aérea",
+   "atv": [
+    "SERVICIO DE TRANSPORTE DE CARGA POR VIA AEREA"
+   ]
+  },
+  {
+   "codigo": "5210.0",
+   "descripcion": "Almacenamiento y depósito",
+   "atv": [
+    "SERVICIOS DE ALMACENAJE"
+   ]
+  },
+  {
+   "codigo": "5221.1",
+   "descripcion": "Remolque y asistencia para vehículo destinado al transporte terrestre",
+   "atv": [
+    "SERVICIOS DE GRUA"
+   ]
+  },
+  {
+   "codigo": "5221.2",
+   "descripcion": "Servicios de estacionamientos y garajes",
+   "atv": [
+    "PARQUEOS/ESTACIONAMIENTO DE VEHICULOS",
+    "FUNCIONAMIENTO DE INSTALACIONES TERMINALES COMO PUERTOS, MUELLES Y AEROPUERTOS"
+   ]
+  },
+  {
+   "codigo": "5221.9",
+   "descripcion": "Servicios de administración de carreteras, puentes y otros servicios auxiliares",
+   "atv": [
+    "PERMISO DE PASO POR PROPIEDADES PRIVADAS (PEAJE)"
+   ]
+  },
+  {
+   "codigo": "5223.0",
+   "descripcion": "Actividades de servicio secundario de transporte por vía aérea",
+   "atv": [
+    "PRESTACION DE SERVICIOS DE TRANSITO AEREO"
+   ]
+  },
+  {
+   "codigo": "5224.0",
+   "descripcion": "Manipulación de carga"
+  },
+  {
+   "codigo": "5229.0",
+   "descripcion": "Otras actividades de apoyo al transporte",
+   "atv": [
+    "AGENCIAS ADUANALES, ALMACENES FISCALES Y ESTACIONAMIENTOS TRANSITORIOS",
+    "AGENCIA DE TRANSPORTE (NAVIERA)",
+    "AGENTE ADUANERO FISICO O JURIDICO",
+    "ASESOR ADUANERO",
+    "SERVICIO DE INSPECCION DE TODO TIPO DE MERCADERIAS Y ACTIVOS(INCLUYE DROGAS)"
+   ]
+  },
+  {
+   "codigo": "5310.0",
+   "descripcion": "Servicios postales (Correo)",
+   "atv": [
+    "ACTIVIDADES POSTALES Y DE CORREO"
+   ]
+  },
+  {
+   "codigo": "5510.1",
+   "descripcion": "Actividades de alojamiento para estancias cortas en hoteles y moteles",
+   "atv": [
+    "HOTEL",
+    "MOTEL Y/O SERVICIO DE HABITACION OCASIONAL, ALBERGUES, POSADAS Y SIMILARES"
+   ]
+  },
+  {
+   "codigo": "5510.9",
+   "descripcion": "Otras actividades de alojamiento para estancias cortas n.c.p",
+   "atv": [
+    "ALQUILER DE BIENES INMUEBLES DE USO HABITACIONAL POR PERIODOS INFERIORES A UN MES (CASAS DE ESTANCIA TRANSITORIA, CASA DE HUESPEDES, CABINAS, CAMPAMENTOS, ENTRE OTROS)"
+   ]
+  },
+  {
+   "codigo": "5590.0",
+   "descripcion": "Otras actividades de alojamientos",
+   "atv": [
+    "RESIDENCIAS UNIVERSITARIAS CON SERVICIOS INTEGRADOS"
+   ]
+  },
+  {
+   "codigo": "5610.0",
+   "descripcion": "Actividades de restaurantes y de servicios móviles de comidas",
+   "atv": [
+    "PREPARACION, SERVICIO Y VENTA DE FRUTAS PICADAS Y BEBIDAS DE FRUTAS Y/O LEGUMBRES.",
+    "CAFETERIAS",
+    "SERVICIO DE RESTAURANTE, CAFETERIAS, SODAS Y OTROS EXPENDIOS DE COMIDA",
+    "SODAS",
+    "OTROS EXPENDIOS DE COMIDAS"
+   ]
+  },
+  {
+   "codigo": "5621.0",
+   "descripcion": "Suministros de comidas por encargo",
+   "atv": [
+    "SERVICIOS DE CATERING SERVICE"
+   ]
+  },
+  {
+   "codigo": "5630.0",
+   "descripcion": "Actividades de servicio de bebidas",
+   "atv": [
+    "BARES, CANTINAS O TABERNAS"
+   ]
+  },
+  {
+   "codigo": "5811.0",
+   "descripcion": "Edición de libros",
+   "atv": [
+    "EDICION DE LIBROS DE TEXTOS"
+   ]
+  },
+  {
+   "codigo": "5813.0",
+   "descripcion": "Edición de periódicos, diarios y revistas",
+   "atv": [
+    "EDICION DE PERIODICOS, REVISTAS Y OTRAS PUBLICACIONES PERIODICAS"
+   ]
+  },
+  {
+   "codigo": "5911.0",
+   "descripcion": "Actividades de producción de películas cinematográficas, videos y programas de televisión",
+   "atv": [
+    "ACTIVIDADES PRODUCCION POSTPRODUCCION Y DISTRIBUCION DE PELICULAS CINEMATOGRAFICAS (VIDEOS)"
+   ]
+  },
+  {
+   "codigo": "5914.0",
+   "descripcion": "Actividades de proyección de películas",
+   "atv": [
+    "EXHIBICION DE FILMES Y VIDEOCINTAS (SALAS DE CINE)"
+   ]
+  },
+  {
+   "codigo": "5920.0",
+   "descripcion": "Actividades de grabación y publicación de grabaciones sonoras",
+   "atv": [
+    "GRABACION DE SONIDO (MUSICA, ETC.) EN DISCOS GRAMOFONICOS YEN CINTA MAGNETOFONICA"
+   ]
+  },
+  {
+   "codigo": "6010.0",
+   "descripcion": "Transmisiones de radio",
+   "atv": [
+    "SERVICIO DE RADIO FRECUENCIA",
+    "TRANSMISIONES DE RADIO",
+    "TRANSMISIONES DE RADIO CULTURALES SEGUN LEY GENERAL DE TELECOMUNICACIONES."
+   ]
+  },
+  {
+   "codigo": "6020.0",
+   "descripcion": "Programación y transmisión de televisión",
+   "atv": [
+    "PROGRAMACION Y TRANSMISIONES DE TELEVISION",
+    "CANALES DE TELEVISION"
+   ]
+  },
+  {
+   "codigo": "6110.0",
+   "descripcion": "Actividades de telecomunicaciones alámbricas",
+   "especialidades": [
+    "Otras actividades de telecomunicaciones alámbricas",
+    "Servicios telefónicos y/o telegráficos"
+   ],
+   "atv": [
+    "SERVICIO DE TELEVISION POR CABLE, SATELITE U OTROS SISTEMA S SIMILARES",
+    "VENTA DE ESPACIO EN EL CABLE SUBMARINO",
+    "SERVICIOS TELEFONICOS, TELEGRAFICOS Y POR TELEX"
+   ]
+  },
+  {
+   "codigo": "6120.0",
+   "descripcion": "Actividades de telecomunicaciones inalámbricas",
+   "atv": [
+    "SERVICIO DE TRANSMISION DE DATOS, TEXTO, SONIDO, VOZ Y VIDEO POR MEDIO DE LA RED DE INTERNET"
+   ]
+  },
+  {
+   "codigo": "6190.1",
+   "descripcion": "Servicios de café internet",
+   "atv": [
+    "SERVICIOS DE INTERNET EN LOCALES PUBLICOS ( CAFE INTERNET )"
+   ]
+  },
+  {
+   "codigo": "6190.9",
+   "descripcion": "Otras actividades de telecomunicación",
+   "atv": [
+    "VENTA AL POR MENOR DE TARJETAS TELEFONICAS, PINES, TIEMPO AIRE Y SIMILARES",
+    "SERVICIOS DE RADIO-MENSAJES, RADIOLOCALIZADORES Y SIMILARES",
+    "MANTENIMIENTO DE REDES DE TELECOMUNICACION"
+   ]
+  },
+  {
+   "codigo": "6201.0",
+   "descripcion": "Actividades de programación informática",
+   "atv": [
+    "DISENADOR GRAFICO, DE SOFTWARE Y PAGINAS WEB"
+   ]
+  },
+  {
+   "codigo": "6202.0",
+   "descripcion": "Actividades de consultoría informática y gestión de instalaciones informáticas",
+   "atv": [
+    "CONSULTORES INFORMATICOS"
+   ]
+  },
+  {
+   "codigo": "6209.0",
+   "descripcion": "Otras actividades de la tecnología de información y servicio informáticos",
+   "atv": [
+    "OTRAS ACTIVIDADES DE INFORMATICA"
+   ]
+  },
+  {
+   "codigo": "6311.0",
+   "descripcion": "Procesamiento de datos, hospedaje y actividades conexas",
+   "atv": [
+    "PROCESAMIENTO DE DATOS",
+    "ACTIVIDADES RELACIONADAS CON BASES DE DATOS"
+   ]
+  },
+  {
+   "codigo": "6391.0",
+   "descripcion": "Actividades de agencias de noticias",
+   "atv": [
+    "ACTIVIDADES DE AGENCIAS DE NOTICIAS"
+   ]
+  },
+  {
+   "codigo": "6411.0",
+   "descripcion": "Banca Central",
+   "atv": [
+    "BANCA CENTRAL"
+   ]
+  },
+  {
+   "codigo": "6419.0",
+   "descripcion": "Otros tipos de intermediación monetaria",
+   "especialidades": [
+    "Otros tipos de intermediación monetaria",
+    "Servicio de envío y recibo de dinero"
+   ],
+   "atv": [
+    "COOPERATIVAS DE AHORRO Y CREDITO",
+    "BANCOS ESTATALES (EXCEPTO EL BANCO CENTRAL)",
+    "ENTIDADES FINANCIERAS PRIVADAS (BANCOS)",
+    "INSTITUCIONES DE AHORRO Y CREDITO PARA VIVIENDA",
+    "SERVICIO DE ENVIO Y RECIBO DE DINERO"
+   ]
+  },
+  {
+   "codigo": "6420.0",
+   "descripcion": "Actividades de sociedades de cartera",
+   "atv": [
+    "ACTIVIDADES DE SOCIEDADES DE CARTERA (HOLDING)"
+   ]
+  },
+  {
+   "codigo": "6430.0",
+   "descripcion": "Fondo y sociedades de Inversión y entidades financieras similares",
+   "atv": [
+    "FIDEICOMISOS Y/O ADMINISTRADORES DE FONDOS DE INVERSION",
+    "SOCIEDADES DE INVERSION MOBILIARIA",
+    "FONDOS DE INVERSION"
+   ]
+  },
+  {
+   "codigo": "6491.0",
+   "descripcion": "Arrendamiento financiero",
+   "atv": [
+    "ARRENDAMIENTO OPERATIVO EN FUNCION FINANCIERA CON OPCION DECOMPRA O RENOVACION (LEASING OPERATIVO)"
+   ]
+  },
+  {
+   "codigo": "6492.0",
+   "descripcion": "Otros tipos de crédito",
+   "especialidades": [
+    "Emisores de tarjetas de crédito/débito",
+    "Casa de empeño y afín",
+    "Entidades financieras distintas al sistema bancario nacional",
+    "Servicio de préstamo (prestamistas)"
+   ],
+   "atv": [
+    "EMISORES DE TARJETAS DE CREDITO/DEBITO",
+    "CASA DE EMPENO Y AFIN",
+    "ENTIDADES FINANCIERAS DISTINTAS AL SISTEMA BANCARIO NACIONAL",
+    "SERVICIO DE PRESTAMO (PRESTAMISTAS)"
+   ]
+  },
+  {
+   "codigo": "6499.0",
+   "descripcion": "Otras actividades de servicios financiero, excepto las de seguros y fondos de pensiones n.c.p",
+   "especialidades": [
+    "Otras actividades de servicios financiero, excepto las de seguros y fondos de pensiones ncp",
+    "Ingresos por intereses diferentes al comercio del préstamo",
+    "Rentas de capital sujetas a retenciones únicas y definitivas"
+   ],
+   "atv": [
+    "SERVICIO RECUPERACION DE DEUDAS (FACTORE0)",
+    "INGRESOS POR INTERESES DIFERENTES AL COMERCIO DEL PRESTAMO"
+   ]
+  },
+  {
+   "codigo": "6511.0",
+   "descripcion": "Seguros de vida",
+   "atv": [
+    "SEGUROS DE VIDA"
+   ]
+  },
+  {
+   "codigo": "6512.0",
+   "descripcion": "Seguros generales",
+   "atv": [
+    "PLANES DE SEGUROS GENERALES"
+   ]
+  },
+  {
+   "codigo": "6530.0",
+   "descripcion": "Fondos de pensión",
+   "especialidades": [
+    "Operadora de pensiones complementaria",
+    "Fondo de operadoras de pensiones exentos"
+   ],
+   "atv": [
+    "OPERADORAS DE PENSIONES",
+    "FONDOS DE OPERADORAS DE PENSIONES EXENTOS DEL 8%"
+   ]
+  },
+  {
+   "codigo": "6611.0",
+   "descripcion": "Administración de mercados financieros",
+   "atv": [
+    "ADMINISTRACION DE MERCADOS FINANCIEROS"
+   ]
+  },
+  {
+   "codigo": "6612.0",
+   "descripcion": "Corretaje de valores y de contratos de productos básicos",
+   "atv": [
+    "CORREDORES DE BOLSA",
+    "PUESTOS DE BOLSA",
+    "PUESTOS Y/O CASAS DE CAMBIO DE MONEDA EXTRANJERA"
+   ]
+  },
+  {
+   "codigo": "6619.0",
+   "descripcion": "Otras actividades auxiliares a las actividades de servicios financieros",
+   "especialidades": [
+    "Tramitación y liquidación de las transacciones con tarjetas de crédito/débito (adquirente)",
+    "Otras actividades auxiliares a las actividades de servicios financieros"
+   ],
+   "atv": [
+    "TRAMITACION Y LIQUIDACION DE LAS TRANSACCIONES CON TARJETAS DE CREDITO/DEBITO (ADQUIRENTE)",
+    "ASESORES FINANCIEROS Y ACTIVIDADES AUXILIARES DE LA INTERMEDICIACION FINANCIERA"
+   ]
+  },
+  {
+   "codigo": "6622.0",
+   "descripcion": "Actividades de agentes y corredores de seguro",
+   "atv": [
+    "AGENTES DE SEGUROS",
+    "COMERCIALIZADORES DE SEGUROS"
+   ]
+  },
+  {
+   "codigo": "6629.0",
+   "descripcion": "Otras actividades auxiliares de seguros y fondos de pensiones",
+   "atv": [
+    "ACTIVIDADES AUXILIARES DE LA FINANCIACION DE PLANES DE SEGUROS Y DE PENSIONES"
+   ]
+  },
+  {
+   "codigo": "6810.0",
+   "descripcion": "Actividades inmobiliarias con bienes propios o arrendados",
+   "especialidades": [
+    "Compra y venta de propiedades (inversionistas)",
+    "Otras actividades inmobiliarias con bienes propios o arrendados (alquiler)"
+   ],
+   "atv": [
+    "COMPRA Y VENTA DE PROPIEDADES (INVERSIONISTAS)",
+    "ALQUILER DE CASAS Y OTROS",
+    "ALQUILER DE LOCALES COMERCIALES Y CENTROS COMERCIALES",
+    "ALQUILER DE EDIFICIOS Y PROPIEDADES DIFERENTES A CASAS DE HABITACION",
+    "ARRENDAMIENTO O ALQUILER DE BIENES INMUEBLES MEDIANTE CONTRATO VERBAL O ESCRITO."
+   ]
+  },
+  {
+   "codigo": "6820.0",
+   "descripcion": "Actividades inmobiliarias realizadas a cambio de una retribución o por contrata",
+   "atv": [
+    "AGENTES O CORREDORES DE BIENES RAICES"
+   ]
+  },
+  {
+   "codigo": "6910.0",
+   "descripcion": "Actividades jurídicas",
+   "especialidades": [
+    "Notario; Abogado; Asesor Legal"
+   ],
+   "atv": [
+    "BUFFETE DE ABOGADO, NOTARIO, ASESOR LEGAL"
+   ]
+  },
+  {
+   "codigo": "6920.0",
+   "descripcion": "Actividades de contabilidad, teneduría de libros y auditorías; consultoría fiscal",
+   "especialidades": [
+    "Contador público; Contador privado"
+   ],
+   "atv": [
+    "ACTVIDAD DE CONTABILIDAD (CONTADORES), TENEDURIA DE LIBROS, TODO TIPO DE AUDITORIA,INCLUYENDO LA FISCAL Y ASESORIA FISCAL."
+   ]
+  },
+  {
+   "codigo": "7010.0",
+   "descripcion": "Actividades de oficinas principales",
+   "atv": [
+    "ACTIVIDADES DE SERVICIOS AUXILIARES PARA LA ADMINISTRACION PUBLICA EN GENERAL"
+   ]
+  },
+  {
+   "codigo": "7020.0",
+   "descripcion": "Actividades de consultoría en gestión",
+   "atv": [
+    "ASESORAMIENTO EMPRESARIAL Y EN MATERIA DE GESTION"
+   ]
+  },
+  {
+   "codigo": "7110.0",
+   "descripcion": "Actividades de arquitectura e ingeniería y actividades conexas de consultoría técnica",
+   "especialidades": [
+    "Otras actividades de arquitectura e ingeniería y actividades conexas",
+    "Ingeniero industrial",
+    "Ingeniero en geodesia y topografía",
+    "Ingeniero en seguridad ocupacional"
+   ],
+   "atv": [
+    "ACTIVIDADES DE ARQUITECTURA E INGENIERIA",
+    "SERVICIOS DE CONSULTORIA EN MANTENIMIENTO INDUSTRIAL Y MECANICO",
+    "ACTIVIDADES DE GEOGRAFIA Y/O GEOLOGIA",
+    "DIBUJANTE ARQUITECTONICO Y/O PLANOS DE CONSTRUCCION",
+    "PROFESIONALES EN SALUD OCUPACIONAL"
+   ]
+  },
+  {
+   "codigo": "7120.0",
+   "descripcion": "Ensayos y análisis técnicos",
+   "atv": [
+    "SERVICIO DE REVISION TECNICA VEHICULAR (DIAGNOSTICOS POR ESCANNER)",
+    "QUIMICOS",
+    "ENSAYOS Y ANALISIS TECNICOS",
+    "PROFESIONALES EN TECNOLOGIA DE ALIMENTOS"
+   ]
+  },
+  {
+   "codigo": "7210.0",
+   "descripcion": "Investigaciones y desarrollo experimental en el campo de las ciencias naturales y la ingeniería",
+   "atv": [
+    "INVESTIGACION Y DESARROLLO EXPERIMENTAL EN EL CAMPO DE LAS CIENCIAS NATURALES Y LA INGENIERIA"
+   ]
+  },
+  {
+   "codigo": "7220.0",
+   "descripcion": "Investigación y desarrollo experimental en el campo de las ciencias sociales y las humanidades",
+   "atv": [
+    "INVESTIGACIONES Y DESARROLLO EXPERIMENTAL EN EL CAMPO DE LAS CIENCIAS SOCIALES Y LAS HUMANIDADES"
+   ]
+  },
+  {
+   "codigo": "7310.0",
+   "descripcion": "Publicidad",
+   "especialidades": [
+    "Alquiler de espacios publicitarios",
+    "Otra publicidad"
+   ],
+   "atv": [
+    "ALQUILER DE ESPACIOS PUBLICITARIOS",
+    "PUBLICIDAD",
+    "SERVICIOS DE PUBLICIDAD",
+    "PUBLICIDAD A TRAVES DE MEDIOS ELECTRONICOS"
+   ]
+  },
+  {
+   "codigo": "7320.0",
+   "descripcion": "Estudios de mercados y encuestas de opinión pública",
+   "atv": [
+    "ASESORES EN MERCADEO Y VENTAS",
+    "ENCUESTAS DE OPINION PUBLICA"
+   ]
+  },
+  {
+   "codigo": "7410.0",
+   "descripcion": "Actividades especializadas de diseño",
+   "atv": [
+    "DISENO ARTISTICO PARA COSTURA (MOLDES)",
+    "ARTES GRAFICAS",
+    "SERVICIO DE DISENO O DECORACION DE INTERIORES (POR CUENTA PROPIA)."
+   ]
+  },
+  {
+   "codigo": "7420.0",
+   "descripcion": "Actividades de fotografía",
+   "especialidades": [
+    "Estudios fotográficos",
+    "Otras actividades de fotografía"
+   ],
+   "atv": [
+    "ESTUDIOS FOTOGRAFICOS",
+    "SERVICIO DE FOTOGRAFIA (FOTOGRAFO)",
+    "AGENCIAS FOTOGRAFICAS POR CATALOGO"
+   ]
+  },
+  {
+   "codigo": "7490.0",
+   "descripcion": "Otras actividades profesionales, científicas y técnicas n.c.p",
+   "atv": [
+    "SERVICIO DE PILOTAJE",
+    "METEOROLOGO POR CUENTA PROPIA",
+    "ECONOMISTAS",
+    "BIOLOGO POR CUENTA PROPIA",
+    "SERVICIOS DE BIBLIOTECOLOGIA",
+    "SERVICIOS DE TRADUCTOR",
+    "MODELAJE PROFESIONAL (MODELO)",
+    "SERVICIOS PROFESIONALES NO CONTEMPLADOS EN OTRA PARTE"
+   ]
+  },
+  {
+   "codigo": "7500.0",
+   "descripcion": "Actividades veterinarias",
+   "atv": [
+    "SERVICIOS VETERINARIOS CON VENTA DE PRODUCTOS GRAVADOS CON VENTAS",
+    "SERVICIOS MEDICOS VETERINARIOS"
+   ]
+  },
+  {
+   "codigo": "7710.1",
+   "descripcion": "Alquiler de automóviles sin conductor",
+   "atv": [
+    "ALQUILER DE AUTOMOVILES DE TODO TIPO"
+   ]
+  },
+  {
+   "codigo": "7721.0",
+   "descripcion": "Alquiler y arrendamiento de equipo recreativo y deportivo",
+   "atv": [
+    "ALQUILER DE CARRITOS DE GOLF Y OTROS",
+    "ALQUILER DE EQUIPO RECREATIVO Y DEPORTIVO",
+    "ALQUILER DE ANIMALES (CABALLOS, SERPIENTES, ETC)"
+   ]
+  },
+  {
+   "codigo": "7722.0",
+   "descripcion": "Alquiler de cintas de vídeo y discos",
+   "atv": [
+    "ALQUILER DE PELICULAS CINEMATOGRAFICAS (VIDEO CLUB) Y/O VIDEO JUEGOS"
+   ]
+  },
+  {
+   "codigo": "7729.0",
+   "descripcion": "Alquiler y arrendamiento de otros efectos personales y enseres domésticos",
+   "atv": [
+    "ALQUILER DE MENAJE",
+    "ALQUILER DE TRAJES DE TODO TIPO",
+    "ALQUILER DE EQUIPO Y UTENSILIOS PARA EVENTOS ESPECIALES"
+   ]
+  },
+  {
+   "codigo": "7730.0",
+   "descripcion": "Alquiler y arrendamiento de otros tipo de maquinaria, equipo y bienes tangibles",
+   "atv": [
+    "ALQUILER DE MOTOCICLETA/SERVICIO",
+    "ALQUILER DE EQUIPO DE TRANSPORTE POR VIA TERRESTRE, ACUATICA O AEREA",
+    "ALQUILER DE MAQUINARIA Y EQUIPO PARA USO AGRICOLA",
+    "ALQUILER DE MAQUINARIA Y EQUIPO DE CONSTRUCCION E INGENIERIA CIVIL",
+    "ALQUILER DE MAQUINARIA Y EQUIPO DE OFICINA",
+    "ALQUILER DE MAQUINAS EXPENDEDORAS DE ALIMENTOS Y OTROS",
+    "ALQUILER DE MAQUINAS DE ENTRETENIMIENTO (CON MONEDAS)",
+    "ALQUILER DE EQUIPO PARA RADIO, TELEVISION Y COMUNICACIONES",
+    "ALQUILER DE EQUIPO PARA DISPENSAR BILLETES (CAJERO AUTOMA-TICO)",
+    "ALQUILER MAQUINARIA Y EQUIPO PARA LA ELABORACION Y/O MANTENIMIENTO DE PRODUCTOS",
+    "ALQUILER DE OTROS TIPOS DE MAQUINARIA Y EQUIPO PARA USO COMERCIAL",
+    "ALQUILER DE MAQUINARIA Y/O EQUIPO PARA USO INDUSTRIAL",
+    "ALQUILER DE RAMPAS Y SIMILARES",
+    "ALQUILER DE EQUIPO MEDICO Y ARTICULOS CONEXOS",
+    "ALQUILER DE ARTICULOS EN GENERAL PARA LA INDUSTRIA"
+   ]
+  },
+  {
+   "codigo": "7740.0",
+   "descripcion": "Arrendamiento de propiedad intelectual y productos similares excepto obras protegidas por derechos de autor",
+   "atv": [
+    "ALQUILER DE MARCAS REGISTRADAS",
+    "EXPLOTACION DE FRANQUICIAS"
+   ]
+  },
+  {
+   "codigo": "7830.0",
+   "descripcion": "Otras actividades de dotación de recursos humanos",
+   "atv": [
+    "SERVICIOS DE ADMINISTRACION DE PERSONAL"
+   ]
+  },
+  {
+   "codigo": "7911.0",
+   "descripcion": "Actividades de agencias de viajes",
+   "atv": [
+    "AGENCIAS DE VIAJES Y EXCURSIONES"
+   ]
+  },
+  {
+   "codigo": "7912.0",
+   "descripcion": "Actividades de operadores turísticos",
+   "atv": [
+    "ACTIVIDADES DE OPERADORES TURISTICOS(GUIA DE TURISMO)",
+    "EXPLOTACION DE ACTIVIDADES TURISTICAS(CUYA PRES TACION NO SEA REALIZADA POR UN CENTRO DE RECREO)"
+   ]
+  },
+  {
+   "codigo": "8010.0",
+   "descripcion": "Actividades de seguridad privada",
+   "atv": [
+    "SERVICIOS DE INVESTIGACION, SEGURIDAD PRIVADA, AGENCIAS Y CONSULTORES",
+    "ACTIVIDADES DE DEFENSA"
+   ]
+  },
+  {
+   "codigo": "8110.0",
+   "descripcion": "Actividades combinadas de apoyo a instalaciones",
+   "atv": [
+    "MANTENIMIENTO, REPARACION Y LIMPIEZA DE LOS SERVICIOS Y BIENES COMUNES DE LA PROPIEDAD EN CONDOMINIO"
+   ]
+  },
+  {
+   "codigo": "8121.0",
+   "descripcion": "Limpieza general de edificios",
+   "atv": [
+    "SERVICIOS DE LIMPIEZA (INTERIORES Y EXTERIORES)"
+   ]
+  },
+  {
+   "codigo": "8129.0",
+   "descripcion": "Otras actividades de limpieza de edificios e instalaciones industriales",
+   "atv": [
+    "SERVICIOS DE FUMIGACION (NO AGRICOLA)"
+   ]
+  },
+  {
+   "codigo": "8130.0",
+   "descripcion": "Actividades de paisajismo y servicios de mantenimiento conexos",
+   "atv": [
+    "SERVICIO DE JARDINERIA Y/O DISENO PAISAJISTA"
+   ]
+  },
+  {
+   "codigo": "8219.0",
+   "descripcion": "Fotocopiado, preparación de documentos y otras actividades especializadas de apoyo de oficina",
+   "atv": [
+    "SERVICIO DE FOTOCOPIADORA",
+    "SERVICIO DE FOTOCOPIADO Y OTROS",
+    "SERVICIOS DE LEVANTADO DE TEXTO Y/O CORRECCION DE TEXTOS Y OTROS",
+    "SERVICIOS SECRETARIALES Y/O OFICINISTA"
+   ]
+  },
+  {
+   "codigo": "8220.0",
+   "descripcion": "Actividades de centros de llamadas",
+   "atv": [
+    "SERVICIO DE CONTESTACION DE TELEFONOS (CALL CENTER)"
+   ]
+  },
+  {
+   "codigo": "8291.0",
+   "descripcion": "Actividades de agencias de cobro y agencias de calificación crediticia",
+   "atv": [
+    "SERVCICIO DE COBRANZA DE RECIBOS PUBLICOS Y OTROS",
+    "AGENCIAS DE COBRO Y CALIFICACION CREDITICIA"
+   ]
+  },
+  {
+   "codigo": "8292.0",
+   "descripcion": "Actividades de envasado y empacado",
+   "atv": [
+    "SERVICIOS DE ENVASE Y EMPAQUE"
+   ]
+  },
+  {
+   "codigo": "8299.0",
+   "descripcion": "Otras actividades de servicios de apoyo a las empresas n.c.p",
+   "atv": [
+    "SERVICIO DE RECOLECCION DE MONEDAS DE LOS TELEFONOS PUBLICOS"
+   ]
+  },
+  {
+   "codigo": "8411.0",
+   "descripcion": "Actividades de la administración pública en general",
+   "especialidades": [
+    "Emisión de lotería y similares",
+    "Sujeta al IVA",
+    "Sin obligaciones por Ley o Norma"
+   ],
+   "atv": [
+    "EMISION DE LA LOTERIA NACIONAL Y SIMILARES",
+    "FIDEICOMISOS DE LA LEY DEL SISTEMA DE BANCA PARA EL DESARROLLO",
+    "FONDOS DE LA LEY DEL SISTEMA DE BANCA PARA EL DESARROLLO",
+    "ACTIVIDADES DE LA ADMINISTRACION PUBLICA EN GENERAL",
+    "ENTES PUBLICOS DE NATURALEZA TRIBUTARIA E INSCRIPCION DE BIENES.",
+    "MUNICIPALIDADES Y CONCEJOS DE DISTRITO",
+    "COMITES CANTONALES DE DEPORTES Y RECREACION",
+    "ACTIVIDADES DE LA ADMINISTRACION PUBLICA EN GENERAL, NO SUJETAS A IMPUESTO SOBRE LAS UTILIDADES Y SOBRE EL VALOR AGREGADO"
+   ]
+  },
+  {
+   "codigo": "8413.0",
+   "descripcion": "Regulación y facilitación de la actividad económica",
+   "atv": [
+    "ACTIVIDADES DEL SECTOR PUBLICO RELACIONADAS CON LA INFRAESTRUCTURA",
+    "FONDOS PUBLICOS (ACTIVIDADES DEL SECTOR PUBLICO)"
+   ]
+  },
+  {
+   "codigo": "8421.0",
+   "descripcion": "Relaciones exteriores",
+   "atv": [
+    "RELACIONES EXTERIORES"
+   ]
+  },
+  {
+   "codigo": "8423.0",
+   "descripcion": "Actividades de mantenimiento del orden público y de seguridad",
+   "atv": [
+    "ACTIVIDADES DE MANTENIMIENTO DEL ORDEN PUBLICO Y DE SEGURIDAD",
+    "SERVICIOS DE VIGILANCIA O CONTROL PORTUARIA, COSTERA, AEREA,Y FRONTERIZA"
+   ]
+  },
+  {
+   "codigo": "8430.0",
+   "descripcion": "Actividades de planes de seguridad social de afiliación obligatoria",
+   "atv": [
+    "ACTIVIDADES DE PLANES DE SEGURIDAD SOCIAL DE AFILIACION OBLIGATORIA"
+   ]
+  },
+  {
+   "codigo": "8510.0",
+   "descripcion": "Enseñanza preescolar y primaria",
+   "atv": [
+    "ENSENANZA PREESCOLAR Y PRIMARIA PRIVADA",
+    "ENSENANZA PREESCOLAR Y PRIMARIA PRIVADA NO AUTORIZADOS POR EL MEP.",
+    "PROFESIONALES EN EDUCACION ESPECIAL"
+   ]
+  },
+  {
+   "codigo": "8521.0",
+   "descripcion": "Enseñanza secundaria de formación general",
+   "atv": [
+    "ENSENANZA SECUNDARIA PRIVADA",
+    "ENSENANZA SECUNDARIA PRIVADA NO AUTORIZADA POR EL MEP."
+   ]
+  },
+  {
+   "codigo": "8522.0",
+   "descripcion": "Enseñanza de formación técnica y profesional",
+   "atv": [
+    "ENSENANZA SECUNDARIA DE FORMACION TECNICA Y PROFESIONAL NO AUTORIZADA POR EL MEP."
+   ]
+  },
+  {
+   "codigo": "8530.1",
+   "descripcion": "Enseñanza universitaria",
+   "especialidades": [
+    "Otra enseñanza universitaria (universidad privada)",
+    "Enseñanza superior pública (universidades)"
+   ],
+   "atv": [
+    "ENSENANZA SUPERIOR PRIVADA (UNIVERSIDADES)",
+    "ENSENANZA SUPERIOR PUBLICA (UNIVERSIDADES)"
+   ]
+  },
+  {
+   "codigo": "8530.2",
+   "descripcion": "Enseñanza parauniversitaria",
+   "atv": [
+    "ENSENANZA DE FORMACION TECNICA Y PARAUNIVERSITARIA"
+   ]
+  },
+  {
+   "codigo": "8541.0",
+   "descripcion": "Educación deportiva y recreativa",
+   "atv": [
+    "ENTRENADOR, INSTRUCTORES Y/O PREPARADORES FISICOS POR CUENTA PROPIA",
+    "ACTIVIDADES DE ESCUELAS Y CLUBES DEPORTIVOS"
+   ]
+  },
+  {
+   "codigo": "8542.0",
+   "descripcion": "Educación cultural",
+   "atv": [
+    "ENSENANZA CULTURAL",
+    "ESCUELA Y AGENCIA DE MODELOS"
+   ]
+  },
+  {
+   "codigo": "8549.0",
+   "descripcion": "Otros tipos de enseñanza n.c.p",
+   "atv": [
+    "INSTRUCTOR DE TIRO (MANEJO DE ARMAS).",
+    "ESCUELAS COMERCIALES (NO ESTATALES)",
+    "PROFESOR POR CUENTA PROPIA",
+    "ENSENANZA DE LA DE SEGURIDAD PRIVADA"
+   ]
+  },
+  {
+   "codigo": "8550.0",
+   "descripcion": "Actividades de apoyo a la enseñanza",
+   "atv": [
+    "TERAPIA DEL LENGUAJE"
+   ]
+  },
+  {
+   "codigo": "8610.0",
+   "descripcion": "Actividades de hospitales",
+   "atv": [
+    "ACTIVIDADES DE HOSPITALES",
+    "SERVICIOS DE RADIOLOGIA, ANESTESIOLOGIA Y OTROS"
+   ]
+  },
+  {
+   "codigo": "8620.1",
+   "descripcion": "Actividades de médicos",
+   "especialidades": [
+    "Ginecología",
+    "Medicina general",
+    "Neurólogo",
+    "Oftalmología",
+    "Ortopedista",
+    "Otorrinolaringología",
+    "Farmacia (farmacéutico)",
+    "Cardiología",
+    "Oncología",
+    "Reumatología",
+    "Psiquiatría",
+    "Cirugía"
+   ],
+   "atv": [
+    "GINECOLOGO",
+    "SERVICIOS DE MEDICO GENERAL",
+    "NEUROLOGOS",
+    "SERVICIOS DE OFTALMOLOGO U OCULISTA, OPTOMETRISTA Y/O OPTICO",
+    "ORTOPEDISTA (CONSULTA PRIVADA)",
+    "OTORRINOLARINGOLOGIA Y SERVICIOS CONEXOS.",
+    "FARMACEUTICO O BOTICARIO",
+    "CARDIOLOGOS",
+    "ONCOLOGOS",
+    "REUMATOLOGO",
+    "PSIQUIATRIA",
+    "CIRUJANO PLASTICO."
+   ]
+  },
+  {
+   "codigo": "8620.2",
+   "descripcion": "Actividades de odontólogos",
+   "atv": [
+    "SERVICIOS DE ODONTOLOGO Y CONEXOS"
+   ]
+  },
+  {
+   "codigo": "8690.1",
+   "descripcion": "Laboratorios médicos y de diagnóstico",
+   "atv": [
+    "LABORATORIOS MEDICOS - CLINICOS",
+    "SERVICIOS DE ESTERILIZACION DE PRODUCTOS MEDICOS Y FARMACEUTICOS",
+    "IMAGENELOGIA DIAGNOSTICA Y TERAPEUTICA"
+   ]
+  },
+  {
+   "codigo": "8690.9",
+   "descripcion": "Otras actividades relacionadas con la salud humana",
+   "atv": [
+    "MEDICINA ALTERNATIVA",
+    "FISIOTERAPEUTA O TERAPEUTA FISICO",
+    "PSICOLOGO",
+    "SERVICIOS DE ENFERMERIA",
+    "TRANSPORTE EN AMBULANCIA TERRESTRE Y AEREO (SERVICIO PRIVADO)",
+    "NUTRICIONISTA",
+    "SERVICIOS DE PARAMEDICOS",
+    "OTRAS ACTIVIDADES RELACIONADAS CON LA SALUD HUMANA(BANCO DE SANGRE, BANCO DE PIEL, ETC)",
+    "AUDIOLOGIA",
+    "TERAPIA OCUPACIONAL",
+    "TERAPIA RESPIRATORIA"
+   ]
+  },
+  {
+   "codigo": "8720.0",
+   "descripcion": "Actividades de atención en instituciones para personas con retraso mental, enfermos mentales y toxicómanos",
+   "atv": [
+    "ASOCIACION PROAYUDA A PERSONAS ADICTAS A DROGAS E INDIGENTES"
+   ]
+  },
+  {
+   "codigo": "8790.0",
+   "descripcion": "Otras actividades de atención en instituciones n.c.p",
+   "especialidades": [
+    "Fundaciones de servicio social con alojamiento no sujetas al IVA",
+    "Otras actividades de atención en instituciones n.c.p"
+   ],
+   "atv": [
+    "FUNDACIONES DE SERVICIO SOCIAL CON ALOJAMIENTO",
+    "SERVICIOS SOCIALES CON ALOJAMIENTO PARA ADULTOS"
+   ]
+  },
+  {
+   "codigo": "8810.0",
+   "descripcion": "Asistencia social sin alojamiento para el adulto mayor y personas con discapacidad",
+   "atv": [
+    "FUNDACIONES DE SERVICIO SOCIAL SIN ALOJAMIENTO"
+   ]
+  },
+  {
+   "codigo": "8890.0",
+   "descripcion": "Otras actividades de asistencia social sin alojamiento n.c.p",
+   "atv": [
+    "GUARDERIAS/CENTROS INFANTILES Y SERVICIOS SOCIALES",
+    "SERVICIOS SOCIALES SIN ALOJAMIENTO"
+   ]
+  },
+  {
+   "codigo": "9000.0",
+   "descripcion": "Actividades creativas, artísticas y de entretenimiento",
+   "especialidades": [
+    "Elaboración de artesanías y de obras de arte, así como su restauración",
+    "Otras actividades creativas, artísticas y de entretenimiento"
+   ],
+   "atv": [
+    "SERVICIOS DE RESTAURACION DE OBRAS DE ARTE",
+    "CORRESPONSAL DE RADIO, TELEVISION Y PRENSA ESCRITA",
+    "TEATROS (EXPLOTACION)",
+    "ACTIVIDADES MUSICALES Y ARTISTICAS (SERVICIOS)",
+    "PERIODISTA POR CUENTA PROPIA",
+    "ESPECTACULOS PUBLICOS EN GENERAL EXCEPTO LOS DEPORTIVOS Y EL TEATRO"
+   ]
+  },
+  {
+   "codigo": "9101.0",
+   "descripcion": "Actividades de Bibliotecas y archivos",
+   "atv": [
+    "ACTIVIDADES DE BIBLIOTECAS Y ARCHIVOS"
+   ]
+  },
+  {
+   "codigo": "9102.0",
+   "descripcion": "Actividades de museos y preservación de lugares históricos",
+   "atv": [
+    "GALERIAS DE ARTE"
+   ]
+  },
+  {
+   "codigo": "9103.0",
+   "descripcion": "Actividades de jardines botánicos, zoológicos y parques naturales",
+   "atv": [
+    "ACTIVIDADES DE JARDINES BOTANICOS, ZOOLOGICOS, PARQUES NACIONALES Y RESERVAS NACIONALES"
+   ]
+  },
+  {
+   "codigo": "9200.0",
+   "descripcion": "Actividades de juego de azar y apuestas",
+   "especialidades": [
+    "Explotación de casinos (incluye mesas de juegos y máquinas tragamonedas)",
+    "Otras actividades de juego de azar y apuestas"
+   ],
+   "atv": [
+    "EXPLOTACION DE CASINOS (INCLUYE MESAS DE JUEGOS Y MAQUINAS TRAGAMONEDAS)",
+    "VENTA DE LOTERIA EN AGENCIAS O AL DETALLE",
+    "SERVICIO DE ENLACE DE LLAMADAS Y CASAS DE APUESTAS ELECTRONICAS (SPORTBOOKS)",
+    "EXPLOTACION DE JUEGOS DE AZAR NO ELECTRONICOS (INCLUYE MAQUINAS TRAGAMONEDAS REALIZADAS EN LUGARES DIFERENTES A CASINOS.)"
+   ]
+  },
+  {
+   "codigo": "9311.0",
+   "descripcion": "Gestión de instalaciones deportivas",
+   "atv": [
+    "GIMNASIOS",
+    "EXPLOTACION DE PISCINAS O ALBERCAS DE BANO",
+    "EXPLOTACION DE INSTALACIONES Y CAMPOS DEPORTIVOS",
+    "ESPECTACULOS DEPORTIVOS"
+   ]
+  },
+  {
+   "codigo": "9319.0",
+   "descripcion": "Otras actividades deportivas",
+   "atv": [
+    "ACTIVIDADES DEPORTIVAS Y OTRAS POR CUENTA PROPIA",
+    "PESCA DEPORTIVA"
+   ]
+  },
+  {
+   "codigo": "9329.0",
+   "descripcion": "Otras actividades de esparcimiento y recreativas n.c.p",
+   "atv": [
+    "SALON DE BAILE Y DISCOTECA",
+    "SALON DE PATINES",
+    "NIGHT CLUB/CABARETTE",
+    "ACTIVIDADES DE JUEGOS DE BILLAR, POOL Y OTROS SIMILARES",
+    "SALA DE VIDEO JUEGOS",
+    "OTRAS ACTIVIDADES DE ESPARCIMIENTO",
+    "SERVICIO DE DISCO MOVIL"
+   ]
+  },
+  {
+   "codigo": "9411.0",
+   "descripcion": "Actividades de Asociaciones empresariales y de empleadores",
+   "atv": [
+    "ACTIVIDADES DE ORGANIZACIONES EMPRESARIALES Y DE EMPLEADORES",
+    "CAMARAS DE COMERCIO"
+   ]
+  },
+  {
+   "codigo": "9412.0",
+   "descripcion": "Actividades de asociaciones profesionales",
+   "atv": [
+    "ACTIVIDADES DE ORGANIZACIONES PROFESIONALES"
+   ]
+  },
+  {
+   "codigo": "9420.0",
+   "descripcion": "Actividades de sindicatos",
+   "atv": [
+    "ASOCIACIONES SOLIDARISTAS",
+    "ACTIVIDADES DE SINDICATOS"
+   ]
+  },
+  {
+   "codigo": "9491.0",
+   "descripcion": "Actividades de organizaciones religiosas",
+   "atv": [
+    "ACTIVIDADES DE ORGANIZACIONES RELIGIOSAS"
+   ]
+  },
+  {
+   "codigo": "9492.0",
+   "descripcion": "Actividades de organizaciones políticas",
+   "atv": [
+    "ACTIVIDADES DE ORGANIZACIONES POLITICAS"
+   ]
+  },
+  {
+   "codigo": "9499.0",
+   "descripcion": "Actividades de otras asociaciones n.c.p",
+   "especialidades": [
+    "Otras actividades de otras asociaciones n.c.p",
+    "Asociaciones no sujetas al IVA"
+   ],
+   "atv": [
+    "JUNTAS DE EDUCACION, COMEDORES ESCOLARES, PATRONATOS, COOPERATIVAS ESCOLARES, COLEGIALES, VOCACIONALES",
+    "ASOCIACION DE DESARROLLO COMUNAL Y/O SERVICIOS COMUNITARIOS",
+    "ASOCIACIONES DE CLUBES SOCIALES",
+    "ASOCIACIONES O ENTIDADES CON FINES CULTURALES, SOCIALES, RECREATIVOS, ARTESANALES",
+    "ASOCIACIONES DECLARADAS DE UTILIDAD PUBLICA POR EL PODER EJECUTIVO"
+   ]
+  },
+  {
+   "codigo": "9511.0",
+   "descripcion": "Reparación de computadoras y equipo periférico",
+   "atv": [
+    "REPARACION DE EQUIPO DE COMPUTO",
+    "MANTENIMIENTO DE EQUIPO DE COMPUTO"
+   ]
+  },
+  {
+   "codigo": "9512.0",
+   "descripcion": "Reparación de equipos de comunicaciones",
+   "atv": [
+    "REPARACION Y MANTENIMIENTO DE EQUIPO PARA TELECOMUNICACIONES"
+   ]
+  },
+  {
+   "codigo": "9521.0",
+   "descripcion": "Reparación de aparatos electrónicos de consumo eléctrico",
+   "atv": [
+    "REPARACION EQUIPO DE AUDIO Y VIDEO"
+   ]
+  },
+  {
+   "codigo": "9522.0",
+   "descripcion": "Reparación de aparatos de uso doméstico y equipo doméstico y de jardinería",
+   "atv": [
+    "REPARACION DE ARTICULOS ELECTRICOS"
+   ]
+  },
+  {
+   "codigo": "9523.0",
+   "descripcion": "Reparación de calzado y artículos de cuero",
+   "atv": [
+    "SERVICIOS DE REPARACION DE ZAPATOS"
+   ]
+  },
+  {
+   "codigo": "9524.0",
+   "descripcion": "Reparación de muebles y accesorios domésticos",
+   "atv": [
+    "REPARACION DE TAPICERIA",
+    "REPARACION DE MUEBLES Y ACCESORIOS DOMESTICOS"
+   ]
+  },
+  {
+   "codigo": "9529.0",
+   "descripcion": "Reparación de otros bienes personales y enseres domésticos n.c.p",
+   "atv": [
+    "SERVICIOS DE REPARACION DE JOYERIA Y RELOJERIA EN GENERAL",
+    "REPARACION DE BICICLETAS"
+   ]
+  },
+  {
+   "codigo": "9601.0",
+   "descripcion": "Lavado y limpieza, incluida la limpieza en seco, de productos textiles y piel",
+   "atv": [
+    "REPARACION Y MANTENIMIENTO DE PERSIANAS Y CORTINAS",
+    "SERVICIO DE LIMPIEZA Y LAVADO DE MUEBLES"
+   ]
+  },
+  {
+   "codigo": "9602.0",
+   "descripcion": "Actividades de peluquería y otros tratamientos de belleza",
+   "atv": [
+    "SALONES DE BELLEZA, PELUQUERIA Y BARBERIA"
+   ]
+  },
+  {
+   "codigo": "9603.0",
+   "descripcion": "Funerales y actividades conexas",
+   "especialidades": [
+    "Servicios fúnebres, cementario privado y actividades conexas",
+    "Cementerio público (junta administradora)"
+   ],
+   "atv": [
+    "SERVICIOS FUNEBRES Y ACTIVIDADES CONEXAS",
+    "CEMENTERIO O CAMPOSANTO PRIVADO",
+    "CEMENTERIO PUBLICO (JUNTA ADMINISTRADORA)"
+   ]
+  },
+  {
+   "codigo": "9609.0",
+   "descripcion": "Otras actividades de servicios personales n.c.p",
+   "atv": [
+    "SALAS DE MASAJES",
+    "OTRAS ACTIVIDADES DE SERVICIOS PERSONALES N.C.P.",
+    "CENTRO O SALA DE BRONCEADO",
+    "PELUQUERIA Y SALA DE ESTETICA PARA ANIMALES",
+    "SERVICIO DE TATUAJE Y PIERCING",
+    "ALBERGUE Y CUIDO DE ANIMALES A DOMICILIO"
+   ]
+  },
+  {
+   "codigo": "9700.0",
+   "descripcion": "Actividades de los hogares como empleadores de personal doméstico",
+   "atv": [
+    "HOGARES PRIVADOS CON SERVICIO DOMESTICO"
+   ]
+  },
+  {
+   "codigo": "9900.0",
+   "descripcion": "Actividades de organizaciones y órganos extraterritoriales",
+   "atv": [
+    "ACTIVIDADES DE ORGANIZACIONES Y ORGANOS EXTRATERRITORIALES QUE BRINDAN SERVICIOS EN EL PAIS",
+    "ACTIVIDADES DE ORGANIZACIONES Y ORGANOS EXTRATERRITORIALES, INCLUYE LAS EMBAJADAS DE OTROS PAISES"
+   ]
+  }
+ ]
+}

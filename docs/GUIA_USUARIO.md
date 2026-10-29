@@ -13,9 +13,9 @@ La hoja de **Primeros pasos** resume el recorrido para participantes nuevos. Est
 
 Menú **Emisor y actividades**.
 
-- **Identificación**: tipo y número sin guiones (física 9 dígitos, jurídica 10, DIMEX 11-12, NITE 10). El botón **Consultar** lee el padrón público de Hacienda (`/fe/ae`) y trae las actividades inscritas.
+- **Identificación**: basta con escribir el número sin guiones (física 9 dígitos, jurídica 10, DIMEX 11-12, NITE 10). Al completarlo, la app consulta el padrón público de Hacienda (`/fe/ae`): si el contribuyente está **inscrito**, carga su nombre, el tipo de identificación y las actividades activas, con la principal marcada; si **no está inscrito**, lo indica. El botón **Consultar** repite la consulta.
 - **Proveedor de sistemas**: cédula del proveedor del software; si es desarrollo propio, la del mismo emisor.
-- **Actividades**: códigos CIIU 4 de TRIBU-CR (p. ej. `6920.0`). Marque la principal.
+- **Actividades**: códigos CIIU 4 de TRIBU-CR (p. ej. `6920.0`). Para quien no está inscrito, el buscador **Buscar actividad económica (CIIU 4)** encuentra la actividad por código o por palabras («repuestos», «panadería», «contabilidad»), también por el nombre que tenía en ATV, y la agrega con un clic. Al escribir un código del listado, la descripción oficial se completa sola. Marque la principal.
 - **Sucursales y terminales**: `001` casa matriz; terminal `00001` si solo hay una. Forman los primeros 8 dígitos del consecutivo.
 - **Números SINPE Móvil**: el Decreto 45953-H obliga a registrarlos en el RUT cuando se usan para cobrar.
 

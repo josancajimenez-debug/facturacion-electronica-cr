@@ -1,11 +1,13 @@
-import { REGEX_CORREO, TIPO_IDENTIFICACION, descripcion, validarIdentificacion, type Emisor } from '@fe-cr/core';
+import { REGEX_ACTIVIDAD_CIIU4, REGEX_CORREO, TIPO_IDENTIFICACION, actividadCiiu4, descripcion, validarIdentificacion, type ActividadCiiu4, type Emisor } from '@fe-cr/core';
+import { ActividadBuscador } from '../components/ActividadBuscador';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Alerta, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { limpiarIdentificacion } from '../lib/formato';
+import { consultable, consultarPadron, tipoSegunNumero, type Padron } from '../lib/padron';
 
 /**
  * Terminales escritas como «00001, 00002». Mientras se escribe se conserva el elemento vacío tras la
@@ -40,10 +42,15 @@ export function EmisorPagina() {
   const editar = (id?: string) => setParametros(id ? { editar: id } : {}, { replace: true });
   const [form, setForm] = useState<Emisor>(() => editado ?? nuevoEmisor());
   const [consultando, setConsultando] = useState(false);
+  /** Resultado de la última consulta al padrón de Hacienda para el número escrito. */
+  const [padron, setPadron] = useState<Padron | null>(null);
+  const cargadoDelPadron = useRef<Padron | null>(null);
   // Solo se recarga el formulario al cambiar de emisor: cada guardado del backend entrega una copia
   // nueva del mismo emisor y, si dependiera del objeto, borraría lo que el usuario está editando.
   useEffect(() => {
     setForm(editado ?? nuevoEmisor());
+    setPadron(null);
+    cargadoDelPadron.current = null;
   }, [editado?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (p: Partial<Emisor>) => setForm((f) => ({ ...f, ...p }));
@@ -59,6 +66,7 @@ export function EmisorPagina() {
   if (form.actividades.length === 0) errores.push('Registre al menos una actividad económica.');
   form.actividades.forEach((a, i) => {
     if (!a.codigo.trim()) errores.push(`Actividad ${i + 1}: indique el código.`);
+    else if (!REGEX_ACTIVIDAD_CIIU4.test(a.codigo)) errores.push(`Actividad ${i + 1}: el código ${a.codigo} no tiene el formato CIIU 4 de TRIBU-CR (cuatro dígitos, punto y un dígito, como 6920.0).`);
     if (!a.descripcion.trim()) errores.push(`Actividad ${i + 1}: indique la descripción.`);
   });
   const repetidas = (lista: string[]) => [...new Set(lista.filter((x, i) => x && lista.indexOf(x) !== i))];
@@ -113,26 +121,71 @@ export function EmisorPagina() {
     }
   };
 
-  /** Consulta pública del Ministerio de Hacienda (GET /fe/ae): nombre y actividades inscritas. */
-  const consultarHacienda = async () => {
+  /**
+   * Consulta pública del Ministerio de Hacienda (GET /fe/ae). Si el contribuyente está inscrito, se
+   * asocian su nombre, tipo de identificación y actividades inscritas; si no, queda la búsqueda en el
+   * listado CIIU 4 para elegir las actividades que va a inscribir.
+   */
+  const consultarHacienda = async (numero: string, señal?: AbortSignal) => {
     setConsultando(true);
     try {
-      const r = await fetch(`https://api.hacienda.go.cr/fe/ae?identificacion=${encodeURIComponent(form.identificacion.numero)}`);
-      if (r.status === 404) throw new Error('La identificación no figura en el padrón público de Hacienda.');
-      if (r.status === 429) throw new Error('Límite de consultas del API excedido; intente en unos minutos.');
-      if (!r.ok) throw new Error(`El API respondió ${r.status}.`);
-      const j = (await r.json()) as { nombre: string; actividades: { estado: string; codigo: string; descripcion: string; tipo: string }[] };
-      set({
-        nombre: form.nombre || j.nombre,
-        actividades: j.actividades.filter((a) => a.estado === 'A').map((a) => ({ codigo: a.codigo, descripcion: a.descripcion, principal: a.tipo === 'P' })),
+      const p = await consultarPadron(numero, señal);
+      setPadron(p);
+      // Lo que trajo la consulta de otro número no corresponde a este contribuyente.
+      const anterior = cargadoDelPadron.current;
+      cargadoDelPadron.current = p.inscrito ? p : null;
+      const sinLoAnterior = (f: Emisor): Emisor =>
+        !anterior?.inscrito ? f : {
+          ...f,
+          nombre: f.nombre === anterior.nombre ? '' : f.nombre,
+          actividades: f.actividades.filter((a) => !anterior.actividades.some((x) => x.codigo === a.codigo)),
+        };
+      if (!p.inscrito) {
+        setForm((f) => (f.identificacion.numero === numero ? sinLoAnterior(f) : f));
+        return;
+      }
+      setForm((actual) => {
+        if (actual.identificacion.numero !== numero) return actual; // el usuario ya cambió el número
+        const f = sinLoAnterior(actual);
+        const tipo = ['01', '02', '03', '04'].includes(p.tipoIdentificacion ?? '') ? p.tipoIdentificacion! : f.identificacion.tipo;
+        return {
+          ...f,
+          // Al registrar, manda el nombre inscrito en Hacienda; al editar se respeta el guardado.
+          nombre: creando || !f.nombre.trim() ? p.nombre : f.nombre,
+          identificacion: { tipo, numero },
+          actividades: p.actividades.length ? p.actividades : f.actividades,
+        };
       });
-      avisar('Actividades obtenidas del API público de Hacienda.', 'ok');
     } catch (e) {
-      avisar((e as Error).message, 'err');
+      if (!señal?.aborted) avisar((e as Error).message, 'err');
     } finally {
-      setConsultando(false);
+      if (!señal?.aborted) setConsultando(false);
     }
   };
+
+  // Basta con escribir el número: al completarse, se consulta el padrón sin pulsar «Consultar».
+  const numero = form.identificacion.numero;
+  useEffect(() => {
+    if (!consultable(numero) || padron?.numero === numero || editado?.identificacion.numero === numero) return;
+    const control = new AbortController();
+    const t = setTimeout(() => void consultarHacienda(numero, control.signal), 600);
+    return () => {
+      clearTimeout(t);
+      control.abort();
+      setConsultando(false);
+    };
+  }, [numero]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const codigosElegidos = form.actividades.map((a) => a.codigo);
+  const agregarActividad = (a: ActividadCiiu4) =>
+    set({ actividades: [...form.actividades, { codigo: a.codigo, descripcion: a.descripcion, principal: form.actividades.length === 0 }] });
+  /** Al escribir un código del listado, la descripción oficial se completa sola. */
+  const cambiarCodigo = (i: number, texto: string) => {
+    const codigo = texto.trim();
+    const oficial = actividadCiiu4(codigo);
+    set({ actividades: form.actividades.map((x, j) => (j === i ? { ...x, codigo, descripcion: oficial && !x.descripcion.trim() ? oficial.descripcion : x.descripcion } : x)) });
+  };
+  const padronActual = padron?.numero === numero ? padron : null;
 
   return (
     <>
@@ -198,6 +251,7 @@ export function EmisorPagina() {
 
       <div className="card">
         <div className="card-head"><h2>Identificación</h2></div>
+        <EstadoPadron padron={padronActual} consultando={consultando} />
         <div className="card-body grid grid-3">
           <Texto etiqueta="Nombre o razón social" valor={form.nombre} onCambio={(v) => set({ nombre: v })} requerido max={100} />
           <Texto etiqueta="Nombre comercial" valor={form.nombreComercial} onCambio={(v) => set({ nombreComercial: v || undefined })} max={80} />
@@ -209,11 +263,14 @@ export function EmisorPagina() {
             ]}
             ayuda="Art. 2 incisos 9, 10 y 21 del Decreto 44739-H." />
           <Selector etiqueta="Tipo de identificación" valor={form.identificacion.tipo} onCambio={(v) => set({ identificacion: { ...form.identificacion, tipo: v } })} opciones={TIPO_IDENTIFICACION.slice(0, 4)} requerido />
-          <CampoConAccion etiqueta="Número de identificación" valor={form.identificacion.numero} onCambio={(v) => set({ identificacion: { ...form.identificacion, numero: limpiarIdentificacion(form.identificacion.tipo, v) } })} alfanumerico={form.identificacion.tipo === '02'} accion={
-            <button className="btn btn-sm" onClick={consultarHacienda} disabled={consultando || !!eId} title="Consulta pública GET /fe/ae">
-              <Search /> Consultar
+          <CampoConAccion etiqueta="Número de identificación" valor={form.identificacion.numero} onCambio={(v) => {
+            const n = limpiarIdentificacion(form.identificacion.tipo === '02' ? '02' : '01', v);
+            set({ identificacion: { tipo: tipoSegunNumero(n, form.identificacion.tipo), numero: n } });
+          }} alfanumerico={form.identificacion.tipo === '02'} accion={
+            <button className="btn btn-sm" onClick={() => void consultarHacienda(numero)} disabled={consultando || !consultable(numero)} title="Consulta pública GET /fe/ae">
+              <Search /> {consultando ? 'Consultando…' : 'Consultar'}
             </button>
-          } ayuda="Sin guiones. Física 9 dígitos, jurídica 10 caracteres (admite letras desde la actualización v4.4), DIMEX 11-12, NITE 10." />
+          } ayuda="Sin guiones. Al completar el número se consulta Hacienda y, si está inscrito, se cargan nombre y actividades. Física 9 dígitos, jurídica 10 caracteres, DIMEX 11-12, NITE 10." />
           <Texto etiqueta="Proveedor de sistemas" valor={form.proveedorSistemas} onCambio={(v) => set({ proveedorSistemas: v.replace(/\s/g, '') })} requerido ayuda="Cédula del proveedor; si es desarrollo propio, la del mismo emisor." />
           <Texto etiqueta="Registro fiscal bebidas alcohólicas (Ley 8707)" valor={form.registroFiscal8707} onCambio={(v) => set({ registroFiscal8707: v || undefined })} max={12} />
         </div>
@@ -267,9 +324,15 @@ export function EmisorPagina() {
           <p className="small muted" style={{ margin: 0 }}>
             Desde el 6/10/2025 TRIBU-CR usa la clasificación CIIU 4 (formato como «6920.0»). El campo CodigoActividadEmisor es obligatorio en FE, FEE y TE.
           </p>
+          {padronActual?.inscrito && padronActual.actividades.length > 0 ? (
+            <Alerta tipo="ok">Actividades inscritas en Hacienda para {padronActual.nombre}. Si inscribe una nueva en TRIBU-CR, vuelva a consultar o agréguela con la búsqueda.</Alerta>
+          ) : padronActual && !padronActual.inscrito ? (
+            <Alerta tipo="warn">La identificación {padronActual.numero} no figura inscrita en Hacienda. Busque y agregue las actividades que va a inscribir en TRIBU-CR.</Alerta>
+          ) : null}
+          <ActividadBuscador onElegir={agregarActividad} yaElegidas={codigosElegidos} />
           {form.actividades.map((a, i) => (
             <div key={i} className="row" style={{ alignItems: 'flex-end' }}>
-              <div style={{ width: 140 }}><Texto etiqueta="Código" valor={a.codigo} placeholder="6920.0" onCambio={(v) => set({ actividades: form.actividades.map((x, j) => (j === i ? { ...x, codigo: v.trim() } : x)) })} max={6} /></div>
+              <div style={{ width: 140 }}><Texto etiqueta="Código" valor={a.codigo} placeholder="6920.0" onCambio={(v) => cambiarCodigo(i, v)} max={6} /></div>
               <div style={{ flex: 1, minWidth: 200 }}><Texto etiqueta="Descripción" valor={a.descripcion} onCambio={(v) => set({ actividades: form.actividades.map((x, j) => (j === i ? { ...x, descripcion: v } : x)) })} /></div>
               <label className="check" style={{ marginBottom: 8 }}>
                 <input type="radio" name="principal" checked={!!a.principal} onChange={() => set({ actividades: form.actividades.map((x, j) => ({ ...x, principal: j === i })) })} /> Principal
@@ -329,6 +392,26 @@ export function EmisorPagina() {
         </div>
       </div>
     </>
+  );
+}
+
+/** Resultado de la consulta al padrón de Hacienda para el número escrito. */
+function EstadoPadron({ padron, consultando }: { padron: Padron | null; consultando: boolean }) {
+  if (consultando) return <div className="card-body" style={{ paddingBottom: 0 }} aria-live="polite"><span className="small muted">Consultando el padrón del Ministerio de Hacienda…</span></div>;
+  if (!padron) return null;
+  return (
+    <div className="card-body" style={{ paddingBottom: 0 }} aria-live="polite">
+      {padron.inscrito ? (
+        <Alerta tipo={padron.estado === 'Inscrito' ? 'ok' : 'warn'}>
+          <strong>{padron.nombre}</strong> · {padron.estado}
+          {padron.regimen && <> · {padron.regimen}</>}
+          {padron.administracion && <> · {padron.administracion}</>}
+          {' '}({padron.actividades.length === 1 ? '1 actividad activa' : `${padron.actividades.length} actividades activas`}).
+        </Alerta>
+      ) : (
+        <Alerta tipo="warn">No inscrito: el número {padron.numero} no figura en el padrón público de Hacienda. Complete los datos y elija las actividades en «Actividades económicas».</Alerta>
+      )}
+    </div>
   );
 }
 
