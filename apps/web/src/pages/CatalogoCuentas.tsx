@@ -1,6 +1,7 @@
 import { CATALOGO_CUENTAS, edicionNiifPara, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
 import { Download, Save } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { useContabilidad, type ConfigContable } from '../lib/contabilidad';
@@ -25,8 +26,8 @@ export function CatalogoCuentas() {
 
   const guardar = () => {
     if (!(p.umbralCapitalizacion >= 0)) return avisar('El umbral de capitalización debe ser un monto válido.', 'err');
-    if (borrador.apertura && borrador.apertura.capital > 0 && !borrador.apertura.fecha) return avisar('Indique la fecha del asiento de apertura.', 'err');
-    guardarConfig(borrador);
+    // La apertura se edita en su propia página: se conserva la guardada.
+    guardarConfig({ ...borrador, apertura: config.apertura });
     avisar('Políticas contables guardadas. Los libros se recalcularon.', 'ok');
   };
 
@@ -59,11 +60,9 @@ export function CatalogoCuentas() {
             <input type="checkbox" checked={p.adopcionAnticipadaNiif2025} onChange={(e) => cambiar({ adopcionAnticipadaNiif2025: e.target.checked })} />
             Adopción anticipada de la tercera edición (2025), obligatoria para periodos que inician desde el 1/01/2027; debe revelarse.
           </label>
-          <div className="grid grid-2">
-            <Texto etiqueta="Fecha del asiento de apertura" tipo="date" valor={borrador.apertura?.fecha ?? ''} onCambio={(v) => setBorrador({ ...borrador, apertura: { capital: borrador.apertura?.capital ?? 0, fecha: v } })} />
-            <Texto etiqueta="Capital aportado en efectivo (₡)" tipo="number" valor={borrador.apertura?.capital ?? ''} onCambio={(v) => setBorrador({ ...borrador, apertura: { fecha: borrador.apertura?.fecha ?? '', capital: Number(v) || 0 } })}
-              ayuda="Abre el libro de inventarios y balances (Código de Comercio, art. 255): Bancos contra Capital social." />
-          </div>
+          <p className="small muted" style={{ margin: 0 }}>
+            El asiento de apertura (aporte de capital o saldos del balance anterior) se registra en <Link to="/contabilidad/apertura">Balance de apertura</Link>.
+          </p>
           <div><button className="btn btn-primary" onClick={guardar}><Save /> Guardar políticas</button></div>
         </div>
       </div>

@@ -16,3 +16,4 @@ export * from './cuentas';
 export * from './contabilidad';
 export * from './libros';
 export * from './cierre';
+export * from './apertura';

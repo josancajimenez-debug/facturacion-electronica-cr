@@ -10,11 +10,21 @@ Cada comprobante electrónico **aceptado** genera su asiento de partida doble ba
 | --- | --- |
 | `packages/core/src/cuentas.ts` | Catálogo de cuentas de cuatro niveles con su **manual** (descripción, cuándo se debita y cuándo se acredita, sección NIIF) y la edición NIIF aplicable a cada fecha |
 | `packages/core/src/contabilidad.ts` | Lectura del comprobante (emitido o XML recibido), clasificación por CAByS, tratamiento del IVA, kárdex al costo promedio ponderado, generación del asiento y del libro diario |
+| `packages/core/src/apertura.ts` | Balance de apertura: aporte de capital o saldos iniciales de una empresa en marcha, lectura del balance en CSV o pegado desde Excel, validación del cuadre e inventario inicial por artículo para el kárdex |
 | `packages/core/src/libros.ts` | Libro mayor, balance de comprobación y estados financieros |
 | `apps/web/src/lib/contabilidad.ts` | Arma el libro con los datos del emisor activo; guarda políticas y apertura en el navegador |
-| Páginas `CatalogoCuentas`, `LibroDiario`, `LibroMayor`, `InventariosBalances` | Menú **Contabilidad**; además, la pestaña «Asiento contable» del detalle de cada comprobante y el botón «Asiento» en Recepción |
+| Páginas `CatalogoCuentas`, `BalanceApertura`, `LibroDiario`, `LibroMayor`, `AjustesCierre`, `EstadosFinancieros` | Menú **Contabilidad**; además, la pestaña «Asiento contable» del detalle de cada comprobante y el botón «Asiento» en Recepción |
 
 Los asientos **se derivan** de los comprobantes en cada consulta: el mismo comprobante produce siempre el mismo asiento, y no se guardan en la base de datos. Las políticas contables y el asiento de apertura se guardan por emisor en el navegador.
+
+## Balance de apertura
+
+Menú **Contabilidad → Balance de apertura**. Dos modalidades:
+
+- **Inicio de operaciones:** aporte de capital en efectivo (Bancos contra Capital social pagado).
+- **Empresa en marcha:** se anexa el balance anterior en CSV (coma, punto y coma o tabulador) o se pegan las celdas de Excel. Columnas: código de la cuenta del catálogo, nombre (opcional) y debe y haber, o un único saldo con signo. Se omiten encabezados, subtotales y totales; solo se aceptan subcuentas de activo, pasivo y patrimonio, y el balance debe cuadrar. Hay una plantilla descargable con todas las cuentas de balance.
+
+El inventario inicial puede detallarse por artículo (CAByS, cantidad y costo) para que el kárdex calcule el costo de ventas al promedio; su suma debe coincidir con 1.1.03.01. En los estados financieros los saldos iniciales se presentan como **saldo al inicio del periodo**: no aparecen como aportes de capital en el estado de cambios en el patrimonio ni como flujos en el estado de flujos de efectivo.
 
 ## Qué se contabiliza
 
@@ -43,7 +53,6 @@ Cada asiento indica si **requiere revisión** y por qué: `DESCUADRE_ARITMETICO`
 
 - Aprobación de asientos por el CPI con trazabilidad (usuario, fecha y hora), guardada en la base de datos.
 - Asientos manuales y de ajuste: depreciación, estimación de incobrables, liquidación del IVA, provisión del impuesto sobre la renta y cierre del período.
-- Saldos iniciales detallados (inventario inicial, cuentas por cobrar y por pagar) en el asiento de apertura.
 - Catálogo de cuentas editable por la entidad.
 
 ## Fuentes

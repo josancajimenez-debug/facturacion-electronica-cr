@@ -6,6 +6,7 @@
  * Los asientos son una propuesta técnica: quedan en borrador hasta la aprobación del CPI.
  */
 import Decimal from 'decimal.js';
+import { asientoAperturaBalance, type AperturaContable } from './apertura';
 import { ESQUEMA_XML, NOMBRE_COMPROBANTE, type TipoComprobante } from './catalogos';
 import { esCabysServicio } from './calculos';
 import { cuenta, edicionNiifPara, seccionNiif } from './cuentas';
@@ -113,6 +114,8 @@ export interface Asiento {
   deducibleRenta: boolean | 'revisar';
   fundamento: string[];
   estado: 'borrador';
+  /** Balance de apertura de una entidad en marcha: se presenta como saldo inicial, no como movimiento del periodo. */
+  saldoInicial?: boolean;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -666,7 +669,7 @@ export interface EntradaLibroDiario {
   /** CAByS de los productos que la entidad vende: sus compras van a inventario. */
   cabysInventario: string[];
   politicas?: PoliticasContables;
-  apertura?: { fecha: string; capital: number };
+  apertura?: AperturaContable;
 }
 
 export interface LibroDiario {
@@ -722,8 +725,11 @@ export function generarLibroDiario(e: EntradaLibroDiario): LibroDiario {
     new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
     || Number(a.sentido === 'venta') - Number(b.sentido === 'venta')
     || a.clave.localeCompare(b.clave));
+  // El inventario inicial entra al kárdex antes de las operaciones para el costo promedio.
+  for (const x of e.apertura?.existencias ?? []) ctx.kardex.entrada(e.apertura!.fecha, 'apertura', x.cabys, x.detalle, x.cantidad, D(x.costo));
   const asientos = docs.map((d) => generarAsiento(d, ctx));
-  if (e.apertura && e.apertura.capital > 0) asientos.unshift(asientoApertura(e.apertura.fecha, e.apertura.capital));
+  const apertura = e.apertura && asientoAperturaBalance(e.apertura);
+  if (apertura) asientos.unshift(apertura);
   asientos.sort((a, b) => a.fecha.localeCompare(b.fecha) || Number(b.origen.documento === 'apertura') - Number(a.origen.documento === 'apertura'));
   asientos.forEach((a, i) => (a.numero = i + 1));
   return { asientos, kardex: ctx.kardex, omitidos };

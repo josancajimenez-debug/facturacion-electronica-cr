@@ -3,6 +3,7 @@ import {
   completarLibro,
   esCabysServicio,
   generarLibroDiario,
+  type AperturaContable,
   type ConfigCierre,
   type DetalleCierre,
   type LibroDiario,
@@ -13,7 +14,7 @@ import { useApp } from '../estado';
 
 export interface ConfigContable {
   politicas: PoliticasContables;
-  apertura?: { fecha: string; capital: number };
+  apertura?: AperturaContable;
   /** Asientos de ajuste y de cierre por año (AAAA). */
   cierres?: Record<string, ConfigCierre>;
 }

@@ -252,8 +252,9 @@ function flujosEfectivo(delPeriodo: Map<string, Decimal>, resultado: Decimal) {
 export function estadosFinancieros(todos: Asiento[], desde: string, hasta: string): EstadosFinancieros {
   const asientos = todos.filter((a) => !(esCierreDeResultados(a) && a.fecha >= desde && a.fecha <= hasta));
   const alCorte = saldos(asientos, (a) => a.fecha <= hasta);
-  const delPeriodo = saldos(asientos, (a) => a.fecha >= desde && a.fecha <= hasta);
-  const anteriores = saldos(asientos, (a) => a.fecha < desde);
+  // Los saldos iniciales de una entidad en marcha son el punto de partida, no movimientos del periodo.
+  const delPeriodo = saldos(asientos, (a) => a.fecha >= desde && a.fecha <= hasta && !a.saldoInicial);
+  const anteriores = saldos(asientos, (a) => a.fecha < desde || (!!a.saldoInicial && a.fecha <= hasta));
 
   const resultadoDe = (s: Map<string, Decimal>) => {
     const r = (clase: string) => renglones(s, clase).total;
