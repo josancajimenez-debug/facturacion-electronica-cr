@@ -15,6 +15,8 @@ export function EncabezadoAsiento({ asiento: a }: { asiento: Asiento }) {
       <div className="row">
         {a.periodoTributario !== a.fecha.slice(0, 7) && <span className="badge info">Período tributario {a.periodoTributario}</span>}
         {a.deducibleRenta === 'revisar' && <span className="badge warn">Deducibilidad por revisar</span>}
+        {a.origen.documento === 'ajuste' && <span className="badge info">Ajuste</span>}
+        {a.origen.documento === 'cierre' && <span className="badge info">Cierre</span>}
         {a.requiereRevision ? <span className="badge warn">Requiere revisión</span> : <span className="badge">Borrador</span>}
       </div>
     </div>

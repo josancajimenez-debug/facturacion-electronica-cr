@@ -96,7 +96,7 @@ export interface Asiento {
   periodoTributario: string;
   glosa: string;
   origen: {
-    documento: 'emitido' | 'recibido' | 'apertura';
+    documento: 'emitido' | 'recibido' | 'apertura' | 'ajuste' | 'cierre';
     tipo?: TipoComprobante;
     clave?: string;
     consecutivo?: string;

@@ -155,6 +155,9 @@ export interface EstadosFinancieros {
     totalCostos: number;
     utilidadBruta: number;
     totalGastos: number;
+    /** Utilidad antes del impuesto sobre la renta (Sección 29). */
+    utilidadAntesImpuesto: number;
+    impuestoRenta: number;
     resultado: number;
   };
   /** Sección 6: una columna por componente del patrimonio. */
@@ -193,6 +196,9 @@ export interface RenglonFlujo {
   concepto: string;
   monto: number;
 }
+
+/** Asiento que salda las cuentas de ingresos, costos y gastos contra el patrimonio. */
+export const esCierreDeResultados = (a: Asiento): boolean => a.origen.documento === 'cierre' && a.lineas.some((l) => /^[456]\./.test(l.cuenta));
 
 /** Suma de los saldos de las cuentas cuyo código empieza con `prefijo`. */
 const suma = (s: Map<string, Decimal>, prefijo: string) =>
@@ -240,9 +246,11 @@ function flujosEfectivo(delPeriodo: Map<string, Decimal>, resultado: Decimal) {
 /**
  * Estado de situación financiera al `hasta` y estado de resultados del periodo `desde`-`hasta`.
  * Mientras no haya asientos de cierre, los resultados anteriores al periodo se presentan como
- * resultados acumulados y los del periodo como resultado del periodo.
+ * resultados acumulados y los del periodo como resultado del periodo. Los asientos de cierre del
+ * propio periodo se omiten: saldarían los ingresos y gastos que el estado de resultados presenta.
  */
-export function estadosFinancieros(asientos: Asiento[], desde: string, hasta: string): EstadosFinancieros {
+export function estadosFinancieros(todos: Asiento[], desde: string, hasta: string): EstadosFinancieros {
+  const asientos = todos.filter((a) => !(esCierreDeResultados(a) && a.fecha >= desde && a.fecha <= hasta));
   const alCorte = saldos(asientos, (a) => a.fecha <= hasta);
   const delPeriodo = saldos(asientos, (a) => a.fecha >= desde && a.fecha <= hasta);
   const anteriores = saldos(asientos, (a) => a.fecha < desde);
@@ -262,7 +270,10 @@ export function estadosFinancieros(asientos: Asiento[], desde: string, hasta: st
 
   const ingresos = renglones(delPeriodo, '4');
   const costos = renglones(delPeriodo, '5');
-  const gastos = renglones(delPeriodo, '6');
+  const gastosTotales = renglones(delPeriodo, '6');
+  // El impuesto sobre la renta (6.3) se presenta aparte, después de la utilidad antes de impuesto.
+  const impuestoRenta = suma(delPeriodo, '6.3.');
+  const gastos = { renglones: gastosTotales.renglones.filter((x) => !x.codigo.startsWith('6.3')), total: gastosTotales.total.minus(impuestoRenta) };
 
   // Cambios en el patrimonio: los resultados anteriores sin asiento de cierre se suman a los acumulados.
   const cero = D(0);
@@ -310,6 +321,8 @@ export function estadosFinancieros(asientos: Asiento[], desde: string, hasta: st
       totalCostos: costos.total.toNumber(),
       utilidadBruta: ingresos.total.minus(costos.total).toNumber(),
       totalGastos: gastos.total.toNumber(),
+      utilidadAntesImpuesto: resultado.plus(impuestoRenta).toNumber(),
+      impuestoRenta: impuestoRenta.toNumber(),
       resultado: resultado.toNumber(),
     },
     cambiosPatrimonio: {

@@ -1,6 +1,7 @@
 import { TIPO_IDENTIFICACION, descripcion, edicionNiifPara, estadosFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
 import { Download, Printer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { Alerta, Cargando, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { finDeMes, useContabilidad } from '../lib/contabilidad';
@@ -88,6 +89,7 @@ export function EstadosFinancieros() {
   const periodo = `del ${fecha(desde)} al ${fecha(hasta)}`;
   const actividad = emisor.actividades.find((a) => a.principal) ?? emisor.actividades[0];
   const notas = notasDeDetalle([...s.activo, ...s.pasivo, ...s.patrimonio]);
+  const cierre = config.cierres?.[corte.slice(0, 4)];
 
   /** Encabezado formal de cada estado: entidad, nombre del estado, fecha o periodo y moneda. */
   const Encabezado = ({ titulo, cuando }: { titulo: string; cuando: string }) => (
@@ -113,6 +115,8 @@ export function EstadosFinancieros() {
       [],
       [`Estado del resultado integral del ${desde} al ${hasta}`, '', 'Monto'],
       ...[...r.ingresos, ...r.costos, ...r.gastos].map((x) => [x.nombre, x.codigo, x.monto.toFixed(2)]),
+      ['Utilidad antes del impuesto sobre la renta', '', r.utilidadAntesImpuesto.toFixed(2)],
+      ['Impuesto sobre la renta', '6.3.01.01', r.impuestoRenta.toFixed(2)],
       ['Resultado integral del periodo', '', r.resultado.toFixed(2)],
       [],
       ['Estado de cambios en el patrimonio', 'Capital', 'Reservas', 'Resultados acumulados', 'Resultado del periodo', 'Total'],
@@ -148,6 +152,12 @@ export function EstadosFinancieros() {
         </div>
       </div>
 
+      {!cierre?.cerrado && (
+        <Alerta tipo="warn">
+          Los asientos de {cierre?.ajustesAutomaticos ? 'cierre' : 'ajuste y de cierre'} del periodo {corte.slice(0, 4)} no están registrados: estas cifras son preliminares.{' '}
+          <Link to="/contabilidad/ajustes-cierre">Ir a Ajustes y cierre</Link>
+        </Alerta>
+      )}
       {!s.cuadra && <Alerta tipo="err">El estado de situación no cuadra: activo {dinero(s.totalActivo)} frente a pasivo más patrimonio {dinero(s.totalPasivo + s.totalPatrimonio)}.</Alerta>}
       {!f.cuadra && <Alerta tipo="err">El estado de flujos de efectivo no concilia con la variación del efectivo del estado de situación.</Alerta>}
 
@@ -189,14 +199,16 @@ export function EstadosFinancieros() {
                 <Total texto="Utilidad bruta" monto={r.utilidadBruta} />
                 <Renglones filas={r.gastos} />
                 <Total texto="Total gastos" monto={r.totalGastos} />
-                <Total texto={r.resultado >= 0 ? 'Utilidad del periodo' : 'Pérdida del periodo'} monto={r.resultado} />
+                <Total texto={r.utilidadAntesImpuesto >= 0 ? 'Utilidad antes del impuesto sobre la renta' : 'Pérdida antes del impuesto sobre la renta'} monto={r.utilidadAntesImpuesto} />
+                <tr><td style={{ paddingLeft: 12 }}>Impuesto sobre la renta</td><td className="num">{dinero(r.impuestoRenta)}</td></tr>
+                <Total texto={r.resultado >= 0 ? 'Utilidad neta del periodo' : 'Pérdida neta del periodo'} monto={r.resultado} />
                 <tr><td style={{ paddingLeft: 12 }}>Otro resultado integral</td><td className="num">{dinero(0)}</td></tr>
                 <Total texto="Resultado integral total del periodo" monto={r.resultado} />
               </tbody>
             </table>
           </div>
           <p className="small muted card-body" style={{ margin: 0 }}>
-            Sección 5, enfoque de un solo estado con desglose de gastos por función. Antes del impuesto sobre la renta: los gastos se registran aunque no sean deducibles y la conciliación fiscal se hace aparte (Sección 29).
+            Sección 5, enfoque de un solo estado con desglose de gastos por función. El impuesto sobre la renta proviene del asiento de ajuste del periodo (Sección 29); los gastos se registran aunque no sean deducibles.
           </p>
         </Seccion>
 
@@ -277,7 +289,9 @@ export function EstadosFinancieros() {
                 <li><strong>Propiedades, planta y equipo (Sección 17):</strong> se capitalizan las compras con costo unitario igual o superior a {dinero(config.politicas.umbralCapitalizacion)}; se miden al costo menos la depreciación acumulada.</li>
                 <li><strong>Ingresos (Sección 23):</strong> se reconocen al emitirse el comprobante aceptado por Hacienda, netos de devoluciones, descuentos e IVA.</li>
                 <li><strong>Impuesto al valor agregado:</strong> el IVA soportado acreditable se registra como crédito fiscal; el no acreditable forma parte del costo o del gasto.</li>
-                <li><strong>Impuesto sobre la renta (Sección 29):</strong> no se ha registrado el gasto por impuesto; los resultados se presentan antes de impuestos.</li>
+                <li><strong>Impuesto sobre la renta (Sección 29):</strong> el impuesto corriente se reconoce al cierre mediante un asiento de ajuste sobre la utilidad antes de impuesto{r.impuestoRenta ? '' : ' (en este periodo no se ha registrado)'}.</li>
+                <li><strong>Depreciación y amortización (Secciones 17 y 18):</strong> línea recta sobre el costo, desde el mes de adquisición, según la vida útil definida para cada clase de activo.</li>
+                <li><strong>Cierre del periodo:</strong> al 31 de diciembre los ingresos, costos y gastos se trasladan a utilidades acumuladas{config.cierres?.[corte.slice(0, 4)]?.parametros.reservaLegal ? ' y se asigna la reserva legal (Código de Comercio, art. 143)' : ''}.</li>
               </ul>
             </div>
             {notas.map((n, i) => (

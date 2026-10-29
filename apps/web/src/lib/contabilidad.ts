@@ -1,10 +1,21 @@
-import { POLITICAS_PREDETERMINADAS, esCabysServicio, generarLibroDiario, type LibroDiario, type PoliticasContables } from '@fe-cr/core';
+import {
+  POLITICAS_PREDETERMINADAS,
+  completarLibro,
+  esCabysServicio,
+  generarLibroDiario,
+  type ConfigCierre,
+  type DetalleCierre,
+  type LibroDiario,
+  type PoliticasContables,
+} from '@fe-cr/core';
 import { useCallback, useMemo, useState } from 'react';
 import { useApp } from '../estado';
 
 export interface ConfigContable {
   politicas: PoliticasContables;
   apertura?: { fecha: string; capital: number };
+  /** Asientos de ajuste y de cierre por año (AAAA). */
+  cierres?: Record<string, ConfigCierre>;
 }
 
 const clave = (emisorId: string) => `fe-cr:contabilidad:${emisorId}`;
@@ -19,10 +30,15 @@ function leer(emisorId: string | undefined): ConfigContable {
 }
 
 /**
- * Libro diario derivado de los comprobantes aceptados del emisor activo. Las políticas contables y el
- * asiento de apertura se guardan en este navegador, por emisor.
+ * Libro diario derivado de los comprobantes aceptados del emisor activo, más los asientos de ajuste y
+ * de cierre registrados. Las políticas contables, la apertura, los ajustes y los cierres se guardan en
+ * este navegador, por emisor.
  */
-export function useContabilidad(): { libro: LibroDiario | null; config: ConfigContable; guardarConfig: (c: ConfigContable) => void } {
+export function useContabilidad(): {
+  libro: (LibroDiario & { cierres: Record<string, DetalleCierre> }) | null;
+  config: ConfigContable;
+  guardarConfig: (c: ConfigContable) => void;
+} {
   const { emisor, comprobantes, recibidos, productos } = useApp();
   const [config, setConfig] = useState(() => leer(emisor?.id));
   const guardarConfig = useCallback(
@@ -36,7 +52,7 @@ export function useContabilidad(): { libro: LibroDiario | null; config: ConfigCo
     },
     [emisor],
   );
-  const libro = useMemo(
+  const base = useMemo(
     () =>
       emisor
         ? generarLibroDiario({
@@ -48,8 +64,9 @@ export function useContabilidad(): { libro: LibroDiario | null; config: ConfigCo
             apertura: config.apertura,
           })
         : null,
-    [emisor, comprobantes, recibidos, productos, config],
+    [emisor, comprobantes, recibidos, productos, config.politicas, config.apertura],
   );
+  const libro = useMemo(() => (base ? completarLibro(base, config.cierres) : null), [base, config.cierres]);
   return { libro, config, guardarConfig };
 }
 

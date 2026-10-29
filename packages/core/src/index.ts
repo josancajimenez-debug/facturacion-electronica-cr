@@ -15,3 +15,4 @@ export * from './actualizacion';
 export * from './cuentas';
 export * from './contabilidad';
 export * from './libros';
+export * from './cierre';

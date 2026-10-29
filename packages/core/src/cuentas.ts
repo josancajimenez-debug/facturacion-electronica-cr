@@ -200,6 +200,12 @@ const FILAS: Fila[] = [
     seDebita: 'Traslado del monto al tercero.',
     seAcredita: 'Otros cargos incluidos en las ventas.',
   }],
+  ['2.1.03.02', 'Gastos acumulados por pagar', {
+    corriente: true, niif: 21,
+    descripcion: 'Gastos devengados al cierre que aún no se han facturado ni pagado (servicios, intereses, cargas sociales).',
+    seDebita: 'Pago o recepción de la factura.',
+    seAcredita: 'Asiento de ajuste por el gasto devengado.',
+  }],
   ['2.2', 'Pasivo no corriente', { corriente: false }],
   ['2.2.01', 'Obligaciones financieras', { corriente: false, niif: 11 }],
   ['2.2.01.01', 'Préstamos bancarios a largo plazo', {
@@ -327,6 +333,15 @@ const FILAS: Fila[] = [
     descripcion: 'Gasto por depreciación de propiedades, planta y equipo y amortización de intangibles.',
     seDebita: 'Asiento de ajuste del periodo.', seAcredita: 'Cierre.',
   }],
+  ['6.1.01.12', 'Pérdidas crediticias (deterioro de cuentas por cobrar)', {
+    niif: 11,
+    descripcion: 'Deterioro estimado de la cartera de clientes al cierre.',
+    seDebita: 'Asiento de ajuste de la estimación.', seAcredita: 'Reversión de la estimación y cierre.',
+  }],
+  ['6.1.01.13', 'Seguros', {
+    descripcion: 'Primas de seguros devengadas en el periodo.',
+    seDebita: 'Ajuste por la porción devengada de los pagos anticipados.', seAcredita: 'Cierre.',
+  }],
   ['6.1.01.99', 'Otros gastos de operación', {
     descripcion: 'Gastos que no corresponden a otra cuenta y otros cargos incluidos en facturas de proveedores.',
     seDebita: 'Compras no clasificadas.', seAcredita: 'Notas de crédito y cierre.',
@@ -342,6 +357,13 @@ const FILAS: Fila[] = [
     niif: 30,
     descripcion: 'Pérdida o ganancia neta por la conversión de partidas monetarias en moneda extranjera (Sección 30).',
     seDebita: 'Pérdidas cambiarias.', seAcredita: 'Ganancias cambiarias.',
+  }],
+  ['6.3', 'Impuesto sobre la renta'],
+  ['6.3.01', 'Impuesto sobre la renta', { niif: 29 }],
+  ['6.3.01.01', 'Gasto por impuesto sobre la renta', {
+    niif: 29,
+    descripcion: 'Impuesto corriente sobre la renta del periodo (Ley 7092). Se presenta después de la utilidad antes de impuesto.',
+    seDebita: 'Asiento de ajuste por la provisión del impuesto.', seAcredita: 'Cierre.',
   }],
 ];
 
