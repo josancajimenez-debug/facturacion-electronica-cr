@@ -4,6 +4,9 @@
  * de actividades económicas» que publica el Ministerio (correspondencia ATV CIIU 3 – TRIBU-CR CIIU 4).
  * Además del nombre oficial, se busca por los nombres de la actividad en ATV y por las especialidades
  * de TRIBU-CR, que son como la gente suele describir lo que hace («repuestos», «panadería», «taxi»).
+ *
+ * Se importa desde «@fe-cr/core/actividades» y no desde el índice del paquete: así el listado (unos
+ * 95 KB) solo viaja con la página que lo usa y no con cada pantalla ni con la función Edge.
  */
 import listado from './datos/actividades-ciiu4.json';
 
@@ -16,7 +19,6 @@ export interface ActividadCiiu4 {
   atv?: string[];
 }
 
-export const FUENTE_ACTIVIDADES = listado.fuente;
 export const ACTIVIDADES_CIIU4: ActividadCiiu4[] = listado.codigos;
 
 /** Formato del código de actividad en TRIBU-CR: cuatro dígitos, punto y un dígito (p. ej. 6920.0). */

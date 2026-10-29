@@ -1,4 +1,4 @@
-import { ACTIVIDADES_CIIU4, buscarActividades, type ActividadCiiu4 } from '@fe-cr/core';
+import { ACTIVIDADES_CIIU4, buscarActividades, type ActividadCiiu4 } from '@fe-cr/core/actividades';
 import { useId, useMemo, useState } from 'react';
 
 /** Búsqueda en el listado de actividades económicas CIIU 4 de TRIBU-CR por código o descripción. */

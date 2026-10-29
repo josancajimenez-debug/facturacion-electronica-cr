@@ -60,4 +60,10 @@ describe('Transición a la NIIF para las PYMES, tercera edición', () => {
     expect(avisos.map((a) => a.nivel)).toEqual(['error', 'error']);
     expect(avisos[1].mensaje).toMatch(/Apéndice A/);
   });
+
+  it('exige un primer ejercicio válido para la tercera edición', () => {
+    expect(revisarTransicion({ modo: 'primera-adopcion', primerEjercicio: 202 })[0]).toMatchObject({ nivel: 'error', fuente: 'Apéndice A, Fecha de vigencia' });
+    expect(revisarTransicion({ modo: 'primera-adopcion', primerEjercicio: 2027 })).toEqual([]);
+    expect(fechasTransicion('primera-adopcion', 2027).cierreComparativo).toBe('2026-12-31');
+  });
 });

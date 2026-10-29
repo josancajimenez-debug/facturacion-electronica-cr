@@ -1,6 +1,6 @@
 # Pruebas
 
-| Comando | Qué prueba | Requiere | Resultado verificado (26/10/2026) |
+| Comando | Qué prueba | Requiere | Resultado verificado (29/10/2026) |
 | --- | --- | --- | --- |
 | `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas; regresiones de la revisión integral (vigencia según la fecha del simulador, tipo 10 en NC/ND/REP, base del IVA devuelto, fechas imposibles en la clave) y tipo de cambio de los recibidos (88). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas, CSV, identificación alfanumérica y glosario (cada cita de términos y códigos con su referencia APA, orden alfabético, catálogos sin códigos repetidos, tipos de comprobante 01-10, búsqueda sin tildes) limpieza de datos local y almacenamiento lleno (18). Supabase: esquema, RLS, consecutivo atómico y auditoría (7), función Edge completa sobre PostgreSQL/PGlite (9) y limpieza de datos (6: administrador por correo, acciones negadas a los demás, cada usuario limpia lo suyo sin tocar a otros, emisor compartido, limpieza por usuario en todas las tablas, «limpiar todo» con frase y cuentas intactas) | Node | 128/128 ✔ |
 | `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge, sin variables ni parámetros sin usar | Node | Sin errores ✔ |
@@ -65,6 +65,19 @@ Guion de navegador de la limpieza de datos (26/10/2026, modo local, tres cuentas
 | Al eliminar la actividad principal del emisor, quedaba sin principal | No se reasignaba | Revisión manual |
 
 Guion de navegador integral (26/10/2026, modo local): registro, demo, los 15 escenarios con el resultado esperado, factura desde el formulario (aceptada), las 5 pestañas del detalle, descargas PDF y XML, nota de crédito (aceptada), filtro y CSV de comprobantes, recepción con confirmación, carga de XML con teclado, alta de receptor y producto, guardado del emisor, Reportes, Auditoría y las 13 páginas a 1366, 768, 600 y 390 px sin desbordamiento. Consola: sin errores ni advertencias.
+
+## Pruebas de regresión de la sexta revisión integral (29/10/2026)
+
+| Error | Causa | Prueba |
+| --- | --- | --- |
+| En la FEC, al cambiar de proveedor quedaban la referencia vacía y la condición 13 del anterior, o el régimen de un proveedor previo | Las referencias sugeridas solo se agregaban, nunca se quitaban | `compras.test.ts` › al cambiar de vendedor quita la referencia automática… |
+| En la FEC manual, una cédula escrita con guiones no validaba | El campo no limpiaba la identificación como los demás formularios | Guion de navegador (`a11y`: «1-0999-0999») |
+| En «Transición NIIF PYMES» no se podía escribir un ajuste negativo | Campo numérico: el «-» inicial se leía como vacío y se convertía en 0 | Componente `CampoMonto`; guion de navegador |
+| Un año a medio escribir («202») generaba fechas de transición absurdas | Sin validación del ejercicio | `transicion.test.ts` › exige un primer ejercicio válido |
+| En Receptores, una cédula jurídica no se aceptaba si el tipo seguía en «física» | Solo Emisor y Proveedores deducían el tipo por la cantidad de dígitos | Guion de navegador (`flujos` › receptores CRUD) |
+| El listado CIIU 4 (95 KB) se descargaba en todas las pantallas y viajaba en la función Edge | Se exportaba desde el índice del paquete | Compilación: el paquete principal bajó de 531 a 449 KB |
+
+Guion de navegador (29/10/2026, modo local): 25 rutas a 1366, 820 y 390 px sin errores de consola ni desbordamiento; accesibilidad de controles; emisión FE, TE, FEE y FEC; recepción y confirmación; descargas; balance de apertura; asiento manual y cierre; CRUD de receptores; actividades por cédula; proveedores y FEC; transición NIIF. Consola: sin errores de la aplicación.
 
 ## Casos de cálculo verificados a mano
 

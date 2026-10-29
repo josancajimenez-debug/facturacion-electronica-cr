@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { borradorFecPara, infoRegimen, regimenDesdeHacienda } from '../src/compras';
+import { ajustarFecAlRegimen, borradorFecPara, infoRegimen, regimenDesdeHacienda } from '../src/compras';
 import { EMISOR_DEMO } from '../src/datos-demo';
 import type { BorradorComprobante } from '../src/tipos';
 import { validarBorrador } from '../src/validaciones';
@@ -55,5 +55,20 @@ describe('Proveedores de la FEC (Decreto 44739-H, art. 2 inc. 13)', () => {
     expect(regimenDesdeHacienda('Régimen Especial Agropecuario')).toBe('agropecuario');
     expect(regimenDesdeHacienda('Régimen general')).toBe('general');
     expect(regimenDesdeHacienda(undefined)).toBeUndefined();
+  });
+
+  it('al cambiar de vendedor quita la referencia automática vacía y conserva la que el usuario completó', () => {
+    const rea = borradorFecPara('agropecuario', '01');
+    const b = { referencias: rea.referencias!, condicionVenta: '01' };
+    // Pasa a un no domiciliado: la 14 vacía se reemplaza por la 16.
+    expect(ajustarFecAlRegimen(b, 'no-domiciliado', '05').referencias.map((r) => r.tipoDoc)).toEqual(['16']);
+    // Si la 14 ya tiene el número del comprobante, se conserva.
+    const completada = { ...b, referencias: [{ ...b.referencias[0], numero: 'FAC-1' }] };
+    expect(ajustarFecAlRegimen(completada, 'no-domiciliado', '05').referencias.map((r) => r.tipoDoc)).toEqual(['14', '16']);
+    // La condición 13 se pone con el «No contribuyente» y se quita al cambiar a otro vendedor.
+    const usado = ajustarFecAlRegimen(b, 'no-inscrito', '06');
+    expect(usado.condicionVenta).toBe('13');
+    expect(ajustarFecAlRegimen(usado, 'simplificado', '01')).toMatchObject({ condicionVenta: '01', regimenVendedor: 'simplificado' });
+    expect(ajustarFecAlRegimen(b, undefined).referencias).toEqual([]);
   });
 });

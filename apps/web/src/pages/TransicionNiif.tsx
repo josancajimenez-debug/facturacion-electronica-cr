@@ -7,6 +7,7 @@ import {
   conciliarPatrimonio,
   fechasTransicion,
   revisarTransicion,
+  esEjercicioValido,
   type AjusteTransicion,
   type ConfigTransicion,
   type ModoTransicion,
@@ -15,7 +16,7 @@ import {
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Alerta, Selector, Texto } from '../components/ui';
+import { Alerta, CampoMonto, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { useContabilidad } from '../lib/contabilidad';
 import { dinero, fecha as fechaCR } from '../lib/formato';
@@ -39,7 +40,8 @@ export function TransicionNiif() {
   const { config, guardarConfig } = useContabilidad();
   const [t, setT] = useState<ConfigTransicion>(() => config.transicion ?? { modo: 'primera-adopcion', primerEjercicio: 2027, granContribuyente: config.politicas.granContribuyenteNacional });
   const set = (p: Partial<ConfigTransicion>) => setT((x) => ({ ...x, ...p }));
-  const f = fechasTransicion(t.modo, t.primerEjercicio);
+  const anioValido = esEjercicioValido(t.primerEjercicio);
+  const f = fechasTransicion(t.modo, anioValido ? t.primerEjercicio : 2027);
   const avisos = revisarTransicion(t);
   const ajustes = t.ajustes ?? [];
   const conc = conciliarPatrimonio(t.patrimonioAnterior ?? 0, ajustes);
@@ -58,7 +60,7 @@ export function TransicionNiif() {
           <h1>Transición a la NIIF para las PYMES</h1>
           <p>Tercera edición (IASB, febrero de 2025), obligatoria para los periodos que comienzan a partir del 1/01/2027.</p>
         </div>
-        <button className="btn btn-primary" onClick={guardar}><Save /> Guardar</button>
+        <button className="btn btn-primary" onClick={guardar} disabled={!anioValido}><Save /> Guardar</button>
       </div>
 
       <div className="card">
@@ -70,7 +72,7 @@ export function TransicionNiif() {
                 { codigo: 'primera-adopcion', descripcion: 'Adopta la NIIF para las PYMES por primera vez (Sección 35)' },
                 { codigo: 'cambio-edicion', descripcion: 'Ya aplicaba la segunda edición (Apéndice A)' },
               ]} />
-            <Texto etiqueta="Primer ejercicio bajo la tercera edición" tipo="number" valor={t.primerEjercicio} onCambio={(v) => set({ primerEjercicio: Number(v) || 2027 })} ayuda="Ejercicio anual de enero a diciembre." />
+            <Texto etiqueta="Primer ejercicio bajo la tercera edición" tipo="number" valor={t.primerEjercicio} onCambio={(v) => set({ primerEjercicio: Math.trunc(Number(v)) || 0 })} ayuda="Ejercicio anual de enero a diciembre." />
             <div className="stack" style={{ gap: 6 }}>
               <label className="check"><input type="checkbox" checked={!!t.obligacionPublica} onChange={(e) => set({ obligacionPublica: e.target.checked })} /> Tiene obligación pública de rendir cuentas</label>
               <label className="check"><input type="checkbox" checked={!!t.granContribuyente} onChange={(e) => set({ granContribuyente: e.target.checked })} /> Gran Contribuyente Nacional</label>
@@ -78,7 +80,7 @@ export function TransicionNiif() {
           </div>
           <div className="grid grid-3">
             <div><span className="small muted">{primera ? 'Fecha de transición (estado de situación financiera de apertura)' : 'Fecha de aplicación inicial'}</span><div><strong>{fechaCR(f.fechaClave)}</strong></div></div>
-            <div><span className="small muted">Periodo comparativo</span><div><strong>{fechaCR(f.inicioComparativo)} – {fechaCR(`${t.primerEjercicio - 1}-12-31`)}</strong></div></div>
+            <div><span className="small muted">Periodo comparativo</span><div><strong>{fechaCR(f.inicioComparativo)} – {fechaCR(f.cierreComparativo)}</strong></div></div>
             <div><span className="small muted">Cierre del primer ejercicio</span><div><strong>{fechaCR(f.cierrePrimerEjercicio)}</strong> {f.anticipada && <span className="badge info">Aplicación anticipada: revelarla</span>}</div></div>
           </div>
           {primera ? (
@@ -172,7 +174,7 @@ export function TransicionNiif() {
         </div>
         <div className="card-body stack">
           <div style={{ maxWidth: 320 }}>
-            <Texto etiqueta={primera ? 'Patrimonio según el marco anterior' : 'Patrimonio según la segunda edición'} tipo="number" valor={t.patrimonioAnterior} onCambio={(v) => set({ patrimonioAnterior: v === '' ? undefined : Number(v) })} />
+            <CampoMonto etiqueta={primera ? 'Patrimonio según el marco anterior' : 'Patrimonio según la segunda edición'} valor={t.patrimonioAnterior} onCambio={(v) => set({ patrimonioAnterior: v })} />
           </div>
           {ajustes.map((a, i) => (
             <div key={i} className="row" style={{ alignItems: 'flex-end' }}>
@@ -180,7 +182,7 @@ export function TransicionNiif() {
               <div style={{ flex: 1, minWidth: 200 }}><Texto etiqueta="Concepto" valor={a.concepto} onCambio={(v) => setAjuste(i, { concepto: v })} /></div>
               <div style={{ width: 90 }}><Texto etiqueta="Sección" tipo="number" valor={a.seccion} onCambio={(v) => setAjuste(i, { seccion: Number(v) || 0 })} /></div>
               <div style={{ width: 160 }}><Selector etiqueta="Naturaleza" valor={a.naturaleza} mostrarCodigo={false} onCambio={(v) => setAjuste(i, { naturaleza: v as NaturalezaAjuste })} opciones={NATURALEZA_AJUSTE} /></div>
-              <div style={{ width: 150 }}><Texto etiqueta="Efecto en patrimonio" tipo="number" valor={a.efecto} onCambio={(v) => setAjuste(i, { efecto: Number(v) || 0 })} /></div>
+              <div style={{ width: 150 }}><CampoMonto etiqueta="Efecto en patrimonio" valor={a.efecto} onCambio={(v) => setAjuste(i, { efecto: v ?? 0 })} /></div>
               <label className="check" style={{ marginBottom: 8 }} title="Vidas útiles, valores residuales, porcentajes de incobrables"><input type="checkbox" checked={!!a.cambioEstimacion} onChange={(e) => setAjuste(i, { cambioEstimacion: e.target.checked })} /> Cambia una estimación</label>
               <button className="btn btn-ghost btn-icon btn-danger" aria-label={`Quitar ajuste ${a.ref}`} onClick={() => set({ ajustes: ajustes.filter((_, j) => j !== i) })}><Trash2 /></button>
             </div>

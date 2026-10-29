@@ -128,6 +128,7 @@ export interface FechasTransicion {
   /** Primera adopción: comienzo del primer periodo comparativo. Cambio de edición: fecha de aplicación inicial. */
   fechaClave: string;
   inicioComparativo: string;
+  cierreComparativo: string;
   cierrePrimerEjercicio: string;
   anticipada: boolean;
 }
@@ -140,10 +141,14 @@ export function fechasTransicion(modo: ModoTransicion, primerEjercicio: number):
     modo,
     fechaClave: modo === 'primera-adopcion' ? comparativo : inicio,
     inicioComparativo: comparativo,
+    cierreComparativo: `${primerEjercicio - 1}-12-31`,
     cierrePrimerEjercicio: `${primerEjercicio}-12-31`,
     anticipada: inicio < VIGENCIA_NIIF_2025,
   };
 }
+
+/** Ejercicio razonable para la tercera edición (se emitió en 2025; se admite la aplicación anticipada). */
+export const esEjercicioValido = (anio: number): boolean => Number.isInteger(anio) && anio >= 2025 && anio <= 2100;
 
 export type NaturalezaAjuste = 'reconocimiento' | 'baja' | 'reclasificacion' | 'medicion';
 
@@ -194,6 +199,7 @@ export function revisarTransicion(c: ConfigTransicion): AvisoTransicion[] {
   const avisos: AvisoTransicion[] = [];
   const err = (mensaje: string, fuente: string) => avisos.push({ nivel: 'error', mensaje, fuente });
   const adv = (mensaje: string, fuente: string) => avisos.push({ nivel: 'advertencia', mensaje, fuente });
+  if (!esEjercicioValido(c.primerEjercicio)) err('Indique el primer ejercicio bajo la tercera edición (de 2025 en adelante): la Norma se emitió en febrero de 2025.', 'Apéndice A, Fecha de vigencia');
   if (c.obligacionPublica) err('Una entidad con obligación pública de rendir cuentas no puede aplicar la NIIF para las PYMES: le corresponden las NIIF completas.', 'Sección 1, párrafos 1.2 y 1.3');
   if (c.granContribuyente) err('Los Grandes Contribuyentes Nacionales deben llevar registros conforme a las NIIF completas para efectos fiscales.', 'Oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025');
   const exenciones = Object.entries(c.exenciones ?? {}).filter(([, d]) => d.aplica);

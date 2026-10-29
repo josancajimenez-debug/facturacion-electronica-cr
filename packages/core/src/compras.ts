@@ -100,6 +100,9 @@ export function regimenDesdeHacienda(descripcion?: string): RegimenVendedor | un
   return undefined;
 }
 
+/** Prefijo de la razón de las referencias que agrega la APP; identifica las que puede quitar sola. */
+const RAZON_AUTOMATICA = 'Compra a proveedor: ';
+
 /**
  * Datos que el comprador deja listos al pasar del proveedor a la FEC: la referencia que exige su
  * régimen (el número del comprobante del vendedor lo completa el usuario) y la condición de venta 13
@@ -108,7 +111,7 @@ export function regimenDesdeHacienda(descripcion?: string): RegimenVendedor | un
 export function borradorFecPara(regimen: RegimenVendedor, tipoIdentificacion?: string, fecha = fechaEmisionCR()): Partial<BorradorComprobante> {
   const info = infoRegimen(regimen);
   const referencias: Referencia[] = info?.referencia
-    ? [{ tipoDoc: info.referencia, numero: '', fechaEmision: fecha, codigo: '04', razon: `Compra a proveedor: ${info.descripcion}` }]
+    ? [{ tipoDoc: info.referencia, numero: '', fechaEmision: fecha, codigo: '04', razon: `${RAZON_AUTOMATICA}${info.descripcion}` }]
     : [];
   return {
     tipo: 'FEC',
@@ -116,6 +119,23 @@ export function borradorFecPara(regimen: RegimenVendedor, tipoIdentificacion?: s
     referencias,
     ...(tipoIdentificacion === '06' ? { condicionVenta: '13' } : {}),
   };
+}
+
+/**
+ * Ajusta la FEC al cambiar de vendedor o de régimen: quita las referencias que la APP agregó para el
+ * régimen anterior y siguen sin número, agrega la que exige el nuevo y pone o quita la condición de
+ * venta 13 (bienes usados de un «No contribuyente»). Las referencias que el usuario completó se conservan.
+ */
+export function ajustarFecAlRegimen(
+  b: Pick<BorradorComprobante, 'referencias' | 'condicionVenta'>,
+  regimen: RegimenVendedor | undefined,
+  tipoIdentificacion?: string,
+): Pick<BorradorComprobante, 'regimenVendedor' | 'referencias' | 'condicionVenta'> {
+  const propias = b.referencias.filter((r) => r.numero || !r.razon?.startsWith(RAZON_AUTOMATICA));
+  const sugerido = regimen ? borradorFecPara(regimen, tipoIdentificacion) : { referencias: [] };
+  const faltantes = (sugerido.referencias ?? []).filter((r) => !propias.some((p) => p.tipoDoc === r.tipoDoc));
+  const condicionVenta = tipoIdentificacion === '06' ? '13' : b.condicionVenta === '13' ? '01' : b.condicionVenta;
+  return { regimenVendedor: regimen, referencias: [...propias, ...faltantes], condicionVenta };
 }
 
 type Reportar = (campo: string, mensaje: string) => void;

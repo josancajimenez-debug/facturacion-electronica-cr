@@ -1,4 +1,6 @@
-import { REGEX_ACTIVIDAD_CIIU4, REGEX_CORREO, TIPO_IDENTIFICACION, actividadCiiu4, descripcion, validarIdentificacion, type ActividadCiiu4, type Emisor } from '@fe-cr/core';
+import { REGEX_CORREO, TIPO_IDENTIFICACION, descripcion, validarIdentificacion, type Emisor } from '@fe-cr/core';
+// Subruta propia: el listado CIIU 4 solo se descarga con esta página.
+import { REGEX_ACTIVIDAD_CIIU4, actividadCiiu4, type ActividadCiiu4 } from '@fe-cr/core/actividades';
 import { ActividadBuscador } from '../components/ActividadBuscador';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react';

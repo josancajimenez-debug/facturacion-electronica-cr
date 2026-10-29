@@ -1,6 +1,6 @@
-import type { Codigo, Validacion } from '@fe-cr/core';
+import { leerMonto, type Codigo, type Validacion } from '@fe-cr/core';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
-import { Component, useEffect, useId, useRef, type ReactNode } from 'react';
+import { Component, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { ETIQUETA_ESTADO } from '../lib/formato';
 
 export function Campo({ etiqueta, ayuda, error, children }: { etiqueta: string; ayuda?: ReactNode; error?: string; children: (id: string) => ReactNode }) {
@@ -28,6 +28,45 @@ export function Texto(props: { etiqueta: string; valor: string | number | undefi
           step={props.paso}
           disabled={props.deshabilitado}
           onChange={(e) => props.onCambio(e.target.value)}
+        />
+      )}
+    </Campo>
+  );
+}
+
+/** Lee un monto escrito a mano; undefined si está vacío y NaN si no es un número. */
+const montoDe = (texto: string): number | undefined => {
+  if (!texto.trim()) return undefined;
+  try {
+    return leerMonto(texto);
+  } catch {
+    return NaN;
+  }
+};
+
+/**
+ * Monto con signo escrito como texto: admite «-», «1.234,56», «1,234.56» o «(2.000)» mientras se escribe.
+ * Un input numérico borraría el «-» inicial (el navegador lo informa vacío) y no dejaría escribir negativos.
+ */
+export function CampoMonto(props: { etiqueta: string; valor: number | undefined; onCambio: (v: number | undefined) => void; ayuda?: ReactNode }) {
+  const [texto, setTexto] = useState(props.valor === undefined ? '' : String(props.valor));
+  // Si el valor cambia desde fuera (carga de datos, otro campo), se muestra; lo que se está escribiendo se respeta.
+  useEffect(() => {
+    setTexto((t) => (montoDe(t) === props.valor ? t : props.valor === undefined ? '' : String(props.valor)));
+  }, [props.valor]);
+  const n = montoDe(texto);
+  return (
+    <Campo etiqueta={props.etiqueta} ayuda={props.ayuda} error={Number.isNaN(n) ? 'Monto no válido.' : undefined}>
+      {(id) => (
+        <input
+          id={id}
+          inputMode="decimal"
+          value={texto}
+          onChange={(e) => {
+            setTexto(e.target.value);
+            const v = montoDe(e.target.value);
+            if (!Number.isNaN(v)) props.onCambio(v);
+          }}
         />
       )}
     </Campo>

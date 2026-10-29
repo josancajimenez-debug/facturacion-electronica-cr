@@ -17,6 +17,5 @@ export * from './contabilidad';
 export * from './libros';
 export * from './cierre';
 export * from './apertura';
-export * from './actividades';
 export * from './compras';
 export * from './transicion';

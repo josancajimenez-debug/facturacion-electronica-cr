@@ -17,7 +17,7 @@ import {
   TIPO_OTROS_CARGOS,
   TIPO_TRANSACCION,
   UNIDAD_MEDIDA,
-  borradorFecPara,
+  ajustarFecAlRegimen,
   fechaEmisionCR,
   infoRegimen,
   previsualizar,
@@ -38,7 +38,7 @@ import { CabysBuscador } from '../components/CabysBuscador';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, Campo, ListaValidaciones, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
-import { aRfc, deRfc, dinero } from '../lib/formato';
+import { aRfc, deRfc, dinero, limpiarIdentificacion } from '../lib/formato';
 
 const TIPOS: { codigo: TipoComprobante; corto: string }[] = [
   { codigo: 'FE', corto: 'Factura' },
@@ -132,17 +132,12 @@ export function NuevoComprobante() {
     }
   }, [receptorId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // FEC a un proveedor registrado: su régimen define si procede y qué referencia exige (Decreto 44739-H, art. 2 inc. 13).
+  // FEC: el régimen del vendedor registrado define si procede y qué referencia exige (Decreto 44739-H,
+  // art. 2 inc. 13). Al cambiar de vendedor se quita lo que la APP agregó para el anterior. Con datos
+  // manuales el régimen lo elige el usuario.
   useEffect(() => {
-    const regimen = receptor?.proveedor?.regimen;
-    if (b.tipo !== 'FEC' || !regimen) return;
-    const sugerido = borradorFecPara(regimen, receptor.identificacion?.tipo);
-    setB((x) => ({
-      ...x,
-      regimenVendedor: regimen,
-      referencias: [...x.referencias, ...(sugerido.referencias ?? []).filter((r) => !x.referencias.some((y) => y.tipoDoc === r.tipoDoc))],
-      condicionVenta: sugerido.condicionVenta ?? x.condicionVenta,
-    }));
+    if (b.tipo !== 'FEC' || receptorId === '__manual') return;
+    setB((x) => ({ ...x, ...ajustarFecAlRegimen(x, receptor?.proveedor?.regimen, receptor?.identificacion?.tipo) }));
   }, [receptorId, b.tipo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const vista = useMemo(() => previsualizar(b, emisor!), [b, emisor]);
@@ -307,9 +302,9 @@ export function NuevoComprobante() {
                   <Texto etiqueta="Nombre" valor={b.contraparte?.nombre} onCambio={(v) => set({ contraparte: { ...b.contraparte, nombre: v } })} requerido />
                   <Texto etiqueta="Correo" valor={b.contraparte?.correo} onCambio={(v) => set({ contraparte: { nombre: '', ...b.contraparte, correo: v || undefined } })} />
                   <Selector etiqueta="Tipo de identificación" valor={b.contraparte?.identificacion?.tipo} vacio="—" onCambio={(v) => set({ contraparte: { nombre: '', ...b.contraparte, identificacion: v ? { tipo: v, numero: b.contraparte?.identificacion?.numero ?? '' } : undefined } })} opciones={TIPO_IDENTIFICACION} />
-                  <Texto etiqueta="Número" valor={b.contraparte?.identificacion?.numero} deshabilitado={!b.contraparte?.identificacion}
+                  <Texto etiqueta="Número de identificación" valor={b.contraparte?.identificacion?.numero} deshabilitado={!b.contraparte?.identificacion}
                     ayuda={b.contraparte?.identificacion ? undefined : 'Elija primero el tipo de identificación.'}
-                    onCambio={(v) => b.contraparte?.identificacion && set({ contraparte: { ...b.contraparte, identificacion: { ...b.contraparte.identificacion, numero: v.trim().toUpperCase() } } })} />
+                    onCambio={(v) => b.contraparte?.identificacion && set({ contraparte: { ...b.contraparte, identificacion: { ...b.contraparte.identificacion, numero: limpiarIdentificacion(b.contraparte.identificacion.tipo, v) } } })} />
                   {/* La ubicación solo se muestra cuando existe en el borrador: así lo que se ve es lo que se valida y emite. */}
                   {esFEC && (b.contraparte?.ubicacion ? (
                     <UbicacionCampos valor={b.contraparte.ubicacion} onCambio={(u) => set({ contraparte: { nombre: '', ...b.contraparte, ubicacion: u } })} />
@@ -325,13 +320,7 @@ export function NuevoComprobante() {
               {esFEC && (
                 <>
                   <Selector etiqueta="Régimen del vendedor" valor={b.regimenVendedor} vacio="— Seleccione —" mostrarCodigo={false} requerido
-                    onCambio={(v) => {
-                      const sugerido = v ? borradorFecPara(v as RegimenVendedor, b.contraparte?.identificacion?.tipo) : {};
-                      set({
-                        regimenVendedor: (v || undefined) as RegimenVendedor | undefined,
-                        referencias: [...b.referencias, ...(sugerido.referencias ?? []).filter((r) => !b.referencias.some((y) => y.tipoDoc === r.tipoDoc))],
-                      });
-                    }}
+                    onCambio={(v) => set(ajustarFecAlRegimen(b, (v || undefined) as RegimenVendedor | undefined, b.contraparte?.identificacion?.tipo))}
                     opciones={REGIMEN_VENDEDOR.map((x) => ({ codigo: x.codigo, descripcion: `${x.descripcion}${x.procedeFec ? '' : ' — no procede FEC'}` }))}
                     ayuda={regimen ? `${regimen.ayuda} Fundamento: ${regimen.fundamento}.` : 'Define si la compra se documenta con FEC (Decreto 44739-H, art. 2 inc. 13).'} />
                   {regimen?.procedeFec === false && <Alerta tipo="err">No procede la Factura Electrónica de Compra. {regimen.ayuda}</Alerta>}
