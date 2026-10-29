@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { TablaAsiento } from '../components/Asiento';
 import { Alerta, Cargando, Estado, VisorXml } from '../components/ui';
+import { VisorPdf } from '../components/VisorPdf';
 import { useApp } from '../estado';
 import { useContabilidad } from '../lib/contabilidad';
 import { descargar, dinero, fechaHora } from '../lib/formato';
@@ -301,7 +302,7 @@ export function DetalleComprobante() {
               </div>
             )}
             {pestana === 'pdf' && (pdfUrl ? (
-              <iframe title="Representación gráfica" src={pdfUrl} style={{ width: '100%', height: 640, border: '1px solid var(--border)', borderRadius: 8 }} />
+              <VisorPdf url={pdfUrl} />
             ) : <Cargando texto="Generando la representación gráfica…" />)}
           </div>
         </div>
