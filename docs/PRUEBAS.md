@@ -89,6 +89,11 @@ Guion de navegador (29/10/2026, modo local): 25 rutas a 1366, 820 y 390 px sin e
 | EVA: 130 − 10 % × 1 000 = 30 | Brealey y Myers, cap. 13 | `indicadores.test.ts` |
 | Empresa sin saldos: ningún indicador «favorable» | Error encontrado al probar: «sin deuda» y «sin gastos financieros» salían favorables | `indicadores.test.ts` y guion de navegador |
 
+| Pasivo corriente con saldo a favor (IVA pagado de más): la razón corriente salía negativa y «desfavorable» | Solo se excluía el divisor cero, no el negativo | `indicadores.test.ts` › un pasivo corriente con saldo a favor… |
+| El CSV mostraba la evaluación con el código interno («sin-datos») y sin la unidad | Las etiquetas vivían solo en el componente | Etiquetas únicas en `NOMBRE_NIVEL_INDICADOR` y `NOMBRE_UNIDAD_INDICADOR` del núcleo |
+
+Séptima revisión integral (29/10/2026): pruebas unitarias 196; tipos estrictos sin variables sin usar; 0 vulnerabilidades; 75 vistas sin errores de consola ni desbordamiento; 13 guiones de navegador sin fallas de la aplicación; nuevo guion `emisores` que confirma que la configuración contable (costo de capital, apertura, cierres, transición) no se cruza al cambiar de emisor.
+
 Guion de navegador `indicadores`: 24 tarjetas con análisis, filtros por grupo, solo alertas, explicación desplegable, costo de capital validado y guardado, CSV, cambio de corte, 820 y 390 px sin desbordamiento, impresión con las explicaciones abiertas.
 
 ## Casos de cálculo verificados a mano

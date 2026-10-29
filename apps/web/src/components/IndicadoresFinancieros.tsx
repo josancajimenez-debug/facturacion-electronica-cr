@@ -5,6 +5,7 @@ import {
   diagnosticoFinanciero,
   formatearIndicador,
   indicadoresFinancieros,
+  NOMBRE_NIVEL_INDICADOR,
   type CategoriaIndicador,
   type EstadosFinancieros,
   type Indicador,
@@ -14,15 +15,10 @@ import { ChevronDown, ChevronRight, Minus, TrendingDown, TrendingUp } from 'luci
 import { useMemo, useState } from 'react';
 import { Campo } from './ui';
 
-const NIVELES: Record<NivelIndicador, { texto: string; clase: string }> = {
-  favorable: { texto: 'Favorable', clase: 'ok' },
-  vigilar: { texto: 'Vigilar', clase: 'warn' },
-  desfavorable: { texto: 'Desfavorable', clase: 'err' },
-  'sin-datos': { texto: 'Sin datos', clase: '' },
-};
+const CLASE_NIVEL: Record<NivelIndicador, string> = { favorable: 'ok', vigilar: 'warn', desfavorable: 'err', 'sin-datos': '' };
 
 function Nivel({ nivel }: { nivel: NivelIndicador }) {
-  return <span className={`badge ${NIVELES[nivel].clase}`}>{NIVELES[nivel].texto}</span>;
+  return <span className={`badge ${CLASE_NIVEL[nivel]}`}>{NOMBRE_NIVEL_INDICADOR[nivel]}</span>;
 }
 
 function Tendencia({ i }: { i: Indicador }) {
@@ -41,7 +37,7 @@ function Tendencia({ i }: { i: Indicador }) {
 function Tarjeta({ i, abierta, alternar }: { i: Indicador; abierta: boolean; alternar: () => void }) {
   const id = `kpi-${i.id}`;
   return (
-    <article className={`card kpi-card ${NIVELES[i.nivel].clase}`} aria-labelledby={`${id}-t`}>
+    <article className={`card kpi-card ${CLASE_NIVEL[i.nivel]}`} aria-labelledby={`${id}-t`}>
       <div className="kpi-cabeza">
         <h3 id={`${id}-t`}>{i.nombre}</h3>
         <Nivel nivel={i.nivel} />
@@ -186,7 +182,7 @@ export function IndicadoresFinancieros({ ef, anterior, costoCapital, onCostoCapi
               <button
                 key={c}
                 type="button"
-                className={`kpi-categoria ${NIVELES[diagnostico.categorias[c].nivel].clase}${filtro === c ? ' on' : ''}`}
+                className={`kpi-categoria ${CLASE_NIVEL[diagnostico.categorias[c].nivel]}${filtro === c ? ' on' : ''}`}
                 aria-pressed={filtro === c}
                 onClick={() => setFiltro(filtro === c ? 'todas' : c)}
               >

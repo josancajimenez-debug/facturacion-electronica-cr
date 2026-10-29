@@ -15,6 +15,9 @@ export type CategoriaIndicador = 'liquidez' | 'actividad' | 'endeudamiento' | 'r
 export type NivelIndicador = 'favorable' | 'vigilar' | 'desfavorable' | 'sin-datos';
 export type UnidadIndicador = 'veces' | 'porcentaje' | 'dias' | 'colones' | 'puntos';
 
+export const NOMBRE_NIVEL_INDICADOR: Record<NivelIndicador, string> = { favorable: 'Favorable', vigilar: 'Vigilar', desfavorable: 'Desfavorable', 'sin-datos': 'Sin datos' };
+export const NOMBRE_UNIDAD_INDICADOR: Record<UnidadIndicador, string> = { veces: 'veces', porcentaje: 'fracción (×100 = %)', dias: 'días', colones: 'colones', puntos: 'puntos' };
+
 export const CATEGORIAS_INDICADORES: Record<CategoriaIndicador, { nombre: string; pregunta: string }> = {
   liquidez: { nombre: 'Liquidez', pregunta: '¿Puede la empresa pagar sus deudas de corto plazo con sus activos corrientes?' },
   actividad: { nombre: 'Actividad y eficiencia', pregunta: '¿Con qué rapidez convierte inventarios y cuentas por cobrar en efectivo?' },
@@ -192,8 +195,8 @@ const DEFINICIONES: Definicion[] = [
     referencia: 'Entre 1 y 2; idealmente 1,5 o más, aunque muchas empresas funcionan bien entre 1,2 y 1,4 (Amat). Por encima de 3, revisar recursos ociosos.',
     fuente: `${FUENTES_INDICADORES.ross} (ec. 3.1); ${FUENTES_INDICADORES.amat}`,
     mejorSiSube: true,
-    calcular: (b) => b.pasivoCorriente === 0
-      ? { valor: null, calculo: `${col(b.activoCorriente)} ÷ ₡0,00`, motivo: 'No hay pasivo corriente.', nivelSinValor: b.activoCorriente > 0 ? 'favorable' : 'sin-datos' }
+    calcular: (b) => b.pasivoCorriente <= 0
+      ? { valor: null, calculo: `${col(b.activoCorriente)} ÷ ${col(b.pasivoCorriente)}`, motivo: 'No hay pasivo corriente.', nivelSinValor: b.activoCorriente > 0 ? 'favorable' : 'sin-datos' }
       : { valor: b.activoCorriente / b.pasivoCorriente, calculo: `${col(b.activoCorriente)} ÷ ${col(b.pasivoCorriente)}` },
     evaluar: (v) => (v < 1 ? 'desfavorable' : v < 1.2 || v > 3 ? 'vigilar' : 'favorable'),
     analizar: (v, nivel, b, _p, motivo) => {
@@ -218,8 +221,8 @@ const DEFINICIONES: Definicion[] = [
     mejorSiSube: true,
     calcular: (b) => {
       const rapido = b.activoCorriente - b.inventarios - b.pagosAnticipados;
-      return b.pasivoCorriente === 0
-        ? { valor: null, calculo: `${col(rapido)} ÷ ₡0,00`, motivo: 'No hay pasivo corriente.', nivelSinValor: rapido > 0 ? 'favorable' : 'sin-datos' }
+      return b.pasivoCorriente <= 0
+        ? { valor: null, calculo: `${col(rapido)} ÷ ${col(b.pasivoCorriente)}`, motivo: 'No hay pasivo corriente.', nivelSinValor: rapido > 0 ? 'favorable' : 'sin-datos' }
         : { valor: rapido / b.pasivoCorriente, calculo: `(${col(b.activoCorriente)} − ${col(b.inventarios)} − ${col(b.pagosAnticipados)}) ÷ ${col(b.pasivoCorriente)}` };
     },
     evaluar: (v) => rango(v, 1, 0.5),
@@ -243,8 +246,8 @@ const DEFINICIONES: Definicion[] = [
     referencia: 'Orientativa: 0,2 o más da margen para imprevistos; menos de 0,1 deja a la empresa dependiendo de los cobros diarios.',
     fuente: `${FUENTES_INDICADORES.ross} (ec. 3.3)`,
     mejorSiSube: true,
-    calcular: (b) => b.pasivoCorriente === 0
-      ? { valor: null, calculo: `${col(b.efectivo)} ÷ ₡0,00`, motivo: 'No hay pasivo corriente.', nivelSinValor: b.efectivo > 0 ? 'favorable' : 'sin-datos' }
+    calcular: (b) => b.pasivoCorriente <= 0
+      ? { valor: null, calculo: `${col(b.efectivo)} ÷ ${col(b.pasivoCorriente)}`, motivo: 'No hay pasivo corriente.', nivelSinValor: b.efectivo > 0 ? 'favorable' : 'sin-datos' }
       : { valor: b.efectivo / b.pasivoCorriente, calculo: `${col(b.efectivo)} ÷ ${col(b.pasivoCorriente)}` },
     evaluar: (v) => rango(v, 0.2, 0.1),
     analizar: (v, nivel) => {

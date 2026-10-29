@@ -1,4 +1,4 @@
-import { AVISO_NIIF_COMPLETAS, CATEGORIAS_INDICADORES, NOMBRE_EDICION_NIIF, PARAMETROS_INDICADORES, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, diagnosticoFinanciero, esAplicacionAnticipadaNiif, estadosFinancieros, formatearIndicador, indicadoresFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
+import { AVISO_NIIF_COMPLETAS, CATEGORIAS_INDICADORES, NOMBRE_EDICION_NIIF, NOMBRE_NIVEL_INDICADOR, NOMBRE_UNIDAD_INDICADOR, PARAMETROS_INDICADORES, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, diagnosticoFinanciero, esAplicacionAnticipadaNiif, estadosFinancieros, formatearIndicador, indicadoresFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
 import { Download, Printer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -153,9 +153,9 @@ export function EstadosFinancieros() {
       ['Inventario de mercadería', 'CAByS', 'Cantidad', 'Costo promedio', 'Costo total'],
       ...existencias.map((m) => [m.detalle, m.cabys, m.saldoCantidad, m.saldoCantidad ? (m.saldoCosto / m.saldoCantidad).toFixed(2) : '', m.saldoCosto.toFixed(2)]),
       [],
-      [`Indicadores financieros (costo de capital ${formatearIndicador(costoCapital, 'porcentaje')})`, 'Categoría', 'Valor', 'Evaluación', 'Año anterior', 'Fórmula', 'Análisis'],
-      ...indicadores.map((i) => [i.nombre, CATEGORIAS_INDICADORES[i.categoria].nombre, i.valor === null ? 'N/A' : i.valor.toFixed(4), i.nivel, i.anterior == null ? '' : i.anterior.toFixed(4), i.formula, i.analisis]),
-      ['Diagnóstico', '', '', '', '', '', diagnostico.resumen],
+      [`Indicadores financieros (costo de capital ${formatearIndicador(costoCapital, 'porcentaje')})`, 'Categoría', 'Valor', 'Unidad', 'Evaluación', 'Año anterior', 'Fórmula', 'Análisis'],
+      ...indicadores.map((i) => [i.nombre, CATEGORIAS_INDICADORES[i.categoria].nombre, i.valor === null ? 'N/A' : i.valor.toFixed(4), NOMBRE_UNIDAD_INDICADOR[i.unidad], NOMBRE_NIVEL_INDICADOR[i.nivel], i.anterior == null ? '' : i.anterior.toFixed(4), i.formula, i.analisis]),
+      ['Diagnóstico', '', '', '', '', '', '', diagnostico.resumen],
     ]), 'text/csv');
   };
 

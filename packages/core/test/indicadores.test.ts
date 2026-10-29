@@ -111,6 +111,14 @@ describe('Indicadores financieros (bibliografía de finanzas)', () => {
     expect(indicadoresFinancieros(estados({ efectivo: 500 })).every((i) => i.analisis.length > 0)).toBe(true);
   });
 
+  it('un pasivo corriente con saldo a favor (negativo) no se trata como deuda', () => {
+    // IVA pagado de más: la cuenta de pasivo queda con saldo deudor.
+    const k = porId(indicadoresFinancieros(estados({ efectivo: 1000, otrosCorrientes: -50 })));
+    expect(k['razon-corriente']).toMatchObject({ valor: null, nivel: 'favorable' });
+    expect(k['prueba-acida'].nivel).toBe('favorable');
+    expect(k['razon-efectivo'].nivel).toBe('favorable');
+  });
+
   it('marca la tendencia frente al año anterior según la dirección de cada razón', () => {
     const anterior = estados({ efectivo: 100, inventario: 100, proveedores: 200, ventas: 1000, costo: 600 });
     const k = porId(indicadoresFinancieros(PRUFROCK, { anterior }));
