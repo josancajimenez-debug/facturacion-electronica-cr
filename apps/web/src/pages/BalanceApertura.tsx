@@ -110,6 +110,12 @@ export function BalanceApertura() {
               <label className="check"><input type="radio" name="modo" checked={modo === 'capital'} onChange={() => setModo('capital')} /> Inicio de operaciones: aporte de capital en efectivo</label>
               <label className="check"><input type="radio" name="modo" checked={modo === 'saldos'} onChange={() => setModo('saldos')} /> Empresa en marcha: saldos del balance anterior</label>
             </div>
+            {modo === 'saldos' && (
+              <p className="small muted" style={{ margin: 0 }}>
+                Si la empresa llevaba otro marco contable (base fiscal, caja, PCGA locales), los saldos deben ser los del estado de situación financiera de apertura ya ajustado a la
+                Norma (Sección 35). Prepare y concilie esos ajustes en <Link to="/contabilidad/transicion">Transición NIIF PYMES</Link>.
+              </p>
+            )}
             <div className="grid grid-2">
               <Texto etiqueta="Fecha de apertura" tipo="date" valor={fecha} onCambio={setFecha} requerido
                 ayuda={modo === 'saldos' ? 'Normalmente el 1 de enero, con los saldos de cierre al 31 de diciembre anterior.' : undefined} />

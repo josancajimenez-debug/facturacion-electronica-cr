@@ -39,6 +39,15 @@ Menú **Contabilidad → Balance de apertura**. Dos modalidades:
 
 El inventario inicial puede detallarse por artículo (CAByS, cantidad y costo) para que el kárdex calcule el costo de ventas al promedio; su suma debe coincidir con 1.1.03.01. En los estados financieros los saldos iniciales se presentan como **saldo al inicio del periodo**: no aparecen como aportes de capital en el estado de cambios en el patrimonio ni como flujos en el estado de flujos de efectivo.
 
+## Transición a la tercera edición
+
+Página **Transición NIIF PYMES** (`core/transicion.ts`). Primero se elige el camino, porque no se mezclan:
+
+- **Primera adopción (Sección 35)**: la entidad viene de otro marco (base fiscal, caja, PCGA locales). La fecha de transición es el comienzo del periodo comparativo (para el primer ejercicio 2027, el 1/01/2026). Muestra las 7 excepciones obligatorias del 35.9 (incluidas las nuevas *préstamos del gobierno* y *contratos completados*) y las 15 exenciones del 35.10, que se deciden partida por partida con su justificación. Concilia el patrimonio (35.13) y advierte si un ajuste rehace estimaciones (vidas útiles, valores residuales), algo que el 35.9(c) no permite salvo error.
+- **Cambio de edición (Apéndice A)**: la entidad ya aplicaba la segunda edición. Aplica la tercera de forma retroactiva según la Sección 10, salvo los tratamientos de A3 a A49; varios son prospectivos (Secciones 12, 16, 17, 18, 19 y 26) y la Sección 23 admite elegir. Las exenciones del 35.10 no aplican.
+
+Incluye la matriz de brechas de las 35 secciones con la naturaleza del cambio según el resumen oficial de la Norma. El plan se guarda con la configuración contable del emisor. La metodología se tomó de la guía AIC-CILEA de octubre de 2026, corregida donde difiere de la Norma (véase [REVISION_GUIA_NIIF_PYMES.md](REVISION_GUIA_NIIF_PYMES.md)).
+
 ## Qué se contabiliza
 
 | Documento | Asiento |
@@ -69,7 +78,8 @@ Cada asiento indica si **requiere revisión** y por qué: `DESCUADRE_ARITMETICO`
 
 ## Fuentes
 
-- Consejo de Normas Internacionales de Contabilidad (IASB). (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). IFRS Foundation. Secciones 2 a 8, 10, 11, 13, 17, 18, 20 a 23, 29, 30 y 32; Apéndice A (fecha de vigencia y transición).
+- Consejo de Normas Internacionales de Contabilidad (IASB). (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). IFRS Foundation. Secciones 2 a 8, 10, 11, 13, 17, 18, 20 a 23, 29, 30, 32 y 35; Apéndice A (fecha de vigencia y transición).
+- Asociación Interamericana de Contabilidad y Comité de Integración Latino Europa-América. (2026, octubre). *Guía de implementación NIIF para las PYMES y micropymes en todas las jurisdicciones* (N. Aragón Granja, R. Helouani et al.; revisión técnica de I. Estrella).
 - Asamblea Legislativa de la República de Costa Rica. (1964). *Código de Comercio* (Ley N.° 3284), arts. 251 a 263.
 - Asamblea Legislativa de la República de Costa Rica. (1971). *Código de Normas y Procedimientos Tributarios* (Ley N.° 4755), art. 128.
 - Asamblea Legislativa de la República de Costa Rica. (1982). *Ley del Impuesto al Valor Agregado* (Ley N.° 6826), art. 27.

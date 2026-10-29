@@ -19,3 +19,4 @@ export * from './cierre';
 export * from './apertura';
 export * from './actividades';
 export * from './compras';
+export * from './transicion';

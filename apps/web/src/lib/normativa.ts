@@ -111,6 +111,13 @@ export const MATRIZ: NormaMatriz[] = [
     implementacion: 'core/cuentas.ts (SECCIONES_NIIF, seccionNiif), fundamentos de cada asiento, ajustes y cierre, estados financieros y Notas 2 y 3.',
   },
   {
+    norma: 'Guía de implementación NIIF para las PYMES y micropymes en todas las jurisdicciones (AIC y CILEA)',
+    datos: 'Asociación Interamericana de Contabilidad y Comité de Integración Latino Europa-América, octubre de 2026',
+    estado: 'Guía profesional, no normativa: no sustituye a la Norma. Revisada contra el texto oficial; sus diferencias constan en docs/REVISION_GUIA_NIIF_PYMES.md.',
+    disposiciones: 'Metodología de seis fases, formularios de diagnóstico (clasificación, matriz de brechas, exenciones), primera adopción (Sección 35) y caso práctico con conciliaciones.',
+    implementacion: 'Página «Transición NIIF PYMES» (core/transicion.ts): camino de primera adopción (35.9, 35.10, 35.13) o de cambio de edición (Apéndice A), matriz de brechas por sección y conciliación del patrimonio.',
+  },
+  {
     norma: 'Resolución DGT-R-029-2018 – Criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria',
     datos: '15/06/2018',
     estado: 'Vigente (SINALEVI, normas vigentes).',

@@ -5,6 +5,7 @@ import {
   generarLibroDiario,
   type AperturaContable,
   type ConfigCierre,
+  type ConfigTransicion,
   type DetalleCierre,
   type LibroDiario,
   type PoliticasContables,
@@ -16,6 +17,8 @@ import { useApp } from '../estado';
 export interface ConfigContable {
   politicas: PoliticasContables;
   apertura?: AperturaContable;
+  /** Plan de transición a la tercera edición (Sección 35 o Apéndice A). */
+  transicion?: ConfigTransicion;
   /** Asientos de ajuste y de cierre por año (AAAA). */
   cierres?: Record<string, ConfigCierre>;
 }

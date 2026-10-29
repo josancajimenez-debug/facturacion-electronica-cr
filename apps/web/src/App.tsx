@@ -12,6 +12,7 @@ const pagina = <K extends string>(cargar: () => Promise<Record<K, ComponentType>
 const Bienvenida = pagina(() => import('./pages/Bienvenida'), 'Bienvenida');
 const CatalogoCuentas = pagina(() => import('./pages/CatalogoCuentas'), 'CatalogoCuentas');
 const BalanceApertura = pagina(() => import('./pages/BalanceApertura'), 'BalanceApertura');
+const TransicionNiif = pagina(() => import('./pages/TransicionNiif'), 'TransicionNiif');
 const AjustesCierre = pagina(() => import('./pages/AjustesCierre'), 'AjustesCierre');
 const EstadosFinancieros = pagina(() => import('./pages/EstadosFinancieros'), 'EstadosFinancieros');
 const LibroDiario = pagina(() => import('./pages/LibroDiario'), 'LibroDiario');
@@ -66,6 +67,7 @@ export function App() {
               <Route path="/productos" element={<Productos />} />
               <Route path="/contabilidad/catalogo" element={<CatalogoCuentas />} />
               <Route path="/contabilidad/apertura" element={<BalanceApertura />} />
+              <Route path="/contabilidad/transicion" element={<TransicionNiif />} />
               <Route path="/contabilidad/diario" element={<LibroDiario />} />
               <Route path="/contabilidad/mayor" element={<LibroMayor />} />
               <Route path="/contabilidad/ajustes-cierre" element={<AjustesCierre />} />

@@ -22,6 +22,7 @@ import {
   Settings,
   ShieldAlert,
   SunMoon,
+  Route,
   Truck,
   Users,
 } from 'lucide-react';
@@ -44,6 +45,7 @@ const NAV = [
   { grupo: 'Contabilidad' },
   { a: '/contabilidad/catalogo', texto: 'Catálogo y manual', icono: ListTree },
   { a: '/contabilidad/apertura', texto: 'Balance de apertura', icono: FolderInput },
+  { a: '/contabilidad/transicion', texto: 'Transición NIIF PYMES', icono: Route },
   { a: '/contabilidad/diario', texto: 'Libro diario', icono: NotebookPen },
   { a: '/contabilidad/mayor', texto: 'Libro mayor', icono: BookOpenCheck },
   { a: '/contabilidad/ajustes-cierre', texto: 'Ajustes y cierre', icono: CalendarCheck },
