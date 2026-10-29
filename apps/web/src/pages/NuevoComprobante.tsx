@@ -32,7 +32,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorConValidaciones } from '../backend/tipos';
 import { CabysBuscador } from '../components/CabysBuscador';
 import { UbicacionCampos } from '../components/UbicacionCampos';
-import { Alerta, ListaValidaciones, Selector, Texto } from '../components/ui';
+import { Alerta, Campo, ListaValidaciones, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { aRfc, deRfc, dinero } from '../lib/formato';
 
@@ -243,10 +243,9 @@ export function NuevoComprobante() {
               {b.condicionVenta === '99' && <Texto etiqueta="Detalle condición «Otros»" valor={b.condicionVentaOtros} onCambio={(v) => set({ condicionVentaOtros: v })} max={100} />}
               <Selector etiqueta="Moneda" valor={b.moneda} onCambio={(v) => set({ moneda: v, tipoCambio: v === 'CRC' ? 1 : b.tipoCambio === 1 ? 0 : b.tipoCambio })} opciones={MONEDA} />
               {b.moneda !== 'CRC' && (
-                <div className="field">
-                  <label>Tipo de cambio *</label>
+                <Campo etiqueta="Tipo de cambio *" ayuda="USD: tipo de cambio de venta de referencia del BCCR.">{(id) => (
                   <div className="row" style={{ flexWrap: 'nowrap' }}>
-                    <input aria-label="Tipo de cambio" type="number" step="0.00001" value={b.tipoCambio || ''} onChange={(e) => set({ tipoCambio: Number(e.target.value) })} />
+                    <input id={id} type="number" step="0.00001" value={b.tipoCambio || ''} onChange={(e) => set({ tipoCambio: Number(e.target.value) })} />
                     <button className="btn btn-sm" onClick={async () => {
                       try {
                         const tc = await backend.tipoCambio();
@@ -257,8 +256,7 @@ export function NuevoComprobante() {
                       }
                     }}>BCCR/Hacienda</button>
                   </div>
-                  <span className="hint">USD: tipo de cambio de venta de referencia del BCCR.</span>
-                </div>
+                )}</Campo>
               )}
             </div>
           </div>
@@ -331,13 +329,12 @@ export function NuevoComprobante() {
                     </div>
                     {buscarCabysEn === i && <CabysBuscador onElegir={(c) => { setLinea(i, { codigoCabys: c.codigo, detalle: l.detalle || c.descripcion.slice(0, 200), codigoTarifaIva: c.codigoTarifaIva ?? l.codigoTarifaIva }); setBuscarCabysEn(null); }} />}
                     <div className="grid grid-4" style={{ marginTop: 8 }}>
-                      <div className="field" style={{ gridColumn: 'span 2' }}>
-                        <label>CAByS</label>
+                      <div style={{ gridColumn: 'span 2' }}><Campo etiqueta="Código CAByS">{(id) => (
                         <div className="row" style={{ flexWrap: 'nowrap' }}>
-                          <input aria-label="Código CAByS" className="mono" value={l.codigoCabys} onChange={(e) => setLinea(i, { codigoCabys: e.target.value.replace(/\D/g, '').slice(0, 13) })} />
+                          <input id={id} className="mono" value={l.codigoCabys} onChange={(e) => setLinea(i, { codigoCabys: e.target.value.replace(/\D/g, '').slice(0, 13) })} />
                           <button className="btn btn-sm" onClick={() => setBuscarCabysEn(buscarCabysEn === i ? null : i)}>Buscar</button>
                         </div>
-                      </div>
+                      )}</Campo></div>
                       <div style={{ gridColumn: 'span 2' }}><Texto etiqueta="Detalle" valor={l.detalle} onCambio={(v) => setLinea(i, { detalle: v })} max={200} /></div>
                       <Texto etiqueta="Cantidad" tipo="number" paso="0.001" valor={l.cantidad} onCambio={(v) => setLinea(i, { cantidad: Number(v) })} />
                       <Selector etiqueta="Unidad" valor={l.unidadMedida} mostrarCodigo={false} onCambio={(v) => setLinea(i, { unidadMedida: v })} opciones={UNIDAD_MEDIDA.map((u) => ({ codigo: u.codigo, descripcion: `${u.codigo} – ${u.descripcion}` }))} />
@@ -482,14 +479,13 @@ export function NuevoComprobante() {
                   return (
                     <div key={i} className="linea-card grid grid-3">
                       <Selector etiqueta="Tipo de documento (nota 10)" valor={ref.tipoDoc} onCambio={(v) => upd({ tipoDoc: v })} opciones={TIPO_DOC_REFERENCIA} />
-                      <div className="field">
-                        <label>Clave o número</label>
-                        <input list="claves-emitidas" className="mono" value={ref.numero ?? ''} onChange={(e) => {
+                      <Campo etiqueta="Clave o número">{(id) => (
+                        <input id={id} list="claves-emitidas" className="mono" value={ref.numero ?? ''} onChange={(e) => {
                           const numero = e.target.value.trim();
                           const c = comprobantes.find((x) => x.clave === numero);
                           upd({ numero, ...(c ? { fechaEmision: c.fechaEmision } : {}) });
                         }} />
-                      </div>
+                      )}</Campo>
                       <Texto etiqueta="Fecha de emisión" tipo="datetime-local" valor={deRfc(ref.fechaEmision)} onCambio={(v) => upd({ fechaEmision: aRfc(v) })} />
                       <Selector etiqueta="Código de referencia (nota 9)" valor={ref.codigo} onCambio={(v) => upd({ codigo: v })} opciones={CODIGO_REFERENCIA} />
                       <div style={{ gridColumn: 'span 2' }}><Texto etiqueta="Razón" valor={ref.razon} onCambio={(v) => upd({ razon: v })} max={180} /></div>

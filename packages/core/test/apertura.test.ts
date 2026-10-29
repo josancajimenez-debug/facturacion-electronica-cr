@@ -18,6 +18,19 @@ const BALANCE = `Código;Cuenta;Debe;Haber
 Total;;3.950.000;3.950.000`;
 
 describe('Balance de apertura', () => {
+  it('detecta el separador en la primera fila de datos aunque el archivo empiece con un título', () => {
+    const r = leerBalanceCsv('Balance de situación al 31 de diciembre de 2025\n\nCódigo;Cuenta;Debe;Haber\n1.1.01.02;Bancos;1.500.000,00;\n3.1.01.01;Capital;;1.500.000,00');
+    expect(r.errores).toEqual([]);
+    expect(r.saldos).toEqual([{ cuenta: '1.1.01.02', debe: 1500000, haber: 0 }, { cuenta: '3.1.01.01', debe: 0, haber: 1500000 }]);
+  });
+
+  it('una cuenta repetida en el archivo no se pierde en silencio: se informa y se conserva la primera', () => {
+    const r = leerBalanceCsv('1.1.01.02,Bancos,800000,\n1.1.01.02,Bancos,200000,\n3.1.01.01,Capital,,800000');
+    expect(r.saldos.map((s) => s.cuenta)).toEqual(['1.1.01.02', '3.1.01.01']);
+    expect(r.saldos[0].debe).toBe(800000);
+    expect(r.errores).toEqual(['Línea 2: la cuenta 1.1.01.02 ya aparece en la línea 1; se omitió esta línea.']);
+  });
+
   it('lee montos en formato costarricense e internacional', () => {
     expect(leerMonto('1.234.567,89')).toBe(1234567.89);
     expect(leerMonto('1,234,567.89')).toBe(1234567.89);

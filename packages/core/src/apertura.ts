@@ -150,10 +150,12 @@ function separarCampos(linea: string, sep: string): string[] {
  */
 export function leerBalanceCsv(texto: string): { saldos: SaldoApertura[]; errores: string[] } {
   const lineas = texto.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim());
-  const primera = lineas[0] ?? '';
-  const sep = ['\t', ';', ','].find((s) => primera.includes(s)) ?? ',';
+  // El separador se toma de la primera fila de datos: los títulos de Excel suelen no tener ninguno.
+  const muestra = lineas.find((l) => /^\s*"?\d+(\.\d+)*"?\s*[\t;,]/.test(l)) ?? lineas[0] ?? '';
+  const sep = ['\t', ';', ','].find((s) => muestra.includes(s)) ?? ',';
   const saldos: SaldoApertura[] = [];
   const errores: string[] = [];
+  const lineaDe = new Map<string, number>();
   lineas.forEach((linea, i) => {
     const campos = separarCampos(linea, sep);
     const codigo = campos[0]?.replace(/\s/g, '') ?? '';
@@ -177,6 +179,8 @@ export function leerBalanceCsv(texto: string): { saldos: SaldoApertura[]; errore
       const neto = D(debe).minus(haber);
       if (neto.isZero()) return;
       if (!ES_BALANCE.has(codigo)) return void errores.push(`Línea ${i + 1}: ${codigo} ${c.nombre} es una cuenta de resultados; el balance de apertura solo lleva activo, pasivo y patrimonio (traslade el resultado a utilidades acumuladas).`);
+      if (lineaDe.has(codigo)) return void errores.push(`Línea ${i + 1}: la cuenta ${codigo} ya aparece en la línea ${lineaDe.get(codigo)}; se omitió esta línea.`);
+      lineaDe.set(codigo, i + 1);
       saldos.push({ cuenta: codigo, debe: neto.greaterThan(0) ? redondear(neto) : 0, haber: neto.lessThan(0) ? redondear(neto.negated()) : 0 });
     } catch (err) {
       errores.push(`Línea ${i + 1}: ${(err as Error).message}`);

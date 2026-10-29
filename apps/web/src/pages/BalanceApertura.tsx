@@ -5,14 +5,14 @@ import { Link } from 'react-router-dom';
 import { Alerta, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { useContabilidad } from '../lib/contabilidad';
-import { csv, descargar, dinero } from '../lib/formato';
+import { csv, descargar, dinero, fecha as fechaCR } from '../lib/formato';
 
 type Modo = 'capital' | 'saldos';
 
 type Montos = Record<string, { debe: number; haber: number }>;
 
 /** Catálogo de balance completo (clases, grupos, cuentas y subcuentas) en el orden del plan de cuentas. */
-const CATALOGO_BALANCE = CATALOGO_CUENTAS.filter((c) => /^[123](.|$)/.test(c.codigo));
+const CATALOGO_BALANCE = CATALOGO_CUENTAS.filter((c) => /^[123](\.|$)/.test(c.codigo));
 
 const porCuenta = (saldos: SaldoApertura[] = []): Montos => Object.fromEntries(saldos.map((s) => [s.cuenta, { debe: s.debe, haber: s.haber }]));
 const existenciaVacia = (): ExistenciaInicial => ({ cabys: '', detalle: '', cantidad: 0, costo: 0 });
@@ -48,6 +48,7 @@ export function BalanceApertura() {
   const errores = validarApertura(borrador);
   const conDatos = !!fecha || capital > 0 || conMonto.length > 0;
   const t = totalesApertura(conMonto);
+  const estadoCuadre = !conMonto.length ? 'Sin saldos' : t.cuadra ? 'Cuadrado' : `Diferencia ${dinero(t.debe - t.haber)}`;
   const inventario = conMonto.find((s) => s.cuenta === '1.1.03.01');
 
   const importar = (texto: string, nombre?: string) => {
@@ -81,6 +82,7 @@ export function BalanceApertura() {
     if (guardarConfig({ ...config, apertura: borrador })) avisar('Balance de apertura guardado. Los libros se recalcularon.', 'ok');
   };
   const quitar = () => {
+    if (!confirm('¿Quitar el balance de apertura? El asiento de apertura y el inventario inicial se eliminarán de los libros.')) return;
     if (!guardarConfig({ ...config, apertura: undefined })) return;
     setFecha('');
     setCapital(0);
@@ -102,7 +104,7 @@ export function BalanceApertura() {
 
       <div className="stack">
         <div className="card">
-          <div className="card-head"><h2>1. Tipo de apertura</h2>{inicial && <span className="badge ok">Registrada al {inicial.fecha}</span>}</div>
+          <div className="card-head"><h2>1. Tipo de apertura</h2>{inicial && <span className="badge ok">Registrada al {fechaCR(inicial.fecha)}</span>}</div>
           <div className="card-body stack">
             <div className="row">
               <label className="check"><input type="radio" name="modo" checked={modo === 'capital'} onChange={() => setModo('capital')} /> Inicio de operaciones: aporte de capital en efectivo</label>
@@ -145,7 +147,7 @@ export function BalanceApertura() {
             <div className="card">
               <div className="card-head">
                 <h2>3. Saldos por cuenta del catálogo</h2>
-                <span className={`badge ${t.cuadra && t.debe > 0 ? 'ok' : 'warn'}`}>{t.cuadra && t.debe > 0 ? 'Cuadrado' : `Diferencia ${dinero(t.debe - t.haber)}`}</span>
+                <span className={`badge ${estadoCuadre === 'Cuadrado' ? 'ok' : 'warn'}`}>{estadoCuadre}</span>
               </div>
               <div className="card-body stack">
                 <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -192,7 +194,7 @@ export function BalanceApertura() {
                       <tr><th colSpan={2}>Totales</th><th className="num">{dinero(t.debe)}</th><th className="num">{dinero(t.haber)}</th></tr>
                       <tr>
                         <td colSpan={2} className="small">Activo {dinero(saldoDe('1', 'deudora'))} = Pasivo {dinero(saldoDe('2', 'acreedora'))} + Patrimonio {dinero(saldoDe('3', 'acreedora'))}</td>
-                        <td colSpan={2} className="right small">{t.cuadra ? 'Ecuación contable cumplida' : `Diferencia ${dinero(t.debe - t.haber)}`}</td>
+                        <td colSpan={2} className="right small">{estadoCuadre === 'Cuadrado' ? 'Ecuación contable cumplida' : estadoCuadre}</td>
                       </tr>
                     </tbody>
                   </table>
