@@ -1,6 +1,6 @@
-import { REGEX_CORREO, TIPO_IDENTIFICACION, validarIdentificacion, type Emisor } from '@fe-cr/core';
+import { REGEX_CORREO, TIPO_IDENTIFICACION, descripcion, validarIdentificacion, type Emisor } from '@fe-cr/core';
 import { UbicacionCampos } from '../components/UbicacionCampos';
-import { Plus, Search, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useId, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Alerta, Selector, Texto } from '../components/ui';
@@ -30,25 +30,29 @@ const nuevoEmisor = (): Emisor => ({
 });
 
 export function EmisorPagina() {
-  const { emisor, backend, avisar, seleccionarEmisor } = useApp();
-  // El modo «nuevo emisor» vive en la URL (?nuevo=1): al seleccionar el emisor recién creado el Layout
-  // vuelve a montar la página, y así el formulario sigue en blanco en lugar de mostrar el guardado.
+  const { emisor, emisores, backend, avisar, seleccionarEmisor } = useApp();
+  // La página abre siempre con el formulario en blanco para registrar un emisor nuevo; los ya guardados
+  // se editan desde la lista con ?editar=<id>. Al vivir en la URL, el modo sobrevive a que el Layout
+  // vuelva a montar la página cuando cambia el emisor activo.
   const [parametros, setParametros] = useSearchParams();
-  const creando = parametros.get('nuevo') === '1' || !emisor;
-  const setCreando = (si: boolean) => setParametros(si ? { nuevo: '1' } : {}, { replace: true });
-  const [form, setForm] = useState<Emisor>(() => (creando || !emisor ? nuevoEmisor() : emisor));
+  const editado = emisores.find((e) => e.id === parametros.get('editar')) ?? null;
+  const creando = !editado;
+  const editar = (id?: string) => setParametros(id ? { editar: id } : {}, { replace: true });
+  const [form, setForm] = useState<Emisor>(() => editado ?? nuevoEmisor());
   const [consultando, setConsultando] = useState(false);
   // Solo se recarga el formulario al cambiar de emisor: cada guardado del backend entrega una copia
   // nueva del mismo emisor y, si dependiera del objeto, borraría lo que el usuario está editando.
   useEffect(() => {
-    if (emisor && !creando) setForm(emisor);
-  }, [emisor?.id, creando]); // eslint-disable-line react-hooks/exhaustive-deps
+    setForm(editado ?? nuevoEmisor());
+  }, [editado?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (p: Partial<Emisor>) => setForm((f) => ({ ...f, ...p }));
   const errores: string[] = [];
   if (form.nombre.trim().length < 5) errores.push('El nombre debe tener al menos 5 caracteres.');
   const eId = validarIdentificacion(form.identificacion);
   if (eId) errores.push(eId);
+  const duplicado = emisores.find((e) => e.id !== editado?.id && e.identificacion.tipo === form.identificacion.tipo && e.identificacion.numero === form.identificacion.numero);
+  if (duplicado) errores.push(`La identificación ${form.identificacion.numero} ya está registrada (${duplicado.nombre}). Use «Editar» en la lista de emisores registrados.`);
   if (['05', '06'].includes(form.identificacion.tipo)) errores.push('Un emisor debe identificarse con cédula física, jurídica, DIMEX o NITE.');
   if (form.correos.filter(Boolean).length === 0) errores.push('Registre al menos un correo.');
   form.correos.filter(Boolean).forEach((c) => !REGEX_CORREO.test(c) && errores.push(`Correo inválido: ${c}`));
@@ -95,19 +99,13 @@ export function EmisorPagina() {
   const [guardando, setGuardando] = useState(false);
   const guardar = async () => {
     setGuardando(true);
-    const eraNuevo = creando;
-    // Se fija ?nuevo=1 antes de guardar: con el primer emisor la página se vuelve a montar mientras se guarda.
-    if (eraNuevo) setCreando(true);
     try {
       const id = await backend.guardarEmisor({ ...form, correos: form.correos.filter(Boolean) });
       seleccionarEmisor(id);
-      if (eraNuevo) {
-        // Ya quedó en la base de datos: se limpia el formulario para registrar otro emisor.
-        setForm(nuevoEmisor());
-        avisar('Emisor creado. El formulario quedó en blanco para registrar otro.', 'ok');
-      } else {
-        avisar('Emisor guardado.', 'ok');
-      }
+      // Ya quedó en la base de datos: el formulario vuelve a quedar en blanco para registrar otro.
+      editar();
+      setForm(nuevoEmisor());
+      avisar(creando ? 'Emisor creado. Aparece en «Emisores registrados».' : 'Cambios del emisor guardados.', 'ok');
     } catch (e) {
       avisar((e as Error).message, 'err');
     } finally {
@@ -144,21 +142,48 @@ export function EmisorPagina() {
           <p>Datos del obligado tributario que figuran en el nodo &lt;Emisor&gt; y en la clave numérica.</p>
         </div>
         <div className="row">
-          {emisor && !creando && (
-            <button className="btn" onClick={() => { setCreando(true); setForm(nuevoEmisor()); }}>
-              <Plus /> Nuevo emisor
-            </button>
-          )}
-          {emisor && creando && (
-            <button className="btn" onClick={() => { setCreando(false); setForm(emisor); }}>
-              Cancelar
+          {!creando && (
+            <button className="btn" onClick={() => editar()}>
+              Cancelar edición
             </button>
           )}
           <button className="btn btn-primary" disabled={errores.length > 0 || guardando} onClick={guardar}>
-            {guardando ? 'Guardando…' : creando ? 'Crear emisor' : 'Guardar'}
+            {guardando ? 'Guardando…' : creando ? 'Crear emisor' : 'Guardar cambios'}
           </button>
         </div>
       </div>
+
+      {emisores.length > 0 && (
+        <div className="card">
+          <div className="card-head">
+            <h2>Emisores registrados</h2>
+            <span className="small muted">{emisores.length} registrados</span>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Nombre</th><th>Identificación</th><th>Actividad principal</th><th /></tr></thead>
+              <tbody>
+                {emisores.map((e) => (
+                  <tr key={e.id}>
+                    <td>
+                      {e.nombre}
+                      {e.id === emisor?.id && <> <span className="badge info">Activo</span></>}
+                      {e.id === editado?.id && <> <span className="badge">Editando</span></>}
+                    </td>
+                    <td className="nowrap">{descripcion(TIPO_IDENTIFICACION, e.identificacion.tipo)} · {e.identificacion.numero}</td>
+                    <td className="mono">{(e.actividades.find((a) => a.principal) ?? e.actividades[0])?.codigo ?? '—'}</td>
+                    <td className="nowrap right">
+                      <button className="btn btn-sm" aria-label={`Editar ${e.nombre}`} onClick={() => editar(e.id)}><Pencil /> Editar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <h2 style={{ margin: '8px 0 12px' }}>{creando ? 'Registrar un emisor nuevo' : `Editando: ${editado.nombre}`}</h2>
 
       {errores.length > 0 && (
         <div className="card">
