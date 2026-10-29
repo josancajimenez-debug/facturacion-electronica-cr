@@ -21,6 +21,8 @@ export interface ConfigContable {
   transicion?: ConfigTransicion;
   /** Asientos de ajuste y de cierre por año (AAAA). */
   cierres?: Record<string, ConfigCierre>;
+  /** Costo de capital anual (fracción) para el ROE y el EVA de los indicadores financieros. */
+  costoCapital?: number;
 }
 
 const PREFIJO = 'fe-cr:contabilidad:';

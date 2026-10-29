@@ -70,6 +70,7 @@ Menú **Recepción**.
 - **Comprobantes emitidos**: filtros por cédula, número, tipo, estado, medio de pago, condición, tarifa de IVA, fechas y montos; exportación a CSV.
 - **Reportes**: ventas por tarifa de IVA, cobros por medio de pago (SINPE destacado), totales por tipo, crédito fiscal de compras confirmadas y ajustes por error material imputados al período. Es material de apoyo; no reemplaza la declaración D-104.
 - **Auditoría**: cada creación, modificación, emisión, respuesta, recepción y confirmación con fecha y usuario; exportable a CSV.
+- **Indicadores financieros (KPI)**: en *Contabilidad › Estados financieros*, pestaña «Indicadores (KPI)». Muestra 24 razones de liquidez, actividad, endeudamiento, rentabilidad y creación de valor, cada una con un semáforo y el análisis de su resultado. Arriba aparece el análisis general con las acciones prioritarias; un clic en un grupo filtra sus indicadores. «Ver fórmula y explicación» despliega qué mide cada razón, su fórmula, el cálculo con sus cifras, cómo se interpreta y la fuente bibliográfica. Escriba el **costo de capital** que exigen los dueños: con él se evalúan el ROE y el EVA. Si hay datos del año anterior, cada tarjeta indica si el indicador mejoró o empeoró frente al mismo corte.
 
 ## 8. Escenarios de prueba
 

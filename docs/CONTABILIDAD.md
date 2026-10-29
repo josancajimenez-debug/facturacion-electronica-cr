@@ -25,6 +25,7 @@ Cada comprobante electrónico **aceptado** genera su asiento de partida doble ba
 | `packages/core/src/contabilidad.ts` | Lectura del comprobante (emitido o XML recibido), clasificación por CAByS, tratamiento del IVA, kárdex al costo promedio ponderado, generación del asiento y del libro diario |
 | `packages/core/src/apertura.ts` | Balance de apertura: aporte de capital o saldos iniciales de una empresa en marcha, lectura del balance en CSV o pegado desde Excel, validación del cuadre e inventario inicial por artículo para el kárdex |
 | `packages/core/src/libros.ts` | Libro mayor, balance de comprobación y estados financieros |
+| `packages/core/src/indicadores.ts` | Indicadores financieros (KPI): cálculo, semáforo, análisis del resultado y diagnóstico |
 | `apps/web/src/lib/contabilidad.ts` | Arma el libro con los datos del emisor activo; guarda políticas y apertura en el navegador |
 | Páginas `CatalogoCuentas`, `BalanceApertura`, `LibroDiario`, `LibroMayor`, `AjustesCierre`, `EstadosFinancieros` | Menú **Contabilidad**; además, la pestaña «Asiento contable» del detalle de cada comprobante y el botón «Asiento» en Recepción |
 
@@ -76,10 +77,41 @@ Cada asiento indica si **requiere revisión** y por qué: `DESCUADRE_ARITMETICO`
 - Aprobación de asientos por el CPI con trazabilidad (usuario, fecha y hora), guardada en la base de datos.
 - Catálogo de cuentas editable por la entidad.
 
+## Indicadores financieros (KPI)
+
+Pestaña **Indicadores (KPI)** de Estados financieros (`core/indicadores.ts`). Calcula 24 razones sobre el estado de situación al corte y el estado de resultados del periodo, en cinco grupos:
+
+| Grupo | Indicadores | Fuente principal |
+| --- | --- | --- |
+| Liquidez | Razón corriente, prueba ácida, razón de efectivo, capital de trabajo neto (fondo de maniobra), días de autonomía (medida del intervalo) | Ross, cap. 3 (ec. 3.1 a 3.5); Amat, cap. 8; Court, cap. 2 |
+| Actividad | Días de inventario y rotación, periodo medio de cobro, periodo medio de pago, ciclo de conversión del efectivo, rotación de activos totales | Ross, cap. 3 (ec. 3.12 a 3.18); Amat, cap. 8; Berk, cap. 26 |
+| Endeudamiento | Razón de endeudamiento, deuda a patrimonio, multiplicador del capital, calidad de la deuda, cobertura de gastos financieros | Ross, cap. 3 (ec. 3.6 a 3.10); Amat, cap. 8 |
+| Rentabilidad | Márgenes bruto, EBITDA, operativo y neto; ROA; ROE con la identidad Du Pont | Ross, cap. 3 (ec. 3.19 a 3.21); Amat, caps. 9 y 10; Soriano y Amat |
+| Efectivo y valor | Conversión de la utilidad en efectivo, valor económico agregado (EVA), calificación Z″ de Altman | Ross, cap. 2; Brealey, Myers y Allen, caps. 13 y 24 |
+
+Cada tarjeta muestra el valor, un semáforo (favorable, vigilar, desfavorable o sin datos), la tendencia frente al mismo corte del año anterior y el análisis del resultado con la acción sugerida. Al desplegarla explica qué mide, la fórmula, el cálculo con las cifras de la empresa, cómo se interpreta, la referencia y la fuente. Arriba, el **análisis de resultados** resume los cinco grupos y las acciones prioritarias; abajo, la descomposición Du Pont del ROE y la barra del ciclo de conversión del efectivo.
+
+Criterios de cálculo:
+
+- Las rotaciones, el ROA, el ROE y la UAII de la Z″ se **anualizan** (× 365 ÷ días del periodo) cuando el corte es anterior al 31 de diciembre; los días de inventario, cobro y pago usan los días del periodo.
+- Se usan saldos al corte, no promedios, como en las razones de la industria (Ross, cap. 3).
+- El **costo de capital** (12 % por omisión) lo define el usuario y se guarda con la configuración contable; se usa en el ROE y el EVA.
+- Los rangos son orientativos. Donde la bibliografía da un rango, se usa ese (Amat: liquidez entre 1 y 2, endeudamiento hasta 0,6); en los demás, la tarjeta indica que es una referencia práctica que debe compararse con el sector y con la historia de la empresa.
+- Una división entre cero no produce un número: la tarjeta muestra «N/A» con el motivo (por ejemplo, sin deuda no hay cobertura de intereses que medir). Una empresa sin saldos ni operaciones aparece completa como «sin datos».
+- Los gastos financieros del catálogo incluyen comisiones y diferencias de cambio, y las cuentas por cobrar incluyen el IVA. Por eso la cobertura de intereses es conservadora y el periodo de cobro tiende a ser algo mayor que el real.
+
+El CSV de estados financieros incluye los indicadores y el diagnóstico.
+
 ## Fuentes
 
 - Consejo de Normas Internacionales de Contabilidad (IASB). (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). IFRS Foundation. Secciones 2 a 8, 10, 11, 13, 17, 18, 20 a 23, 29, 30, 32 y 35; Apéndice A (fecha de vigencia y transición).
 - Asociación Interamericana de Contabilidad y Comité de Integración Latino Europa-América. (2026, octubre). *Guía de implementación NIIF para las PYMES y micropymes en todas las jurisdicciones* (N. Aragón Granja, R. Helouani et al.; revisión técnica de I. Estrella).
+- Amat, O. *Contabilidad y finanzas para Dummies*. Caps. 8 (Estudio de los ratios), 9, 10 y 21.
+- Berk, J., DeMarzo, P. y Harford, J. *Finanzas corporativas*. Caps. 2 (análisis de estados financieros) y 26 (administración del capital de trabajo).
+- Brealey, R. A., Myers, S. C. y Allen, F. *Principios de finanzas corporativas* (9.ª ed.). Caps. 13 (valor económico agregado) y 24 (modelos de calificación de crédito).
+- Court, E. *Aplicaciones para finanzas empresariales*. Cap. 2 (fondo de maniobra y razones financieras).
+- Ross, S. A., Westerfield, R. W. y Jordan, B. D. *Fundamentos de finanzas corporativas* (9.ª ed.). Caps. 2 y 3 (análisis de razones e identidad Du Pont).
+- Soriano, M. J. y Amat, O. (coord.). *Introducción a la contabilidad y las finanzas*. Resultado operativo y EBITDA.
 - Asamblea Legislativa de la República de Costa Rica. (1964). *Código de Comercio* (Ley N.° 3284), arts. 251 a 263.
 - Asamblea Legislativa de la República de Costa Rica. (1971). *Código de Normas y Procedimientos Tributarios* (Ley N.° 4755), art. 128.
 - Asamblea Legislativa de la República de Costa Rica. (1982). *Ley del Impuesto al Valor Agregado* (Ley N.° 6826), art. 27.

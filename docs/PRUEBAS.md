@@ -79,6 +79,18 @@ Guion de navegador integral (26/10/2026, modo local): registro, demo, los 15 esc
 
 Guion de navegador (29/10/2026, modo local): 25 rutas a 1366, 820 y 390 px sin errores de consola ni desbordamiento; accesibilidad de controles; emisión FE, TE, FEE y FEC; recepción y confirmación; descargas; balance de apertura; asiento manual y cierre; CRUD de receptores; actividades por cédula; proveedores y FEC; transición NIIF. Consola: sin errores de la aplicación.
 
+## Indicadores financieros (29/10/2026)
+
+| Caso | Fuente | Prueba |
+| --- | --- | --- |
+| Razones de Prufrock 2009: corriente 1,31; rápida 0,53; efectivo 0,18; deuda 0,28; multiplicador 1,38; cobertura 4,9; inventario 114 días; cobro 30 días; rotación 0,64; margen 15,7 %; ROA 10,1 %; ROE 14,0 %; intervalo 192 días | Ross, cap. 3 | `indicadores.test.ts` |
+| Du Pont: 15,7 % × 0,64 × 1,38 ≈ 14 % | Ross, cap. 3 | `indicadores.test.ts` |
+| Liquidez 44 000 ÷ 40 000 = 1,1 («vigilar»); endeudamiento 30 000 ÷ 70 000 = 0,43; cobro 125 000 ÷ 3 000 000 × 365 = 15 días | Amat, cap. 8 | `indicadores.test.ts` |
+| EVA: 130 − 10 % × 1 000 = 30 | Brealey y Myers, cap. 13 | `indicadores.test.ts` |
+| Empresa sin saldos: ningún indicador «favorable» | Error encontrado al probar: «sin deuda» y «sin gastos financieros» salían favorables | `indicadores.test.ts` y guion de navegador |
+
+Guion de navegador `indicadores`: 24 tarjetas con análisis, filtros por grupo, solo alertas, explicación desplegable, costo de capital validado y guardado, CSV, cambio de corte, 820 y 390 px sin desbordamiento, impresión con las explicaciones abiertas.
+
 ## Casos de cálculo verificados a mano
 
 | Caso | Datos | Esperado |

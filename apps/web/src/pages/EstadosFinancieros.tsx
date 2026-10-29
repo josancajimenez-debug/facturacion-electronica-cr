@@ -1,7 +1,8 @@
-import { AVISO_NIIF_COMPLETAS, NOMBRE_EDICION_NIIF, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, esAplicacionAnticipadaNiif, estadosFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
+import { AVISO_NIIF_COMPLETAS, CATEGORIAS_INDICADORES, NOMBRE_EDICION_NIIF, PARAMETROS_INDICADORES, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, diagnosticoFinanciero, esAplicacionAnticipadaNiif, estadosFinancieros, formatearIndicador, indicadoresFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
 import { Download, Printer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { IndicadoresFinancieros } from '../components/IndicadoresFinancieros';
 import { Alerta, Cargando, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { finDeMes, useContabilidad } from '../lib/contabilidad';
@@ -46,6 +47,7 @@ const VISTAS = {
   resultados: 'Resultado integral',
   patrimonio: 'Cambios en el patrimonio',
   flujos: 'Flujos de efectivo',
+  indicadores: 'Indicadores (KPI)',
   notas: 'Notas',
   inventario: 'Inventario y kárdex',
 } as const;
@@ -79,7 +81,8 @@ function Seccion({ visible, children }: { visible: boolean; children: ReactNode 
 
 export function EstadosFinancieros() {
   const { comprobantesListos, emisor } = useApp();
-  const { libro, config } = useContabilidad();
+  const { libro, config, guardarConfig } = useContabilidad();
+  const costoCapital = config.costoCapital ?? PARAMETROS_INDICADORES.costoCapital;
   const [corte, setCorte] = useState(mesCR);
   const [vista, setVista] = useState<Vista>('situacion');
   const hasta = finDeMes(corte);
@@ -91,11 +94,19 @@ export function EstadosFinancieros() {
     // Existencias al corte: último saldo de cada artículo hasta esa fecha.
     const existencias = new Map<string, (typeof movimientos)[number]>();
     for (const m of movimientos) existencias.set(m.cabys, m);
-    return { ef: estadosFinancieros(libro.asientos, desde, hasta), existencias: [...existencias.values()].filter((m) => m.saldoCantidad !== 0 || m.saldoCosto !== 0), movimientos };
-  }, [libro, desde, hasta]);
+    // Mismo corte del año anterior, para la tendencia de los indicadores.
+    const anioAnterior = String(Number(corte.slice(0, 4)) - 1);
+    const anterior = estadosFinancieros(libro.asientos, `${anioAnterior}-01-01`, finDeMes(`${anioAnterior}${corte.slice(4)}`));
+    return {
+      ef: estadosFinancieros(libro.asientos, desde, hasta),
+      anterior: anterior.situacion.totalActivo !== 0 ? anterior : undefined,
+      existencias: [...existencias.values()].filter((m) => m.saldoCantidad !== 0 || m.saldoCosto !== 0),
+      movimientos,
+    };
+  }, [libro, corte, desde, hasta]);
 
   if (!comprobantesListos || !datos || !emisor) return <Cargando />;
-  const { ef, existencias, movimientos } = datos;
+  const { ef, anterior, existencias, movimientos } = datos;
   const s = ef.situacion;
   const r = ef.resultados;
   const p = ef.cambiosPatrimonio;
@@ -108,7 +119,9 @@ export function EstadosFinancieros() {
   const cierre = config.cierres?.[corte.slice(0, 4)];
 
 
-  const exportar = () =>
+  const exportar = () => {
+    const indicadores = indicadoresFinancieros(ef, { anterior, parametros: { costoCapital } });
+    const diagnostico = diagnosticoFinanciero(indicadores);
     descargar(`estados-financieros-${corte}.csv`, csv([
       [emisor.nombre, `Estados financieros al ${hasta}`, 'Montos en colones (simulación)'],
       [],
@@ -139,7 +152,12 @@ export function EstadosFinancieros() {
       [],
       ['Inventario de mercadería', 'CAByS', 'Cantidad', 'Costo promedio', 'Costo total'],
       ...existencias.map((m) => [m.detalle, m.cabys, m.saldoCantidad, m.saldoCantidad ? (m.saldoCosto / m.saldoCantidad).toFixed(2) : '', m.saldoCosto.toFixed(2)]),
+      [],
+      [`Indicadores financieros (costo de capital ${formatearIndicador(costoCapital, 'porcentaje')})`, 'Categoría', 'Valor', 'Evaluación', 'Año anterior', 'Fórmula', 'Análisis'],
+      ...indicadores.map((i) => [i.nombre, CATEGORIAS_INDICADORES[i.categoria].nombre, i.valor === null ? 'N/A' : i.valor.toFixed(4), i.nivel, i.anterior == null ? '' : i.anterior.toFixed(4), i.formula, i.analisis]),
+      ['Diagnóstico', '', '', '', '', '', diagnostico.resumen],
     ]), 'text/csv');
+  };
 
   const imprimir = () => window.print();
 
@@ -266,6 +284,16 @@ export function EstadosFinancieros() {
             Sección 7. El resultado del periodo se ajusta por las partidas que no mueven efectivo y por los cambios en el capital de trabajo.{' '}
             <span className={`badge ${f.cuadra ? 'ok' : 'err'}`}>{f.cuadra ? 'Concilia con el efectivo del estado de situación' : 'No concilia'}</span>
           </p>
+        </Seccion>
+
+        <Seccion visible={vista === 'indicadores'}>
+          <Encabezado entidad={emisor.nombre} titulo="Indicadores financieros" cuando={`Periodo ${periodo}`} />
+          <IndicadoresFinancieros
+            ef={ef}
+            anterior={anterior}
+            costoCapital={costoCapital}
+            onCostoCapital={(v) => guardarConfig({ ...config, costoCapital: v })}
+          />
         </Seccion>
 
         <Seccion visible={vista === 'notas'}>

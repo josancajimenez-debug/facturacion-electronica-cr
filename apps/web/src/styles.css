@@ -325,6 +325,50 @@ details.catalogo > summary::marker { color: var(--text-3); }
   table.apilada td:first-child { padding-top: 12px; }
   table.apilada td:last-child { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
 }
+/* Indicadores financieros (KPI): tarjetas con semáforo, Du Pont y ciclo de conversión del efectivo. */
+.kpi-categorias { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.kpi-categoria { display: flex; flex-direction: column; gap: 4px; text-align: left; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+.kpi-categoria.ok { border-left-color: var(--ok); }
+.kpi-categoria.warn { border-left-color: var(--warn); }
+.kpi-categoria.err { border-left-color: var(--err); }
+.kpi-categoria.on { outline: 2px solid var(--primary); outline-offset: -1px; }
+.kpi-categoria:focus-visible, .kpi-mas:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.kpi-controles { align-items: flex-end; gap: 12px; }
+.kpi-card { padding: 14px 16px; border-left: 4px solid var(--border); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.kpi-card.ok { border-left-color: var(--ok); }
+.kpi-card.warn { border-left-color: var(--warn); }
+.kpi-card.err { border-left-color: var(--err); }
+.kpi-cabeza { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.kpi-cabeza h3 { margin: 0; font-size: 14.5px; }
+.kpi-valor { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.kpi-tendencia { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; }
+.kpi-tendencia svg { width: 15px; height: 15px; }
+.kpi-tendencia.mejora { color: var(--ok); }
+.kpi-tendencia.empeora { color: var(--err); }
+.kpi-tendencia.igual { color: var(--text-2); }
+.kpi-analisis { margin: 0; }
+.kpi-accion { margin: 0; font-size: 13px; padding: 6px 10px; border-radius: 6px; background: var(--warn-soft); }
+.kpi-mas { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; padding: 2px 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--primary); cursor: pointer; }
+.kpi-mas svg { width: 15px; height: 15px; }
+.kpi-detalle { margin: 4px 0 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 12px; font-size: 13px; border-top: 1px solid var(--border); padding-top: 8px; }
+.kpi-detalle dt { font-weight: 600; color: var(--text-2); }
+.kpi-detalle dd { margin: 0; overflow-wrap: anywhere; }
+.kpi-detalle .mono { font-family: var(--mono); font-size: 12.5px; }
+.kpi-cerrado { display: none; }
+.dupont { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.dupont-paso { display: flex; align-items: center; gap: 8px; flex: 1 1 150px; }
+.dupont-op { font-size: 20px; font-weight: 700; color: var(--text-3); }
+.dupont-caja { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
+.dupont-caja strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+.dupont-caja.total { border-color: var(--primary); background: var(--primary-soft); }
+.cce-barra { display: flex; height: 14px; border-radius: 7px; background: var(--surface-2); overflow: hidden; margin-top: 4px; }
+.cce-inv { background: var(--info); }
+.cce-cob { background: var(--warn); }
+.cce-pag { background: var(--ok); }
+@media (max-width: 640px) {
+  .kpi-detalle { grid-template-columns: minmax(0, 1fr); }
+  .kpi-detalle dt { margin-top: 4px; }
+}
 @media print {
   /* La franja de SIMULACIÓN se conserva al imprimir: el documento no debe parecer real. */
   .sidebar, .topbar, .no-print, .toasts { display: none !important; }
@@ -334,5 +378,7 @@ details.catalogo > summary::marker { color: var(--text-3); }
   /* Estados financieros: se imprime el juego completo, un estado por página. */
   .ef-oculta { display: block !important; }
   .ef-seccion + .ef-seccion { break-before: page; }
+  .kpi-cerrado { display: grid !important; }
+  .kpi-card, .kpi-categoria { break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .pasos li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
