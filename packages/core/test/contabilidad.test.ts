@@ -199,4 +199,20 @@ describe('Libros', () => {
     expect(ef.resultados.utilidadBruta).toBe(10000);
     expect(ef.resultados.resultado).toBe(10000);
   });
+
+  it('cambios en el patrimonio y flujos de efectivo concilian con el estado de situación', () => {
+    const ef = estadosFinancieros(libro.asientos, '2026-01-01', '2026-10-31');
+    const cierre = ef.cambiosPatrimonio.filas.at(-1)!;
+    expect(ef.cambiosPatrimonio.cuadra).toBe(true);
+    expect(cierre).toMatchObject({ capital: 1000000, resultado: 10000, total: ef.situacion.totalPatrimonio });
+    expect(ef.flujos.cuadra).toBe(true);
+    expect(ef.flujos.efectivoInicial).toBe(0);
+    expect(ef.flujos.efectivoInicial + ef.flujos.variacion).toBeCloseTo(ef.flujos.efectivoFinal, 2);
+    expect(ef.flujos.financiamiento).toEqual([{ codigo: '3.1', concepto: 'Aportes (reembolsos) de capital', monto: 1000000 }]);
+    expect(ef.flujos.operacion[0]).toMatchObject({ concepto: 'Resultado del periodo', monto: 10000 });
+    // En un periodo posterior la apertura pasa al saldo inicial y no hay aportes.
+    const nov = estadosFinancieros(libro.asientos, '2026-11-01', '2026-11-30');
+    expect(nov.cambiosPatrimonio.filas[0]).toMatchObject({ capital: 1000000, acumulados: 10000, total: 1010000 });
+    expect(nov.flujos).toMatchObject({ variacion: 0, cuadra: true, efectivoInicial: ef.flujos.efectivoFinal });
+  });
 });

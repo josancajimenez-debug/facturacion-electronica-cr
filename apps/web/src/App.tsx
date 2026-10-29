@@ -11,7 +11,7 @@ const pagina = <K extends string>(cargar: () => Promise<Record<K, ComponentType>
 
 const Bienvenida = pagina(() => import('./pages/Bienvenida'), 'Bienvenida');
 const CatalogoCuentas = pagina(() => import('./pages/CatalogoCuentas'), 'CatalogoCuentas');
-const InventariosBalances = pagina(() => import('./pages/InventariosBalances'), 'InventariosBalances');
+const EstadosFinancieros = pagina(() => import('./pages/EstadosFinancieros'), 'EstadosFinancieros');
 const LibroDiario = pagina(() => import('./pages/LibroDiario'), 'LibroDiario');
 const LibroMayor = pagina(() => import('./pages/LibroMayor'), 'LibroMayor');
 const Bitacora = pagina(() => import('./pages/Bitacora'), 'Bitacora');
@@ -63,7 +63,8 @@ export function App() {
               <Route path="/contabilidad/catalogo" element={<CatalogoCuentas />} />
               <Route path="/contabilidad/diario" element={<LibroDiario />} />
               <Route path="/contabilidad/mayor" element={<LibroMayor />} />
-              <Route path="/contabilidad/inventarios-balances" element={<InventariosBalances />} />
+              <Route path="/contabilidad/estados-financieros" element={<EstadosFinancieros />} />
+              <Route path="/contabilidad/inventarios-balances" element={<Navigate to="/contabilidad/estados-financieros" replace />} />
               <Route path="/reportes" element={<Reportes />} />
               <Route path="/bitacora" element={<Bitacora />} />
               <Route path="/escenarios" element={<Escenarios />} />

@@ -1,6 +1,6 @@
 /**
- * Libros contables derivados del libro diario: mayor, balance de comprobación y los estados del
- * libro de inventarios y balances (Código de Comercio, arts. 251-263; NIIF para las PYMES, Secciones 3 a 5).
+ * Libros contables derivados del libro diario: mayor, balance de comprobación y el juego completo de
+ * estados financieros (Código de Comercio, arts. 251-263; NIIF para las PYMES, Secciones 3 a 8).
  */
 import Decimal from 'decimal.js';
 import type { Asiento } from './contabilidad';
@@ -157,6 +157,84 @@ export interface EstadosFinancieros {
     totalGastos: number;
     resultado: number;
   };
+  /** Sección 6: una columna por componente del patrimonio. */
+  cambiosPatrimonio: {
+    filas: FilaPatrimonio[];
+    cuadra: boolean;
+  };
+  /** Sección 7, método indirecto. */
+  flujos: {
+    operacion: RenglonFlujo[];
+    inversion: RenglonFlujo[];
+    financiamiento: RenglonFlujo[];
+    totalOperacion: number;
+    totalInversion: number;
+    totalFinanciamiento: number;
+    variacion: number;
+    efectivoInicial: number;
+    efectivoFinal: number;
+    cuadra: boolean;
+  };
+}
+
+export interface FilaPatrimonio {
+  concepto: string;
+  capital: number;
+  reservas: number;
+  acumulados: number;
+  resultado: number;
+  total: number;
+  /** Saldo de apertura o de cierre (se resalta). */
+  saldo?: boolean;
+}
+
+export interface RenglonFlujo {
+  codigo: string;
+  concepto: string;
+  monto: number;
+}
+
+/** Suma de los saldos de las cuentas cuyo código empieza con `prefijo`. */
+const suma = (s: Map<string, Decimal>, prefijo: string) =>
+  [...s.entries()].filter(([k]) => k.startsWith(prefijo)).reduce((t, [, v]) => t.plus(v), D(0));
+
+/** Cuentas de valuación del activo no corriente: su variación es un ajuste que no mueve efectivo. */
+const esDepreciacion = (codigo: string) => codigo.startsWith('1.2.02.') || codigo === '1.2.03.02';
+
+type Actividad = 'operacion' | 'inversion' | 'financiamiento';
+
+/**
+ * Flujos de efectivo por el método indirecto: cada variación de una cuenta de balance distinta del
+ * efectivo se asigna a una actividad, de modo que el total concilia siempre con la variación del efectivo.
+ */
+function flujosEfectivo(delPeriodo: Map<string, Decimal>, resultado: Decimal) {
+  const grupos: Record<Actividad, Map<string, { concepto: string; monto: Decimal }>> = { operacion: new Map(), inversion: new Map(), financiamiento: new Map() };
+  const anotar = (actividad: Actividad, codigo: string, concepto: string, monto: Decimal) => {
+    const g = grupos[actividad].get(codigo);
+    grupos[actividad].set(codigo, { concepto, monto: (g?.monto ?? D(0)).plus(monto) });
+  };
+  for (const [codigo, variacion] of [...delPeriodo.entries()].sort(([a], [b]) => compararCodigos(a, b))) {
+    const c = cuenta(codigo);
+    if (!['activo', 'pasivo', 'patrimonio'].includes(c.tipo) || codigo.startsWith('1.1.01.') || variacion.isZero()) continue;
+    // Un aumento del activo consume efectivo; un aumento del pasivo o del patrimonio lo aporta.
+    const efecto = c.tipo === 'activo' ? variacion.negated() : variacion;
+    const grupo = codigo.split('.').slice(0, 3).join('.');
+    const nombre = cuenta(grupo).nombre.toLowerCase();
+    if (esDepreciacion(codigo)) anotar('operacion', codigo, `Depreciación y amortización (${c.nombre.toLowerCase()})`, efecto);
+    else if (c.tipo === 'activo' && c.corriente) anotar('operacion', grupo, `(Aumento) disminución en ${nombre}`, efecto);
+    else if (c.tipo === 'activo') anotar('inversion', grupo, `(Adquisición) venta de ${nombre}`, efecto);
+    else if (c.tipo === 'pasivo' && c.corriente) anotar('operacion', grupo, `Aumento (disminución) en ${nombre}`, efecto);
+    else if (c.tipo === 'pasivo') anotar('financiamiento', grupo, `Préstamos recibidos (pagados): ${nombre}`, efecto);
+    else if (codigo.startsWith('3.1.')) anotar('financiamiento', '3.1', 'Aportes (reembolsos) de capital', efecto);
+    else anotar('financiamiento', '3.9', 'Dividendos y otros movimientos patrimoniales', efecto);
+  }
+  const lista = (m: Map<string, { concepto: string; monto: Decimal }>): RenglonFlujo[] =>
+    [...m.entries()].filter(([, g]) => !g.monto.isZero()).map(([codigo, g]) => ({ codigo, concepto: g.concepto, monto: g.monto.toNumber() }));
+  const total = (l: RenglonFlujo[]) => l.reduce((t, r) => t.plus(r.monto), D(0));
+  const operacion = [{ codigo: '', concepto: 'Resultado del periodo', monto: resultado.toNumber() }, ...lista(grupos.operacion)];
+  const inversion = lista(grupos.inversion);
+  const financiamiento = lista(grupos.financiamiento);
+  return { operacion, inversion, financiamiento, totalOperacion: total(operacion), totalInversion: total(inversion), totalFinanciamiento: total(financiamiento) };
 }
 
 /**
@@ -185,6 +263,33 @@ export function estadosFinancieros(asientos: Asiento[], desde: string, hasta: st
   const ingresos = renglones(delPeriodo, '4');
   const costos = renglones(delPeriodo, '5');
   const gastos = renglones(delPeriodo, '6');
+
+  // Cambios en el patrimonio: los resultados anteriores sin asiento de cierre se suman a los acumulados.
+  const cero = D(0);
+  const fila = (concepto: string, [capital, reservas, acumulados]: Decimal[], resultadoPeriodo: Decimal, saldo?: boolean): FilaPatrimonio => ({
+    concepto,
+    capital: capital.toNumber(),
+    reservas: reservas.toNumber(),
+    acumulados: acumulados.toNumber(),
+    resultado: resultadoPeriodo.toNumber(),
+    total: capital.plus(reservas).plus(acumulados).plus(resultadoPeriodo).toNumber(),
+    ...(saldo ? { saldo } : {}),
+  });
+  const inicial = [suma(anteriores, '3.1.'), suma(anteriores, '3.2.'), suma(anteriores, '3.3.').plus(acumulado)];
+  const [aportes, reservas, otros] = [suma(delPeriodo, '3.1.'), suma(delPeriodo, '3.2.'), suma(delPeriodo, '3.3.')];
+  const filasPatrimonio = [
+    fila('Saldo al inicio del periodo', inicial, cero, true),
+    ...(aportes.isZero() ? [] : [fila('Aportes (reembolsos) de capital', [aportes, cero, cero], cero)]),
+    ...(reservas.isZero() ? [] : [fila('Traslado a reservas', [cero, reservas, cero], cero)]),
+    ...(otros.isZero() ? [] : [fila('Dividendos y otros movimientos de resultados acumulados', [cero, cero, otros], cero)]),
+    fila('Resultado integral del periodo', [cero, cero, cero], resultado),
+    fila('Saldo al cierre del periodo', [inicial[0].plus(aportes), inicial[1].plus(reservas), inicial[2].plus(otros)], resultado, true),
+  ];
+
+  const flujos = flujosEfectivo(delPeriodo, resultado);
+  const efectivoInicial = suma(anteriores, '1.1.01.');
+  const efectivoFinal = suma(alCorte, '1.1.01.');
+  const variacion = flujos.totalOperacion.plus(flujos.totalInversion).plus(flujos.totalFinanciamiento);
   return {
     desde,
     hasta,
@@ -206,6 +311,20 @@ export function estadosFinancieros(asientos: Asiento[], desde: string, hasta: st
       utilidadBruta: ingresos.total.minus(costos.total).toNumber(),
       totalGastos: gastos.total.toNumber(),
       resultado: resultado.toNumber(),
+    },
+    cambiosPatrimonio: {
+      filas: filasPatrimonio,
+      cuadra: Math.abs(filasPatrimonio[filasPatrimonio.length - 1].total - totalPatrimonio.toNumber()) < 0.005,
+    },
+    flujos: {
+      ...flujos,
+      totalOperacion: flujos.totalOperacion.toNumber(),
+      totalInversion: flujos.totalInversion.toNumber(),
+      totalFinanciamiento: flujos.totalFinanciamiento.toNumber(),
+      variacion: variacion.toNumber(),
+      efectivoInicial: efectivoInicial.toNumber(),
+      efectivoFinal: efectivoFinal.toNumber(),
+      cuadra: efectivoInicial.plus(variacion).minus(efectivoFinal).abs().lessThan(0.005),
     },
   };
 }

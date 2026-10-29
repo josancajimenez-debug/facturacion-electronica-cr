@@ -249,6 +249,10 @@ tr.clickable { cursor: pointer; }
 .pdf-visor { display: flex; flex-direction: column; align-items: center; gap: 16px; max-height: 760px; overflow: auto; padding: 16px; background: #525659; border-radius: 8px; }
 .pdf-visor:empty { display: none; }
 .pdf-pagina { width: 100%; max-width: 820px; height: auto; background: #fff; box-shadow: 0 2px 8px rgb(0 0 0 / 0.35); }
+.ef-oculta { display: none; }
+.notas-ef h3 { margin: 0 0 6px; font-size: 15px; }
+.notas-ef p, .notas-ef ul { margin: 0; line-height: 1.55; }
+.notas-ef table { max-width: 560px; }
 .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: girar 0.8s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } .sidebar { transition: none !important; } }
@@ -324,5 +328,8 @@ details.catalogo > summary::marker { color: var(--text-3); }
   .sim-banner .sim-detalle { display: inline !important; }
   .app { display: block; }
   .pasos li { break-inside: avoid; }
+  /* Estados financieros: se imprime el juego completo, un estado por página. */
+  .ef-oculta { display: block !important; }
+  .ef-seccion + .ef-seccion { break-before: page; }
   .pasos li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

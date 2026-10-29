@@ -41,7 +41,7 @@ const NAV = [
   { a: '/contabilidad/catalogo', texto: 'Catálogo y manual', icono: ListTree },
   { a: '/contabilidad/diario', texto: 'Libro diario', icono: NotebookPen },
   { a: '/contabilidad/mayor', texto: 'Libro mayor', icono: BookOpenCheck },
-  { a: '/contabilidad/inventarios-balances', texto: 'Inventarios y balances', icono: Scale },
+  { a: '/contabilidad/estados-financieros', texto: 'Estados financieros', icono: Scale },
   { grupo: 'Control' },
   { a: '/reportes', texto: 'Reportes', icono: PieChart },
   { a: '/bitacora', texto: 'Auditoría', icono: ClipboardList },
