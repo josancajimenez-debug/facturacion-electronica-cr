@@ -8,7 +8,7 @@
  */
 import Decimal from 'decimal.js';
 import type { Asiento, LibroDiario } from './contabilidad';
-import { CATALOGO_CUENTAS, cuenta } from './cuentas';
+import { CATALOGO_CUENTAS, cuenta, seccionNiif } from './cuentas';
 import { compararCodigos, estadosFinancieros } from './libros';
 
 const D = (v: number | Decimal) => new Decimal(v);
@@ -17,7 +17,7 @@ const redondear = (v: Decimal) => v.toDecimalPlaces(2).toNumber();
 export interface ParametrosAjuste {
   /** Vida útil en años de cada subcuenta de propiedades, planta y equipo o intangibles. */
   vidaUtil: Record<string, number>;
-  /** Porcentaje de la cartera de clientes que se estima incobrable al cierre. */
+  /** Porcentaje de la cartera de clientes con evidencia objetiva de deterioro al cierre (evaluación en grupo, Sección 11). */
   porcentajeIncobrables: number;
   /** Tasa del impuesto sobre la renta (%) sobre la utilidad antes de impuesto. */
   tasaRenta: number;
@@ -133,10 +133,13 @@ function depreciacion(asientos: Asiento[], anio: number, vidaUtil: Record<string
   }
   if (!lineas.length) return null;
   return armar(hasta, `Ajuste — depreciación y amortización del periodo ${anio}`, 'ajuste', lineas,
-    ['NIIF para las PYMES, Secciones 17 y 18: línea recta sobre el costo, desde el mes de adquisición'], [...new Set(alertas)]);
+    [`${seccionNiif(17)} y Sección 18: línea recta sobre el costo, desde el mes de adquisición`], [...new Set(alertas)]);
 }
 
-/** Lleva la estimación para pérdidas crediticias al porcentaje de la cartera de clientes. */
+/**
+ * Lleva la estimación por deterioro al porcentaje de la cartera de clientes que, evaluada en grupo, tiene
+ * evidencia objetiva de deterioro (Sección 11, párrafos 11.21 a 11.26; modelo de pérdida incurrida).
+ */
 function estimacionIncobrables(asientos: Asiento[], anio: number, porcentaje: number): Asiento | null {
   if (!(porcentaje > 0)) return null;
   const hasta = `${anio}-12-31`;
@@ -145,9 +148,9 @@ function estimacionIncobrables(asientos: Asiento[], anio: number, porcentaje: nu
   const meta = Decimal.max(clientes, 0).times(porcentaje).dividedBy(100);
   const ajuste = meta.minus(actual).toDecimalPlaces(2);
   if (ajuste.isZero()) return null;
-  return armar(hasta, `Ajuste — estimación para pérdidas crediticias (${porcentaje} % de la cartera)`, 'ajuste',
+  return armar(hasta, `Ajuste — deterioro de cuentas por cobrar (${porcentaje} % de la cartera con evidencia objetiva de deterioro)`, 'ajuste',
     [{ cuenta: '6.1.01.12', debe: ajuste.toNumber(), haber: 0 }, { cuenta: '1.1.02.02', debe: 0, haber: ajuste.toNumber() }],
-    ['NIIF para las PYMES, Sección 11: deterioro de las cuentas por cobrar al costo amortizado']);
+    [`${seccionNiif(11)}, párrafos 11.21 a 11.26: deterioro por evidencia objetiva (pérdidas incurridas), evaluado en grupo por características similares de riesgo crediticio; no se reconocen pérdidas crediticias esperadas futuras`]);
 }
 
 /** Provisión del impuesto sobre la renta corriente sobre la utilidad antes de impuesto (menos lo ya registrado). */
@@ -159,7 +162,7 @@ function impuestoRenta(asientos: Asiento[], anio: number, tasa: number): Asiento
   if (monto.lessThanOrEqualTo(0)) return null;
   return armar(`${anio}-12-31`, `Ajuste — impuesto sobre la renta del periodo ${anio} (${tasa} %)`, 'ajuste',
     [{ cuenta: '6.3.01.01', debe: monto.toNumber(), haber: 0 }, { cuenta: '2.1.02.04', debe: 0, haber: monto.toNumber() }],
-    ['Ley del Impuesto sobre la Renta (Ley 7092); NIIF para las PYMES, Sección 29'],
+    [`Ley del Impuesto sobre la Renta (Ley 7092); ${seccionNiif(29)}`],
     ['Base simplificada: utilidad contable antes de impuesto. Las diferencias por gastos no deducibles o ingresos no gravables se ajustan manualmente.']);
 }
 
@@ -189,7 +192,7 @@ export function asientosCierre(asientos: Asiento[], anio: number, reservaLegal: 
   if (!lineas.some((l) => l.debe || l.haber)) return [];
   lineas.push({ cuenta: '3.3.01.01', debe: resultado.lessThan(0) ? resultado.negated().toNumber() : 0, haber: resultado.greaterThan(0) ? resultado.toNumber() : 0 });
   const cierre = armar(hasta, `Asiento de cierre ${anio} — traslado del ${resultado.greaterThanOrEqualTo(0) ? 'utilidad' : 'pérdida'} del periodo a utilidades acumuladas`, 'cierre', lineas,
-    ['Código de Comercio (Ley 3284), art. 251: cierre del ejercicio; NIIF para las PYMES, Sección 6']);
+    [`Código de Comercio (Ley 3284), art. 251: cierre del ejercicio; ${seccionNiif(6)}`]);
   const lista = [cierre];
   if (reservaLegal && resultado.greaterThan(0)) {
     // 5 % de la utilidad neta hasta que la reserva alcance el 20 % del capital social.

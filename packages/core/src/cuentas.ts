@@ -1,7 +1,7 @@
 /**
  * Catálogo de cuentas y manual contable para una PYME bajo la Norma de Contabilidad NIIF para las PYMES.
  * Estructura de cuatro niveles (clase.grupo.cuenta.subcuenta); solo las subcuentas reciben movimientos.
- * Las secciones NIIF se citan por número, que coincide en las ediciones 2015 y 2025 (ver `seccionNiif`).
+ * Las secciones se citan según la tercera edición (febrero de 2025) de la NIIF para las PYMES (ver `seccionNiif`).
  */
 
 export type TipoCuenta = 'activo' | 'pasivo' | 'patrimonio' | 'ingreso' | 'costo' | 'gasto';
@@ -67,9 +67,9 @@ const FILAS: Fila[] = [
     seDebita: 'Ventas y notas de débito a crédito (condiciones de venta distintas de contado).',
     seAcredita: 'Cobros (incluido el Recibo Electrónico de Pago) y notas de crédito.',
   }],
-  ['1.1.02.02', 'Estimación para pérdidas crediticias', {
+  ['1.1.02.02', 'Estimación por deterioro de cuentas por cobrar', {
     corriente: true, naturaleza: 'acreedora', niif: 11,
-    descripcion: 'Cuenta correctora de Clientes por el deterioro del valor de las cuentas por cobrar.',
+    descripcion: 'Cuenta correctora de Clientes por el deterioro del valor de las cuentas por cobrar cuando existe evidencia objetiva de deterioro (pérdida incurrida; la tercera edición no admite pérdidas crediticias esperadas futuras).',
     seDebita: 'Castigo de cuentas incobrables o reversión del deterioro.',
     seAcredita: 'Reconocimiento del deterioro (asiento de ajuste del CPI).',
   }],
@@ -333,9 +333,9 @@ const FILAS: Fila[] = [
     descripcion: 'Gasto por depreciación de propiedades, planta y equipo y amortización de intangibles.',
     seDebita: 'Asiento de ajuste del periodo.', seAcredita: 'Cierre.',
   }],
-  ['6.1.01.12', 'Pérdidas crediticias (deterioro de cuentas por cobrar)', {
+  ['6.1.01.12', 'Pérdida por deterioro de cuentas por cobrar', {
     niif: 11,
-    descripcion: 'Deterioro estimado de la cartera de clientes al cierre.',
+    descripcion: 'Pérdida por deterioro de la cartera de clientes con evidencia objetiva al cierre, evaluada individualmente o en grupo por riesgo crediticio similar.',
     seDebita: 'Asiento de ajuste de la estimación.', seAcredita: 'Reversión de la estimación y cierre.',
   }],
   ['6.1.01.13', 'Seguros', {
@@ -390,31 +390,64 @@ export function cuenta(codigo: string): Cuenta {
 /** Nivel jerárquico: 1 clase, 2 grupo, 3 cuenta, 4 subcuenta. */
 export const nivelCuenta = (codigo: string): number => codigo.split('.').length;
 
-/** Nombre de la sección según la edición de la NIIF para las PYMES (solo cambian 11, 12 y 23). */
-export function seccionNiif(numero: number, edicion: EdicionNiif): string {
-  const nombres: Record<number, string> = {
-    2: 'Conceptos y Principios Fundamentales',
-    7: 'Estado de Flujos de Efectivo',
-    10: 'Políticas, Estimaciones y Errores Contables',
-    11: edicion === '2025' ? 'Instrumentos Financieros' : 'Instrumentos Financieros Básicos',
-    13: 'Inventarios',
-    17: 'Propiedades, Planta y Equipo',
-    18: 'Activos Intangibles distintos de la Plusvalía',
-    20: 'Arrendamientos',
-    22: 'Pasivos y Patrimonio',
-    23: edicion === '2025' ? 'Ingresos de Actividades Ordinarias Procedentes de Contratos con Clientes' : 'Ingresos de Actividades Ordinarias',
-    29: 'Impuesto a las Ganancias',
-    30: 'Conversión de Moneda Extranjera',
-  };
-  return `NIIF para las PYMES (${edicion}), Sección ${numero}${nombres[numero] ? ` «${nombres[numero]}»` : ''}`;
-}
+/**
+ * Marco contable del sistema: Norma de Contabilidad NIIF para las PYMES, tercera edición (IASB,
+ * febrero de 2025). Es la única edición que se aplica y se cita.
+ */
+export const EDICION_NIIF = '2025' as const;
+export const NOMBRE_EDICION_NIIF = 'Norma de Contabilidad NIIF para las PYMES, tercera edición (febrero de 2025)';
 
-export type EdicionNiif = '2015' | '2025';
+/** Vigencia obligatoria de la tercera edición (Apéndice A): periodos anuales que comienzan a partir de esta fecha. */
+export const VIGENCIA_NIIF_2025 = '2027-01-01';
 
 /**
- * Edición aplicable a una fecha: la tercera edición rige para periodos anuales que comienzan
- * a partir del 1/01/2027; antes, la de 2015 salvo adopción anticipada.
+ * Para periodos que comienzan antes del 1/01/2027 la tercera edición se aplica anticipadamente, lo que
+ * está permitido y debe revelarse (Apéndice A, Fecha de vigencia).
  */
-export function edicionNiifPara(fecha: string, adopcionAnticipada = false): EdicionNiif {
-  return adopcionAnticipada || fecha.slice(0, 4) >= '2027' ? '2025' : '2015';
+export const esAplicacionAnticipadaNiif = (inicioPeriodo: string): boolean => inicioPeriodo < VIGENCIA_NIIF_2025;
+
+/** Secciones 1 a 35 con su nombre en la traducción oficial de la tercera edición (índice de la Norma). */
+export const SECCIONES_NIIF: Record<number, string> = {
+  1: 'Pequeñas y Medianas Entidades',
+  2: 'Conceptos y Principios Fundamentales',
+  3: 'Presentación de Estados Financieros',
+  4: 'Estado de Situación Financiera',
+  5: 'Estado de Resultado Integral y Estado de Resultados',
+  6: 'Estado de Cambios en el Patrimonio y Estado de Resultados y Ganancias Acumuladas',
+  7: 'Estado de Flujos de Efectivo',
+  8: 'Notas a los Estados Financieros',
+  9: 'Estados Financieros Consolidados y Separados',
+  10: 'Políticas Contables, Cambios en las Estimaciones Contables y Errores',
+  11: 'Instrumentos Financieros',
+  12: 'Medición del Valor Razonable',
+  13: 'Inventarios',
+  14: 'Inversiones en Asociadas',
+  15: 'Acuerdos Conjuntos',
+  16: 'Propiedades de Inversión',
+  17: 'Propiedades, Planta y Equipo',
+  18: 'Activos Intangibles distintos de la Plusvalía',
+  19: 'Combinaciones de Negocios y Plusvalía',
+  20: 'Arrendamientos',
+  21: 'Provisiones y Contingencias',
+  22: 'Pasivos y Patrimonio',
+  23: 'Ingresos de Actividades Ordinarias Procedentes de Contratos con Clientes',
+  24: 'Subvenciones del Gobierno',
+  25: 'Costos por Préstamos',
+  26: 'Pagos Basados en Acciones',
+  27: 'Deterioro del Valor de los Activos',
+  28: 'Beneficios a los Empleados',
+  29: 'Impuesto a las Ganancias',
+  30: 'Conversión de Moneda Extranjera',
+  31: 'Hiperinflación',
+  32: 'Hechos Ocurridos después del Periodo sobre el que se Informa',
+  33: 'Información a Revelar sobre Partes Relacionadas',
+  34: 'Actividades Especializadas',
+  35: 'Transición a la Norma de Contabilidad NIIF para las PYMES',
+};
+
+/** Cita de una sección de la tercera edición: «NIIF para las PYMES (2025), Sección 17 «Propiedades, Planta y Equipo»». */
+export function seccionNiif(numero: number): string {
+  const nombre = SECCIONES_NIIF[numero];
+  if (!nombre) throw new Error(`La NIIF para las PYMES (${EDICION_NIIF}) no tiene la Sección ${numero}.`);
+  return `NIIF para las PYMES (${EDICION_NIIF}), Sección ${numero} «${nombre}»`;
 }

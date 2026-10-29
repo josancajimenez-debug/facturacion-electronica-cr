@@ -1,11 +1,11 @@
-import { CATALOGO_CUENTAS, edicionNiifPara, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
+import { CATALOGO_CUENTAS, NOMBRE_EDICION_NIIF, SECCIONES_NIIF, VIGENCIA_NIIF_2025, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
 import { Download, Save } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { useContabilidad, type ConfigContable } from '../lib/contabilidad';
-import { csv, descargar, hoyCR } from '../lib/formato';
+import { csv, descargar, fecha } from '../lib/formato';
 
 const TIPO: Record<Cuenta['tipo'], string> = { activo: 'Activo', pasivo: 'Pasivo', patrimonio: 'Patrimonio', ingreso: 'Ingreso', costo: 'Costo', gasto: 'Gasto' };
 
@@ -15,7 +15,6 @@ export function CatalogoCuentas() {
   const [borrador, setBorrador] = useState<ConfigContable>(config);
   const [filtro, setFiltro] = useState('');
   const [abierta, setAbierta] = useState<string | null>(null);
-  const edicion = edicionNiifPara(hoyCR(), borrador.politicas.adopcionAnticipadaNiif2025);
   const p = borrador.politicas;
   const cambiar = (politicas: Partial<ConfigContable['politicas']>) => setBorrador({ ...borrador, politicas: { ...p, ...politicas } });
 
@@ -33,7 +32,7 @@ export function CatalogoCuentas() {
   const exportar = () =>
     descargar('catalogo-y-manual-de-cuentas.csv', csv([
       ['Código', 'Cuenta', 'Tipo', 'Naturaleza', 'Imputable', 'Descripción', 'Se debita', 'Se acredita', 'NIIF para las PYMES'],
-      ...CATALOGO_CUENTAS.map((c) => [c.codigo, c.nombre, TIPO[c.tipo], c.naturaleza, c.imputable ? 'Sí' : 'No', c.descripcion, c.seDebita, c.seAcredita, c.niif ? seccionNiif(c.niif, edicion) : '']),
+      ...CATALOGO_CUENTAS.map((c) => [c.codigo, c.nombre, TIPO[c.tipo], c.naturaleza, c.imputable ? 'Sí' : 'No', c.descripcion, c.seDebita, c.seAcredita, c.niif ? seccionNiif(c.niif) : '']),
     ]), 'text/csv');
 
   return (
@@ -41,7 +40,7 @@ export function CatalogoCuentas() {
       <div className="page-head">
         <div>
           <h1>Catálogo de cuentas y manual</h1>
-          <p>Plan de cuentas para PYMES bajo la NIIF para las PYMES ({edicion}). Seleccione una subcuenta para ver su manual: qué representa, cuándo se debita y cuándo se acredita.</p>
+          <p>Plan de cuentas para PYMES bajo la {NOMBRE_EDICION_NIIF}. Seleccione una subcuenta para ver su manual: qué representa, cuándo se debita y cuándo se acredita.</p>
         </div>
         <button className="btn" onClick={exportar}><Download /> CSV</button>
       </div>
@@ -55,10 +54,10 @@ export function CatalogoCuentas() {
             <Texto etiqueta="Prefijos CAByS de mercadería adicional" valor={p.prefijosInventario.join(', ')} onCambio={(v) => cambiar({ prefijosInventario: v.split(',').map((x) => x.trim()).filter(Boolean) })}
               ayuda="Las compras de bienes que también están en «Productos y servicios» ya se tratan como inventario. Agregue aquí otros prefijos (p. ej. 2391)." />
           </div>
-          <label className="check">
-            <input type="checkbox" checked={p.adopcionAnticipadaNiif2025} onChange={(e) => cambiar({ adopcionAnticipadaNiif2025: e.target.checked })} />
-            Adopción anticipada de la tercera edición (2025), obligatoria para periodos que inician desde el 1/01/2027; debe revelarse.
-          </label>
+          <p className="small" style={{ margin: 0 }}>
+            <strong>Marco contable:</strong> {NOMBRE_EDICION_NIIF}. Es obligatoria para los periodos que comienzan a partir del {fecha(VIGENCIA_NIIF_2025)};
+            en periodos anteriores se aplica anticipadamente (lo permite el Apéndice A) y se revela en la Nota 2 de los estados financieros.
+          </p>
           <p className="small muted" style={{ margin: 0 }}>
             El asiento de apertura (aporte de capital o saldos del balance anterior) se registra en <Link to="/contabilidad/apertura">Balance de apertura</Link>.
           </p>
@@ -90,7 +89,7 @@ export function CatalogoCuentas() {
                     </td>
                     <td className="small">{TIPO[c.tipo]}</td>
                     <td className="small">{c.naturaleza === 'deudora' ? 'Deudora' : 'Acreedora'}</td>
-                    <td className="small nowrap">{c.niif ? `Secc. ${c.niif}` : ''}</td>
+                    <td className="small nowrap" title={c.niif ? SECCIONES_NIIF[c.niif] : undefined}>{c.niif ? `Secc. ${c.niif}` : ''}</td>
                   </tr>,
                   abiertaAqui && (
                     <tr key={`${c.codigo}-manual`}>
@@ -100,7 +99,7 @@ export function CatalogoCuentas() {
                           <div>{c.descripcion}</div>
                           <div><strong>Se debita:</strong> {c.seDebita}</div>
                           <div><strong>Se acredita:</strong> {c.seAcredita}</div>
-                          {c.niif && <div className="muted">{seccionNiif(c.niif, edicion)}</div>}
+                          {c.niif && <div className="muted">{seccionNiif(c.niif)}</div>}
                         </div>
                       </td>
                     </tr>

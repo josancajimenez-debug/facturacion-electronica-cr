@@ -9,7 +9,7 @@ import Decimal from 'decimal.js';
 import { asientoAperturaBalance, type AperturaContable } from './apertura';
 import { ESQUEMA_XML, NOMBRE_COMPROBANTE, type TipoComprobante } from './catalogos';
 import { esCabysServicio } from './calculos';
-import { cuenta, edicionNiifPara, seccionNiif } from './cuentas';
+import { cuenta, seccionNiif } from './cuentas';
 import { desescaparXml, type ComprobanteRecibido } from './recepcion';
 import type { Comprobante, Emisor } from './tipos';
 
@@ -68,8 +68,6 @@ export interface DocumentoContable {
 export interface PoliticasContables {
   /** Costo unitario en colones desde el que el equipo y las obras se capitalizan (Sección 17). */
   umbralCapitalizacion: number;
-  /** Aplicar la tercera edición (2025) antes del 1/01/2027, con revelación. */
-  adopcionAnticipadaNiif2025: boolean;
   /** Prefijos CAByS adicionales que se tratan como mercadería para la venta. */
   prefijosInventario: string[];
 }
@@ -77,7 +75,6 @@ export interface PoliticasContables {
 /** El umbral es una política de cada entidad; el valor es solo un punto de partida. */
 export const POLITICAS_PREDETERMINADAS: PoliticasContables = {
   umbralCapitalizacion: 250000,
-  adopcionAnticipadaNiif2025: false,
   prefijosInventario: [],
 };
 
@@ -425,8 +422,7 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
   let revisar = false;
   let deducible: boolean | 'revisar' = true;
   const fecha = doc.fecha.slice(0, 10);
-  const edicion = edicionNiifPara(fecha, ctx.politicas.adopcionAnticipadaNiif2025);
-  const niif = (n: number) => fundamento.add(seccionNiif(n, edicion));
+  const niif = (n: number) => fundamento.add(seccionNiif(n));
   const alerta = (codigo: string, detalle: string, exigeRevision = true) => {
     alertas.push(`${codigo}: ${detalle}`);
     if (exigeRevision) revisar = true;

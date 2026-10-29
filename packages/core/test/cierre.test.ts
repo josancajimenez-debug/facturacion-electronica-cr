@@ -26,7 +26,7 @@ describe('Asientos de ajuste y de cierre', () => {
   const completo = completarLibro(libro, config());
   const { automaticos, cierre } = completo.cierres['2026'];
 
-  it('depreciación desde el mes de adquisición, estimación de incobrables e impuesto sobre la renta', () => {
+  it('depreciación desde el mes de adquisición, deterioro de cuentas por cobrar e impuesto sobre la renta', () => {
     // 600 000 / 60 meses × 6 meses (julio a diciembre).
     expect(lineas(automaticos[0])).toEqual({ '6.1.01.11': 60_000, '1.2.02.01': -60_000 });
     expect(lineas(automaticos[1])).toEqual({ '6.1.01.12': 40_000, '1.1.02.02': -40_000 });

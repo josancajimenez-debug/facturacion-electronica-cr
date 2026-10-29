@@ -1,6 +1,16 @@
 # Módulo contable
 
-Cada comprobante electrónico **aceptado** genera su asiento de partida doble bajo la **Norma de Contabilidad NIIF para las PYMES**. A partir de esos asientos se obtienen el libro diario, el libro mayor, el balance de comprobación y el libro de inventarios y balances. Las reglas siguen el prompt del motor contable v2.1 (`prompt_sistema_contabilidad_niif_pymes_cr_v2.1.md`, en la carpeta del curso).
+Cada comprobante electrónico **aceptado** genera su asiento de partida doble bajo la **Norma de Contabilidad NIIF para las PYMES, tercera edición (IASB, febrero de 2025)**, la única edición que aplica y cita el sistema. A partir de esos asientos se obtienen el libro diario, el libro mayor, el balance de comprobación y el libro de inventarios y balances. Las reglas siguen el prompt del motor contable v2.1 (`prompt_sistema_contabilidad_niif_pymes_cr_v2.1.md`, en la carpeta del curso).
+
+## Marco contable: NIIF para las PYMES 2025
+
+- **Edición única:** todas las citas (fundamento de cada asiento, manual de cuentas, notas) usan la tercera edición con los nombres oficiales de sus 35 secciones (`SECCIONES_NIIF` y `seccionNiif()` en `packages/core/src/cuentas.ts`).
+- **Vigencia:** obligatoria para periodos anuales que comienzan a partir del 1/01/2027. En periodos anteriores el sistema la aplica anticipadamente, como lo permite el Apéndice A, y la Nota 2 de los estados financieros revela ese hecho.
+- **Sección 11 «Instrumentos Financieros»** (unifica las antiguas 11 y 12): el deterioro de las cuentas por cobrar exige evidencia objetiva de una pérdida incurrida (párrafos 11.21 a 11.26), evaluada individualmente o en grupo por riesgo crediticio similar; la tercera edición no admite pérdidas crediticias esperadas futuras.
+- **Sección 12 «Medición del Valor Razonable»:** sección nueva; el sistema mide al costo histórico.
+- **Sección 23 «Ingresos de Actividades Ordinarias Procedentes de Contratos con Clientes»:** modelo de cinco pasos; el ingreso se reconoce al transferir el control, con el comprobante aceptado como evidencia.
+- **Sección 8:** la Nota 3 revela «información material o con importancia relativa sobre políticas contables» (párrafos 8.4 a 8.6) e incluye juicios y estimaciones.
+- **Sección 10 «Políticas Contables, Cambios en las Estimaciones Contables y Errores»:** vida útil, deterioro e impuesto sobre la renta son estimaciones contables (cambios prospectivos).
 
 > Los asientos son **propuestas en borrador**: no sustituyen el criterio ni la aprobación del contador responsable. Es un entorno de simulación.
 
@@ -52,13 +62,11 @@ Cada asiento indica si **requiere revisión** y por qué: `DESCUADRE_ARITMETICO`
 ## Pendiente para una siguiente etapa
 
 - Aprobación de asientos por el CPI con trazabilidad (usuario, fecha y hora), guardada en la base de datos.
-- Asientos manuales y de ajuste: depreciación, estimación de incobrables, liquidación del IVA, provisión del impuesto sobre la renta y cierre del período.
 - Catálogo de cuentas editable por la entidad.
 
 ## Fuentes
 
-- IFRS Foundation. (2015). *Norma de Contabilidad NIIF para las PYMES* (2.ª ed.). Secciones 2, 10, 11, 13, 17, 18, 20, 22, 23, 29 y 30.
-- IFRS Foundation. (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). Vigencia para periodos anuales que comienzan a partir del 1 de enero de 2027.
+- Consejo de Normas Internacionales de Contabilidad (IASB). (2025). *Norma de Contabilidad NIIF para las PYMES* (3.ª ed., febrero de 2025). IFRS Foundation. Secciones 2 a 8, 10, 11, 13, 17, 18, 20 a 23, 29, 30 y 32; Apéndice A (fecha de vigencia y transición).
 - Asamblea Legislativa de la República de Costa Rica. (1964). *Código de Comercio* (Ley N.° 3284), arts. 251 a 263.
 - Asamblea Legislativa de la República de Costa Rica. (1982). *Ley del Impuesto al Valor Agregado* (Ley N.° 6826), art. 27.
 - Dirección General de Tributación. (2018). *Criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria* (Resolución DGT-R-029-2018).

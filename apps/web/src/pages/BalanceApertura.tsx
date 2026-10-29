@@ -199,7 +199,7 @@ export function BalanceApertura() {
                 </div>
                 <p className="small muted" style={{ margin: 0 }}>
                   Las cuentas de ingresos, costos y gastos no llevan saldo de apertura: el resultado del periodo anterior va en 3.3.01.01 Utilidades acumuladas. Las cuentas de valuación (depreciación acumulada,
-                  estimación de incobrables) llevan saldo acreedor. La depreciación automática del cierre toma el costo de apertura como adquirido en esta fecha; si el activo ya tiene vida transcurrida, ajuste la vida útil o regístrela con un ajuste manual.
+                  estimación por deterioro de cuentas por cobrar) llevan saldo acreedor. La depreciación automática del cierre toma el costo de apertura como adquirido en esta fecha; si el activo ya tiene vida transcurrida, ajuste la vida útil o regístrela con un ajuste manual.
                 </p>
               </div>
             </div>

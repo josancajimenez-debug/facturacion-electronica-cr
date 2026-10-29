@@ -9,7 +9,7 @@ import {
   type ContextoContable,
   type RecibidoContable,
 } from '../src/contabilidad';
-import { CATALOGO_CUENTAS, cuenta, edicionNiifPara, seccionNiif } from '../src/cuentas';
+import { CATALOGO_CUENTAS, SECCIONES_NIIF, cuenta, esAplicacionAnticipadaNiif, seccionNiif } from '../src/cuentas';
 import { EMISOR_DEMO, PROVEEDOR_DEMO } from '../src/datos-demo';
 import { construirComprobante } from '../src/emision';
 import { balanceComprobacion, estadosFinancieros, libroMayor } from '../src/libros';
@@ -76,12 +76,18 @@ describe('Catálogo de cuentas y manual', () => {
     expect(cuenta('4.1.01.04').naturaleza).toBe('deudora');
   });
 
-  it('edición de la NIIF para las PYMES según el periodo', () => {
-    expect(edicionNiifPara('2026-12-31')).toBe('2015');
-    expect(edicionNiifPara('2027-01-01')).toBe('2025');
-    expect(edicionNiifPara('2026-06-01', true)).toBe('2025');
-    expect(seccionNiif(23, '2025')).toContain('Procedentes de Contratos con Clientes');
-    expect(seccionNiif(11, '2015')).toContain('Básicos');
+  it('marco contable: tercera edición (2025) de la NIIF para las PYMES', () => {
+    expect(Object.keys(SECCIONES_NIIF)).toHaveLength(35);
+    expect(seccionNiif(11)).toBe('NIIF para las PYMES (2025), Sección 11 «Instrumentos Financieros»');
+    expect(seccionNiif(12)).toContain('Medición del Valor Razonable');
+    expect(seccionNiif(23)).toContain('Procedentes de Contratos con Clientes');
+    expect(seccionNiif(10)).toContain('Cambios en las Estimaciones Contables');
+    expect(() => seccionNiif(36)).toThrow();
+    // Obligatoria desde los periodos que comienzan el 1/01/2027; antes, aplicación anticipada que se revela.
+    expect(esAplicacionAnticipadaNiif('2026-01-01')).toBe(true);
+    expect(esAplicacionAnticipadaNiif('2027-01-01')).toBe(false);
+    // Toda cuenta del catálogo cita una sección existente.
+    for (const c of CATALOGO_CUENTAS) if (c.niif) expect(SECCIONES_NIIF[c.niif]).toBeTruthy();
   });
 });
 

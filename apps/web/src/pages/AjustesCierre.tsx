@@ -87,7 +87,7 @@ export function AjustesCierre() {
 
       <ol className="small muted" style={{ margin: '0 0 16px', paddingLeft: 18 }}>
         <li>Registre los <strong>ajustes manuales</strong> que correspondan a cada cuenta (devengos, pagos anticipados, reclasificaciones).</li>
-        <li>Revise y registre los <strong>ajustes automáticos</strong>: depreciación, estimación de incobrables e impuesto sobre la renta.</li>
+        <li>Revise y registre los <strong>ajustes automáticos</strong>: depreciación, deterioro de cuentas por cobrar e impuesto sobre la renta.</li>
         <li>Registre los <strong>asientos de cierre</strong> al 31 de diciembre. Después consulte los estados financieros.</li>
       </ol>
 
@@ -162,8 +162,8 @@ export function AjustesCierre() {
                     <Texto key={k} etiqueta={`Vida útil (años): ${cuenta(k).nombre}`} tipo="number" valor={p.vidaUtil[k] ?? ''} deshabilitado={bloqueado}
                       onCambio={(v) => cambiarParametro({ vidaUtil: { ...p.vidaUtil, [k]: Number(v) || 0 } })} />
                   ))}
-                  <Texto etiqueta="Estimación de incobrables (% de la cartera)" tipo="number" valor={p.porcentajeIncobrables} deshabilitado={bloqueado}
-                    onCambio={(v) => cambiarParametro({ porcentajeIncobrables: Number(v) || 0 })} ayuda="0 = no se registra estimación." />
+                  <Texto etiqueta="Deterioro de cuentas por cobrar (% de la cartera)" tipo="number" valor={p.porcentajeIncobrables} deshabilitado={bloqueado}
+                    onCambio={(v) => cambiarParametro({ porcentajeIncobrables: Number(v) || 0 })} ayuda="Sección 11 (2025): solo pérdidas ya incurridas con evidencia objetiva (mora, dificultades financieras del cliente), evaluadas en grupo por riesgo crediticio similar; no pérdidas esperadas futuras. 0 = sin deterioro." />
                   <Texto etiqueta="Tasa del impuesto sobre la renta (%)" tipo="number" valor={p.tasaRenta} deshabilitado={bloqueado}
                     onCambio={(v) => cambiarParametro({ tasaRenta: Number(v) || 0 })}
                     ayuda="Sociedades: 30 % (tarifa general). Personas físicas con actividad lucrativa y pequeñas empresas tributan por tramos: indique la tasa efectiva o registre el impuesto como ajuste manual." />
