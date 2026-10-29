@@ -2,6 +2,7 @@ import { REGEX_CORREO, TIPO_IDENTIFICACION, validarIdentificacion, type Emisor }
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Alerta, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { limpiarIdentificacion } from '../lib/formato';
@@ -30,8 +31,12 @@ const nuevoEmisor = (): Emisor => ({
 
 export function EmisorPagina() {
   const { emisor, backend, avisar, seleccionarEmisor } = useApp();
-  const [form, setForm] = useState<Emisor>(() => emisor ?? nuevoEmisor());
-  const [creando, setCreando] = useState(!emisor);
+  // El modo «nuevo emisor» vive en la URL (?nuevo=1): al seleccionar el emisor recién creado el Layout
+  // vuelve a montar la página, y así el formulario sigue en blanco en lugar de mostrar el guardado.
+  const [parametros, setParametros] = useSearchParams();
+  const creando = parametros.get('nuevo') === '1' || !emisor;
+  const setCreando = (si: boolean) => setParametros(si ? { nuevo: '1' } : {}, { replace: true });
+  const [form, setForm] = useState<Emisor>(() => (creando || !emisor ? nuevoEmisor() : emisor));
   const [consultando, setConsultando] = useState(false);
   // Solo se recarga el formulario al cambiar de emisor: cada guardado del backend entrega una copia
   // nueva del mismo emisor y, si dependiera del objeto, borraría lo que el usuario está editando.
@@ -90,10 +95,13 @@ export function EmisorPagina() {
   const [guardando, setGuardando] = useState(false);
   const guardar = async () => {
     setGuardando(true);
+    const eraNuevo = creando;
+    // Se fija ?nuevo=1 antes de guardar: con el primer emisor la página se vuelve a montar mientras se guarda.
+    if (eraNuevo) setCreando(true);
     try {
       const id = await backend.guardarEmisor({ ...form, correos: form.correos.filter(Boolean) });
       seleccionarEmisor(id);
-      if (creando) {
+      if (eraNuevo) {
         // Ya quedó en la base de datos: se limpia el formulario para registrar otro emisor.
         setForm(nuevoEmisor());
         avisar('Emisor creado. El formulario quedó en blanco para registrar otro.', 'ok');
