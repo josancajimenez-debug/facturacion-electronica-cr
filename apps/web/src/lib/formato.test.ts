@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { csv, dinero, limpiarIdentificacion, numero } from './formato';
+import { csv, dinero, importe, limpiarIdentificacion, numero } from './formato';
 
 describe('formato', () => {
   it('el cero nunca se muestra con signo negativo', () => {
@@ -7,6 +7,14 @@ describe('formato', () => {
     expect(dinero(-0.001)).toBe(dinero(0));
     expect(numero(-0.004)).toBe(numero(0));
     expect(dinero(-1500)).toMatch(/^-/);
+  });
+
+  it('los montos exportados a CSV usan punto decimal y no dejan «-0.00»', () => {
+    expect(importe(-0.001)).toBe('0.00');
+    expect(importe(-0)).toBe('0.00');
+    expect(importe(1234567.891)).toBe('1234567.89');
+    expect(importe(-15.5)).toBe('-15.50');
+    expect(importe(0.123456, 4)).toBe('0.1235');
   });
 
   it('la cédula jurídica conserva letras (actualización v4.4) y las pasa a mayúsculas', () => {

@@ -262,12 +262,14 @@ export function NuevoComprobante() {
               <Selector etiqueta="Condición de venta (nota 5)" valor={b.condicionVenta} onCambio={(v) => set({ condicionVenta: v, mediosPago: ['02', '08', '10'].includes(v) ? [] : b.mediosPago.length ? b.mediosPago : [{ tipo: '01' }] })} opciones={CONDICION_VENTA.filter((c) => (b.tipo === 'REP' ? ['09', '11'].includes(c.codigo) : !['09', '11'].includes(c.codigo)))} />
               {credito && <Texto etiqueta="Plazo de crédito (días)" tipo="number" valor={b.plazoCredito} onCambio={(v) => set({ plazoCredito: v ? Number(v) : undefined })} requerido />}
               {b.condicionVenta === '99' && <Texto etiqueta="Detalle condición «Otros»" valor={b.condicionVentaOtros} onCambio={(v) => set({ condicionVentaOtros: v })} max={100} />}
-              <Selector etiqueta="Moneda" valor={b.moneda} onCambio={(v) => set({ moneda: v, tipoCambio: v === 'CRC' ? 1 : b.tipoCambio === 1 ? 0 : b.tipoCambio })} opciones={MONEDA} />
+              {/* El tipo de cambio es propio de cada moneda: al cambiarla se pide de nuevo en lugar de conservar el de la anterior. */}
+              <Selector etiqueta="Moneda" valor={b.moneda} onCambio={(v) => set({ moneda: v, tipoCambio: v === 'CRC' ? 1 : v === b.moneda ? b.tipoCambio : 0 })} opciones={MONEDA} />
               {b.moneda !== 'CRC' && (
-                <Campo etiqueta="Tipo de cambio *" ayuda="USD: tipo de cambio de venta de referencia del BCCR.">{(id) => (
+                <Campo etiqueta="Tipo de cambio *" ayuda={b.moneda === 'USD' ? 'Tipo de cambio de venta de referencia del BCCR.' : `Colones por 1 ${b.moneda}, según el tipo de cambio de referencia del BCCR del día.`}>{(id) => (
                   <div className="row" style={{ flexWrap: 'nowrap' }}>
                     <input id={id} type="number" step="0.00001" value={b.tipoCambio || ''} onChange={(e) => set({ tipoCambio: Number(e.target.value) })} />
-                    <button className="btn btn-sm" onClick={async () => {
+                    {/* El API de Hacienda solo publica el tipo de cambio del dólar. */}
+                    {b.moneda === 'USD' && <button className="btn btn-sm" onClick={async () => {
                       try {
                         const tc = await backend.tipoCambio();
                         set({ tipoCambio: tc.venta });
@@ -275,7 +277,7 @@ export function NuevoComprobante() {
                       } catch (e) {
                         avisar(`No se obtuvo el tipo de cambio: ${(e as Error).message}`, 'err');
                       }
-                    }}>BCCR/Hacienda</button>
+                    }}>BCCR/Hacienda</button>}
                   </div>
                 )}</Campo>
               )}

@@ -1,11 +1,30 @@
 # Pruebas
 
-| Comando | Qué prueba | Requiere | Resultado verificado (29/10/2026) |
+| Comando | Qué prueba | Requiere | Resultado verificado (7/11/2026) |
 | --- | --- | --- | --- |
-| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas; regresiones de la revisión integral (vigencia según la fecha del simulador, tipo 10 en NC/ND/REP, base del IVA devuelto, fechas imposibles en la clave) y tipo de cambio de los recibidos (88). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas, CSV, identificación alfanumérica y glosario (cada cita de términos y códigos con su referencia APA, orden alfabético, catálogos sin códigos repetidos, tipos de comprobante 01-10, búsqueda sin tildes) limpieza de datos local y almacenamiento lleno (18). Supabase: esquema, RLS, consecutivo atómico y auditoría (7), función Edge completa sobre PostgreSQL/PGlite (9) y limpieza de datos (6: administrador por correo, acciones negadas a los demás, cada usuario limpia lo suyo sin tocar a otros, emisor compartido, limpieza por usuario en todas las tablas, «limpiar todo» con frase y cuentas intactas) | Node | 128/128 ✔ |
+| `npm test` | Core: clave, consecutivo, fechas, cálculos, validaciones, XML, simulador, recepción, entornos, división territorial, formas farmacéuticas, códigos de referencia 13-17 y actualización v4.4 del 1/11/2026: cédula alfanumérica, REP, claves 17-20, período de 13/14 y saldo de la NC; tablas oficiales de monedas y formas farmacéuticas; IVA devuelto con varios medios de pago; código 12; datos de la nota frente al referenciado; secuencia del consecutivo y sucursal/terminal registradas; regresiones de la revisión integral (vigencia según la fecha del simulador, tipo 10 en NC/ND/REP, base del IVA devuelto, fechas imposibles en la clave) y tipo de cambio de los recibidos (88). Web: backend local, reanudación, sincronización entre pestañas, PDF de varias páginas, CSV, identificación alfanumérica y glosario (cada cita de términos y códigos con su referencia APA, orden alfabético, catálogos sin códigos repetidos, tipos de comprobante 01-10, búsqueda sin tildes) limpieza de datos local y almacenamiento lleno (18). Supabase: esquema, RLS, consecutivo atómico y auditoría (7), función Edge completa sobre PostgreSQL/PGlite (9) y limpieza de datos (6: administrador por correo, acciones negadas a los demás, cada usuario limpia lo suyo sin tocar a otros, emisor compartido, limpieza por usuario en todas las tablas, «limpiar todo» con frase y cuentas intactas). Desde la novena revisión, también prueba de humo de la interfaz (23 pantallas) y tiempo real de Supabase | Node | 246/246 ✔ (core 173, web 51, Supabase 22) |
 | `npm run typecheck` | TypeScript estricto en core, web y lógica de la función Edge, sin variables ni parámetros sin usar | Node | Sin errores ✔ |
 | `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 | `npm audit` | Vulnerabilidades conocidas en dependencias | Node | 0 ✔ |
+
+## Novena revisión integral (7/11/2026, tarde)
+
+**Prueba de humo de la interfaz** (`apps/web/src/App.smoke.test.tsx`): monta la APP completa en modo local, con datos de demostración, una venta a crédito aceptada y una compra confirmada. Recorre 22 rutas y el detalle de un comprobante. Cada pantalla debe cumplir:
+
+- termina de cargar y muestra su título;
+- no cae en el límite de errores;
+- no muestra `NaN` ni `undefined`;
+- no deja errores ni advertencias en la consola.
+
+Así, un error de una pantalla se detecta en `npm test` y en el CI, sin depender de un recorrido manual en el navegador.
+
+| Error | Causa | Prueba |
+| --- | --- | --- |
+| Con Supabase, un comprobante recién emitido podía quedar mostrado como «Procesando» (o «Enviado») aunque ya estuviera aceptado, hasta recargar la página | Cada cambio en tiempo real vuelve a consultar la lista. Con varios cambios seguidos, una respuesta lenta y vieja llegaba después de la nueva y la reemplazaba | `supabase.test.ts` › una respuesta vieja que llega tarde no reemplaza a la más reciente (falla sin el arreglo) |
+| En un comprobante en euros u otra moneda, el botón «BCCR/Hacienda» ponía el tipo de cambio del dólar | El API público de Hacienda solo publica el dólar (`/indicadores/tc/dolar`) y el botón se mostraba para cualquier moneda | El botón solo aparece en USD; para otras monedas se digita |
+| Al cambiar la moneda de USD a EUR se conservaba el tipo de cambio del dólar | Solo se reiniciaba al venir de colones | Ahora cada cambio de moneda pide de nuevo el tipo de cambio |
+| Una respuesta incompleta del API de tipo de cambio producía un error técnico («Cannot read properties of undefined») | No se validaba la respuesta | Se valida y se informa «tipo de cambio inválido» |
+| Los CSV podían mostrar «-0.00» por residuos de redondeo (la pantalla ya mostraba 0,00) | Cada exportación usaba `toFixed` directamente | `formato.test.ts` › los montos exportados a CSV… (función común `importe` en Libro diario, Libro mayor, Estados financieros y Reportes) |
 
 ## Revisión integral del 7/11/2026
 

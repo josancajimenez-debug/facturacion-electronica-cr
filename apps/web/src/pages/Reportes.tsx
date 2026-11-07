@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Alerta, Texto } from '../components/ui';
 import { useApp } from '../estado';
-import { csv, descargar, dinero, mesCR, signoVenta } from '../lib/formato';
+import { csv, descargar, dinero, mesCR, signoVenta, importe } from '../lib/formato';
 
 type Fila = { clave: string; etiqueta: string; base: number; impuesto: number; cantidad: number };
 
@@ -81,28 +81,28 @@ export function Reportes() {
       ['Reporte del período', mes, 'Montos en colones; solo comprobantes ACEPTADOS (simulado)'],
       [],
       ['Ventas por tarifa de IVA', 'Base (subtotal)', 'Impuesto neto', 'Líneas'],
-      ...datos.tarifas.map((f) => [f.etiqueta, f.base.toFixed(2), f.impuesto.toFixed(2), f.cantidad]),
+      ...datos.tarifas.map((f) => [f.etiqueta, importe(f.base), importe(f.impuesto), f.cantidad]),
       [],
       ['Ventas por medio de pago', 'Monto', '', 'Comprobantes'],
-      ...datos.medios.map((f) => [f.etiqueta, f.base.toFixed(2), '', f.cantidad]),
+      ...datos.medios.map((f) => [f.etiqueta, importe(f.base), '', f.cantidad]),
       [],
       ['Por tipo de comprobante', 'Venta neta', 'Impuesto', 'Cantidad'],
-      ...datos.tipos.map((f) => [f.etiqueta, f.base.toFixed(2), f.impuesto.toFixed(2), f.cantidad]),
+      ...datos.tipos.map((f) => [f.etiqueta, importe(f.base), importe(f.impuesto), f.cantidad]),
       [],
-      ['Compras con FEC', datos.compras.toFixed(2), datos.ivaCompras.toFixed(2)],
-      ['Recibidos confirmados', datos.recibidosConfirmados, datos.creditoRecibidos.toFixed(2)],
+      ['Compras con FEC', importe(datos.compras), importe(datos.ivaCompras)],
+      ['Recibidos confirmados', datos.recibidosConfirmados, importe(datos.creditoRecibidos)],
       [],
       ['IVA diferido (condición 10; art. 27 LIVA y art. 40 bis RLIVA)', 'Monto'],
-      ['1. Rebajar: ventas a crédito del período no cobradas', (-datos.diferido.diferido).toFixed(2)],
-      ['2. Sumar: cobrado con REP de ventas de períodos anteriores', datos.diferido.recuperado.toFixed(2)],
-      ['3. Sumar: ventas que superaron los 90 días sin cobro', datos.diferido.vencido.toFixed(2)],
-      ['Sumar: notas de crédito sobre IVA todavía diferido', datos.diferido.notasSobreDiferido.toFixed(2)],
-      ['Ajuste neto al IVA por tarifa', datos.diferido.ajuste.toFixed(2)],
+      ['1. Rebajar: ventas a crédito del período no cobradas', importe(-datos.diferido.diferido)],
+      ['2. Sumar: cobrado con REP de ventas de períodos anteriores', importe(datos.diferido.recuperado)],
+      ['3. Sumar: ventas que superaron los 90 días sin cobro', importe(datos.diferido.vencido)],
+      ['Sumar: notas de crédito sobre IVA todavía diferido', importe(datos.diferido.notasSobreDiferido)],
+      ['Ajuste neto al IVA por tarifa', importe(datos.diferido.ajuste)],
       [],
       ['Ajustes por error material (códigos 13/14) imputados a este período', 'Emitido', 'Total', 'Consecutivo'],
-      ...datos.imputadosAqui.map((c) => [NOMBRE_COMPROBANTE[c.tipo], c.fechaEmision.slice(0, 10), (c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)).toFixed(2), c.consecutivo]),
+      ...datos.imputadosAqui.map((c) => [NOMBRE_COMPROBANTE[c.tipo], c.fechaEmision.slice(0, 10), importe(c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)), c.consecutivo]),
       ['Emitidos en este mes e imputados a otro período', 'Período', 'Total', 'Consecutivo'],
-      ...datos.imputadosOtro.map((c) => [NOMBRE_COMPROBANTE[c.tipo], periodoContable(c), (c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)).toFixed(2), c.consecutivo]),
+      ...datos.imputadosOtro.map((c) => [NOMBRE_COMPROBANTE[c.tipo], periodoContable(c), importe(c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)), c.consecutivo]),
     ]), 'text/csv');
 
   const maxMedio = Math.max(1, ...datos.medios.map((m) => Math.abs(m.base)));

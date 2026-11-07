@@ -40,10 +40,17 @@ export class SupabaseBackend implements Backend {
   /**
    * Consulta inicial + suscripción en tiempo real a los cambios de la tabla. Se vuelve a consultar
    * al quedar suscrito, porque los cambios ocurridos entre la consulta y la suscripción no llegan.
+   * Varias consultas pueden quedar en curso a la vez (p. ej. enviado → recibido → aceptado en segundos):
+   * solo se entrega la respuesta de la más reciente, para que una respuesta lenta y vieja no deje en
+   * pantalla un estado superado.
    */
   private vivo<T>(tabla: string, filtro: string | null, cargar: () => Promise<T>, cb: (v: T) => void): () => void {
     let activo = true;
-    const refrescar = () => cargar().then((v) => void (activo && cb(v)), (e) => console.error(tabla, e));
+    let ultima = 0;
+    const refrescar = () => {
+      const turno = ++ultima;
+      return cargar().then((v) => void (activo && turno === ultima && cb(v)), (e) => console.error(tabla, e));
+    };
     void refrescar();
     const canal: RealtimeChannel = this.sb
       .channel(`${tabla}-${filtro ?? 'todo'}-${nuevoId()}`)

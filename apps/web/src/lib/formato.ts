@@ -16,6 +16,14 @@ export function numero(valor: number, decimales = 2): string {
   return new Intl.NumberFormat('es-CR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }).format(sinCeroNegativo(valor, decimales));
 }
 
+/**
+ * Monto para exportar (CSV): punto decimal, sin separador de miles y sin «-0.00» por residuos de
+ * redondeo, con el mismo criterio que los montos de pantalla.
+ */
+export function importe(valor: number, decimales = 2): string {
+  return sinCeroNegativo(valor, decimales).toFixed(decimales);
+}
+
 /** Muestra una fecha RFC 3339 en hora de Costa Rica. */
 export function fechaHora(iso: string): string {
   if (!iso) return '';

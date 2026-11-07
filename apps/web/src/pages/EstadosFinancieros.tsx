@@ -6,7 +6,7 @@ import { IndicadoresFinancieros } from '../components/IndicadoresFinancieros';
 import { Alerta, Cargando, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { finDeMes, useContabilidad } from '../lib/contabilidad';
-import { csv, descargar, dinero, fecha, mesCR, numero } from '../lib/formato';
+import { csv, descargar, dinero, fecha, mesCR, numero, importe } from '../lib/formato';
 
 function Renglones({ filas }: { filas: RenglonEstado[] }) {
   return (
@@ -126,35 +126,35 @@ export function EstadosFinancieros() {
       [emisor.nombre, `Estados financieros al ${hasta}`, 'Montos en colones (simulación)'],
       [],
       ['Estado de situación financiera', '', 'Monto'],
-      ...[...s.activo, ...s.pasivo, ...s.patrimonio].map((x) => [x.nombre, x.codigo, x.monto.toFixed(2)]),
-      ['Total activo', '', s.totalActivo.toFixed(2)],
-      ['Total pasivo', '', s.totalPasivo.toFixed(2)],
-      ['Total patrimonio', '', s.totalPatrimonio.toFixed(2)],
+      ...[...s.activo, ...s.pasivo, ...s.patrimonio].map((x) => [x.nombre, x.codigo, importe(x.monto)]),
+      ['Total activo', '', importe(s.totalActivo)],
+      ['Total pasivo', '', importe(s.totalPasivo)],
+      ['Total patrimonio', '', importe(s.totalPatrimonio)],
       [],
       [`Estado del resultado integral del ${desde} al ${hasta}`, '', 'Monto'],
-      ...[...r.ingresos, ...r.costos, ...r.gastos].map((x) => [x.nombre, x.codigo, x.monto.toFixed(2)]),
-      ['Utilidad antes del impuesto sobre la renta', '', r.utilidadAntesImpuesto.toFixed(2)],
-      ['Impuesto sobre la renta', '6.3.01.01', r.impuestoRenta.toFixed(2)],
-      ['Resultado integral del periodo', '', r.resultado.toFixed(2)],
+      ...[...r.ingresos, ...r.costos, ...r.gastos].map((x) => [x.nombre, x.codigo, importe(x.monto)]),
+      ['Utilidad antes del impuesto sobre la renta', '', importe(r.utilidadAntesImpuesto)],
+      ['Impuesto sobre la renta', '6.3.01.01', importe(r.impuestoRenta)],
+      ['Resultado integral del periodo', '', importe(r.resultado)],
       [],
       ['Estado de cambios en el patrimonio', 'Capital', 'Reservas', 'Resultados acumulados', 'Resultado del periodo', 'Total'],
-      ...p.filas.map((x) => [x.concepto, x.capital.toFixed(2), x.reservas.toFixed(2), x.acumulados.toFixed(2), x.resultado.toFixed(2), x.total.toFixed(2)]),
+      ...p.filas.map((x) => [x.concepto, importe(x.capital), importe(x.reservas), importe(x.acumulados), importe(x.resultado), importe(x.total)]),
       [],
       ['Estado de flujos de efectivo (método indirecto)', '', 'Monto'],
-      ...f.operacion.map((x) => [x.concepto, 'Operación', x.monto.toFixed(2)]),
-      ['Efectivo neto de actividades de operación', '', f.totalOperacion.toFixed(2)],
-      ...f.inversion.map((x) => [x.concepto, 'Inversión', x.monto.toFixed(2)]),
-      ['Efectivo neto de actividades de inversión', '', f.totalInversion.toFixed(2)],
-      ...f.financiamiento.map((x) => [x.concepto, 'Financiamiento', x.monto.toFixed(2)]),
-      ['Efectivo neto de actividades de financiamiento', '', f.totalFinanciamiento.toFixed(2)],
-      ['Efectivo al inicio del periodo', '', f.efectivoInicial.toFixed(2)],
-      ['Efectivo al final del periodo', '', f.efectivoFinal.toFixed(2)],
+      ...f.operacion.map((x) => [x.concepto, 'Operación', importe(x.monto)]),
+      ['Efectivo neto de actividades de operación', '', importe(f.totalOperacion)],
+      ...f.inversion.map((x) => [x.concepto, 'Inversión', importe(x.monto)]),
+      ['Efectivo neto de actividades de inversión', '', importe(f.totalInversion)],
+      ...f.financiamiento.map((x) => [x.concepto, 'Financiamiento', importe(x.monto)]),
+      ['Efectivo neto de actividades de financiamiento', '', importe(f.totalFinanciamiento)],
+      ['Efectivo al inicio del periodo', '', importe(f.efectivoInicial)],
+      ['Efectivo al final del periodo', '', importe(f.efectivoFinal)],
       [],
       ['Inventario de mercadería', 'CAByS', 'Cantidad', 'Costo promedio', 'Costo total'],
-      ...existencias.map((m) => [m.detalle, m.cabys, m.saldoCantidad, m.saldoCantidad ? (m.saldoCosto / m.saldoCantidad).toFixed(2) : '', m.saldoCosto.toFixed(2)]),
+      ...existencias.map((m) => [m.detalle, m.cabys, m.saldoCantidad, m.saldoCantidad ? importe(m.saldoCosto / m.saldoCantidad) : '', importe(m.saldoCosto)]),
       [],
       [`Indicadores financieros (costo de capital ${formatearIndicador(costoCapital, 'porcentaje')})`, 'Categoría', 'Valor', 'Unidad', 'Evaluación', 'Año anterior', 'Fórmula', 'Análisis'],
-      ...indicadores.map((i) => [i.nombre, CATEGORIAS_INDICADORES[i.categoria].nombre, i.valor === null ? 'N/A' : i.valor.toFixed(4), NOMBRE_UNIDAD_INDICADOR[i.unidad], NOMBRE_NIVEL_INDICADOR[i.nivel], i.anterior == null ? '' : i.anterior.toFixed(4), i.formula, i.analisis]),
+      ...indicadores.map((i) => [i.nombre, CATEGORIAS_INDICADORES[i.categoria].nombre, i.valor === null ? 'N/A' : importe(i.valor, 4), NOMBRE_UNIDAD_INDICADOR[i.unidad], NOMBRE_NIVEL_INDICADOR[i.nivel], i.anterior == null ? '' : importe(i.anterior, 4), i.formula, i.analisis]),
       ['Diagnóstico', '', '', '', '', '', '', diagnostico.resumen],
     ]), 'text/csv');
   };

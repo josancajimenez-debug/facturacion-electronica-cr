@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Alerta, Cargando, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
 import { finDeMes, useContabilidad } from '../lib/contabilidad';
-import { csv, descargar, dinero, fecha, mesCR } from '../lib/formato';
+import { csv, descargar, dinero, fecha, mesCR, importe } from '../lib/formato';
 
 export function LibroMayor() {
   const { comprobantesListos } = useApp();
@@ -28,8 +28,8 @@ export function LibroMayor() {
     descargar(`libro-mayor-${desde}-a-${hasta}.csv`, csv([
       ['Cuenta', 'Nombre', 'Asiento', 'Fecha', 'Glosa', 'Debe', 'Haber', 'Saldo'],
       ...mayor.flatMap((m) => [
-        [m.cuenta.codigo, m.cuenta.nombre, '', `${desde}-01`, 'Saldo inicial', '', '', m.saldoInicial.toFixed(2)],
-        ...m.movimientos.map((x) => [m.cuenta.codigo, m.cuenta.nombre, x.numero, x.fecha, x.glosa, x.debe.toFixed(2), x.haber.toFixed(2), x.saldo.toFixed(2)]),
+        [m.cuenta.codigo, m.cuenta.nombre, '', `${desde}-01`, 'Saldo inicial', '', '', importe(m.saldoInicial)],
+        ...m.movimientos.map((x) => [m.cuenta.codigo, m.cuenta.nombre, x.numero, x.fecha, x.glosa, importe(x.debe), importe(x.haber), importe(x.saldo)]),
       ]),
     ]), 'text/csv');
 

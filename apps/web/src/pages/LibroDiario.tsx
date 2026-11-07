@@ -5,7 +5,7 @@ import { EncabezadoAsiento, TablaAsiento } from '../components/Asiento';
 import { Alerta, Cargando, Texto, Vacio } from '../components/ui';
 import { useApp } from '../estado';
 import { finDeMes, useContabilidad } from '../lib/contabilidad';
-import { csv, descargar, dinero, mesCR } from '../lib/formato';
+import { csv, descargar, dinero, mesCR, importe } from '../lib/formato';
 
 export function LibroDiario() {
   const { comprobantesListos } = useApp();
@@ -28,7 +28,7 @@ export function LibroDiario() {
     descargar(`libro-diario-${desde}-a-${hasta}.csv`, csv([
       ['Asiento', 'Fecha', 'Período tributario', 'Cuenta', 'Nombre', 'Debe', 'Haber', 'Glosa', 'Clave', 'Estado'],
       ...asientos.flatMap((a) => a.lineas.map((l) => [
-        a.numero, a.fecha, a.periodoTributario, l.cuenta, l.nombre, l.debe.toFixed(2), l.haber.toFixed(2), a.glosa, a.origen.clave, a.requiereRevision ? 'Requiere revisión' : 'Borrador',
+        a.numero, a.fecha, a.periodoTributario, l.cuenta, l.nombre, importe(l.debe), importe(l.haber), a.glosa, a.origen.clave, a.requiereRevision ? 'Requiere revisión' : 'Borrador',
       ])),
     ]), 'text/csv');
 
