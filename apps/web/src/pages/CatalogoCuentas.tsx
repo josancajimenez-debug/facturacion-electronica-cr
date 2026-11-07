@@ -1,4 +1,4 @@
-import { AVISO_NIIF_COMPLETAS, CATALOGO_CUENTAS, NOMBRE_EDICION_NIIF, SECCIONES_NIIF, VIGENCIA_NIIF_2025, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
+import { AVISO_NIIF_COMPLETAS, CATALOGO_CUENTAS, FUENTE_GASTO_ACTIVO_MENOR, NOMBRE_EDICION_NIIF, SALARIO_BASE, SECCIONES_NIIF, VIGENCIA_NIIF_2025, nivelCuenta, seccionNiif, type Cuenta } from '@fe-cr/core';
 import { Download, Save } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -25,6 +25,7 @@ export function CatalogoCuentas() {
 
   const guardar = () => {
     if (!(p.umbralCapitalizacion >= 0)) return avisar('El umbral de capitalización debe ser un monto válido.', 'err');
+    if (p.salarioBase !== undefined && !(p.salarioBase > 0)) return avisar('El salario base debe ser un monto mayor que cero.', 'err');
     // La apertura se edita en su propia página: se conserva la guardada.
     if (guardarConfig({ ...borrador, apertura: config.apertura })) avisar('Políticas contables guardadas. Los libros se recalcularon.', 'ok');
   };
@@ -53,6 +54,9 @@ export function CatalogoCuentas() {
               ayuda="Equipo, mobiliario, vehículos y obras con costo unitario igual o mayor se registran como propiedades, planta y equipo (Sección 17); por debajo, como gasto." />
             <Texto etiqueta="Prefijos CAByS de mercadería adicional" valor={p.prefijosInventario.join(', ')} onCambio={(v) => cambiar({ prefijosInventario: v.split(',').map((x) => x.trim()).filter(Boolean) })}
               ayuda="Las compras de bienes que también están en «Productos y servicios» ya se tratan como inventario. Agregue aquí otros prefijos (p. ej. 2391)." />
+            <Texto etiqueta={`Salario base del periodo (₡; ${SALARIO_BASE.anio}: ${SALARIO_BASE.monto.toLocaleString('es-CR')})`} tipo="number" valor={p.salarioBase ?? SALARIO_BASE.monto}
+              onCambio={(v) => cambiar({ salarioBase: v === '' ? undefined : Number(v) })}
+              ayuda={`Fiscalmente solo es gasto deducible inmediato el bien de costo unitario hasta el 25 % del salario base (₡${(((p.salarioBase ?? SALARIO_BASE.monto) * 0.25)).toLocaleString('es-CR')}); si el umbral contable es mayor, esos gastos se marcan para revisión. ${FUENTE_GASTO_ACTIVO_MENOR}; ${SALARIO_BASE.fuente}.`} />
           </div>
           <p className="small" style={{ margin: 0 }}>
             <strong>Marco contable:</strong> {NOMBRE_EDICION_NIIF}. Es obligatoria para los periodos que comienzan a partir del {fecha(VIGENCIA_NIIF_2025)};

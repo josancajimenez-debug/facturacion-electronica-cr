@@ -11,8 +11,8 @@ Cada comprobante electrónico **aceptado** genera su asiento de partida doble ba
 - **Sección 23 «Ingresos de Actividades Ordinarias Procedentes de Contratos con Clientes»:** modelo de cinco pasos; el ingreso se reconoce al transferir el control, con el comprobante aceptado como evidencia.
 - **Sección 8:** la Nota 3 revela «información material o con importancia relativa sobre políticas contables» (párrafos 8.4 a 8.6) e incluye juicios y estimaciones.
 - **Sección 10 «Políticas Contables, Cambios en las Estimaciones Contables y Errores»:** vida útil, deterioro e impuesto sobre la renta son estimaciones contables (cambios prospectivos).
-- **Alcance (Sección 1) y Grandes Contribuyentes Nacionales:** la NIIF para las PYMES no aplica a entidades con obligación pública de rendir cuentas. La DGT exige NIIF completas a los Grandes Contribuyentes Nacionales (oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025): si la política «Gran Contribuyente Nacional» está marcada, cada asiento lleva la alerta `MARCO_NIIF_COMPLETAS` y requiere revisión.
-- **Base fiscal:** los registros siguen el art. 128 del CNPT y los criterios de la Resolución DGT-R-029-2018 para las diferencias entre la base contable y la fiscal.
+- **Alcance (Sección 1) y Grandes Contribuyentes Nacionales:** la NIIF para las PYMES no aplica a entidades con obligación pública de rendir cuentas. La DGT exige NIIF completas a los Grandes Contribuyentes Nacionales (oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025; desde el 1/01/2027, RES-0015-2026, art. 2): si la política «Gran Contribuyente Nacional» está marcada, cada asiento lleva la alerta `MARCO_NIIF_COMPLETAS` y requiere revisión.
+- **Base fiscal:** los registros siguen el art. 128 del CNPT. Las diferencias entre la base contable y la fiscal siguen la Resolución DGT-R-029-2018 en los periodos que inician antes de 2027 y la MH-DGT-RES-0015-2026 desde el 1/01/2027, que deroga a la anterior (`criterioFiscalNiif`). El cierre marca como no deducible la estimación por incobrables (Decreto 43198-H, art. 17 inc. g) y deja para revisión la amortización de intangibles (Ley 7092, art. 9 inc. f) y los gastos por activos de costo unitario mayor al 25 % del salario base (Anexo 1 del Reglamento de Renta).
 - **Operaciones sin comprobante electrónico:** no se contabilizan aquí; se reportan en la D-270 (RES-0055-2025 y RES-0010-2026).
 
 > Los asientos son **propuestas en borrador**: no sustituyen el criterio ni la aprobación del contador responsable. Es un entorno de simulación.
@@ -56,7 +56,7 @@ Incluye la matriz de brechas de las 35 secciones con la naturaleza del cambio se
 | FE, TE, ND emitidas | Caja, Bancos o Tarjetas por liquidar (contado, según el medio de pago) o Clientes (crédito) contra Ingresos (mercancías o servicios según el CAByS) e IVA repercutido. Las mercancías del inventario registran además el costo de ventas |
 | FEE | Igual, con Ventas de exportación |
 | NC emitida | Devoluciones y descuentos sobre ventas e IVA repercutido contra Clientes o efectivo. Con el código de referencia 06 (devolución de mercancía) la mercadería regresa al inventario al costo promedio |
-| Condición de venta 10 u 08 | El IVA va a «IVA por devengar»; el REP lo traslada a «IVA repercutido» al cobrar |
+| Condición de venta 10 u 08 | El IVA va a «IVA por devengar»; el REP lo traslada a «IVA repercutido» al cobrar. En la condición 10, si a los 90 días naturales de la emisión no se ha cobrado, el libro genera el ajuste «IVA diferido vencido» y el REP posterior ya no traslada IVA (LIVA art. 27; RLIVA art. 40 bis) |
 | Comprobantes recibidos y confirmados | Inventario, activo o gasto según el CAByS; IVA acreditable según la **condición del impuesto** del mensaje receptor (01 y 03 total, 02 y 05 según `MontoTotalImpuestoAcreditar`, 04 ninguno); la parte no acreditable se suma al costo |
 | Tiquete recibido | Sin crédito fiscal; deducibilidad por revisar |
 | FEC | Compra; alerta para verificar la autoliquidación del IVA |
@@ -117,6 +117,9 @@ El CSV de estados financieros incluye los indicadores y el diagnóstico.
 - Asamblea Legislativa de la República de Costa Rica. (1982). *Ley del Impuesto al Valor Agregado* (Ley N.° 6826), art. 27.
 - Asamblea Legislativa de la República de Costa Rica. (1988). *Ley del Impuesto sobre la Renta* (Ley N.° 7092), art. 4 (periodo fiscal).
 - Colegio de Contadores Públicos de Costa Rica. (2025, 2 de junio). *Comunicado DE-0028-2025* (oficio MH-DGT-OF-0201-2025: NIIF completas para los Grandes Contribuyentes Nacionales).
-- Dirección General de Tributación. (2018). *Criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria* (Resolución DGT-R-029-2018).
+- Dirección General de Tributación. (2018). *Criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria* (Resolución DGT-R-029-2018; vigente hasta el 31/12/2026).
+- Dirección General de Tributación. (2026, 8 de abril). *Criterios interpretativos sobre la aplicación de las Normas Internacionales de Información Financiera respecto a la normativa tributaria* (Resolución MH-DGT-RES-0015-2026). *La Gaceta*, Alcance 45, N.° 78 (29 de abril de 2026); rige desde el 1/01/2027.
+- Poder Ejecutivo de la República de Costa Rica. (2019). *Reglamento de la Ley del Impuesto sobre el Valor Agregado* (Decreto Ejecutivo N.° 41779-H), art. 40 bis (adicionado por el Decreto 44392-H).
+- Poder Ejecutivo de la República de Costa Rica. (2021). *Reglamento de la Ley del Impuesto sobre la Renta* (Decreto Ejecutivo N.° 43198-H), art. 17 inc. g) y Anexos 1 y 2.
 - Dirección General de Tributación. (2024). *Anexos y estructuras para la emisión de comprobantes electrónicos* (Versión 4.4, con bitácora de ajustes al 22 de abril de 2026): notas 5, 6, 8, 9 y 18.
 - Dirección General de Tributación. (2025, 9 de octubre). *Formulario de la Declaración «Informativa Resumen Mensual de Clientes, Proveedores y Gastos Específicos que no estén amparados en un comprobante electrónico»* (Resolución MH-DGT-RES-0055-2025; plazos de la Resolución MH-DGT-RES-0010-2026).

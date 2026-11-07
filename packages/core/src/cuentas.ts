@@ -177,8 +177,8 @@ const FILAS: Fila[] = [
   }],
   ['2.1.02.02', 'IVA por devengar', {
     corriente: true,
-    descripcion: 'IVA de ventas a crédito con pago diferido del impuesto hasta 90 días (condición de venta 10, art. 27 de la Ley del IVA) o de servicios al Estado (condición 08); se devenga al cobrar.',
-    seDebita: 'Cobro documentado con Recibo Electrónico de Pago (traslado a IVA repercutido).',
+    descripcion: 'IVA de ventas a crédito con pago diferido del impuesto (condición de venta 10, art. 27 de la Ley del IVA y art. 40 bis de su Reglamento) o de servicios al Estado (condición 08). En la condición 10 se devenga al cobrar y, a más tardar, a los 90 días naturales de la emisión, aunque no se haya cobrado.',
+    seDebita: 'Cobro documentado con Recibo Electrónico de Pago o vencimiento de los 90 días (traslado a IVA repercutido).',
     seAcredita: 'Ventas con condición 08 o 10.',
   }],
   ['2.1.02.03', 'Otros impuestos por pagar', {
@@ -408,10 +408,23 @@ export const esAplicacionAnticipadaNiif = (inicioPeriodo: string): boolean => in
 
 /**
  * Para efectos fiscales, la DGT exige NIIF completas a los Grandes Contribuyentes Nacionales (oficio
- * MH-DGT-OF-0201-2025, divulgado en el comunicado DE-0028-2025 del Colegio de Contadores Públicos).
+ * MH-DGT-OF-0201-2025, divulgado en el comunicado DE-0028-2025 del Colegio de Contadores Públicos), regla
+ * que la Resolución MH-DGT-RES-0015-2026, art. 2, recoge desde el 1/01/2027.
  */
 export const AVISO_NIIF_COMPLETAS =
-  'Los Grandes Contribuyentes Nacionales deben respaldar sus declaraciones con registros conforme a las NIIF completas (oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025). Este módulo aplica la NIIF para las PYMES: revise cada registro con las NIIF completas.';
+  'Los Grandes Contribuyentes Nacionales deben respaldar sus declaraciones con registros conforme a las NIIF completas (oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025; desde el 1/01/2027, Resolución MH-DGT-RES-0015-2026, art. 2). Este módulo aplica la NIIF para las PYMES: revise cada registro con las NIIF completas.';
+
+/**
+ * Criterios interpretativos de la DGT sobre las NIIF frente a la normativa tributaria (art. 128 CNPT).
+ * La Resolución MH-DGT-RES-0015-2026 (Alcance 45, La Gaceta 78 del 29/04/2026) rige desde el 1/01/2027
+ * y deroga desde esa fecha la DGT-R-029-2018 (art. 39); los periodos anteriores siguen con la 029-2018.
+ */
+export const VIGENCIA_RES_0015_2026 = '2027-01-01';
+export function criterioFiscalNiif(inicioPeriodo: string): { resolucion: string; detalle: string } {
+  return inicioPeriodo >= VIGENCIA_RES_0015_2026
+    ? { resolucion: 'Resolución MH-DGT-RES-0015-2026', detalle: 'criterios interpretativos sobre la aplicación de las NIIF y la NIIF para las PYMES respecto a la normativa tributaria, vigentes desde el 1/01/2027' }
+    : { resolucion: 'Resolución DGT-R-029-2018', detalle: 'criterios interpretativos sobre la aplicación de las NIIF respecto a la normativa tributaria, vigente hasta el 31/12/2026 (la deroga la MH-DGT-RES-0015-2026 desde el 1/01/2027)' };
+}
 
 /** Secciones 1 a 35 con su nombre en la traducción oficial de la tercera edición (índice de la Norma). */
 export const SECCIONES_NIIF: Record<number, string> = {

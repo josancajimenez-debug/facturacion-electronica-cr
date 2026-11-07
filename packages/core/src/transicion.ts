@@ -201,7 +201,7 @@ export function revisarTransicion(c: ConfigTransicion): AvisoTransicion[] {
   const adv = (mensaje: string, fuente: string) => avisos.push({ nivel: 'advertencia', mensaje, fuente });
   if (!esEjercicioValido(c.primerEjercicio)) err('Indique el primer ejercicio bajo la tercera edición (de 2025 en adelante): la Norma se emitió en febrero de 2025.', 'Apéndice A, Fecha de vigencia');
   if (c.obligacionPublica) err('Una entidad con obligación pública de rendir cuentas no puede aplicar la NIIF para las PYMES: le corresponden las NIIF completas.', 'Sección 1, párrafos 1.2 y 1.3');
-  if (c.granContribuyente) err('Los Grandes Contribuyentes Nacionales deben llevar registros conforme a las NIIF completas para efectos fiscales.', 'Oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025');
+  if (c.granContribuyente) err('Los Grandes Contribuyentes Nacionales deben llevar registros conforme a las NIIF completas para efectos fiscales.', 'Oficio MH-DGT-OF-0201-2025; comunicado CCPCR DE-0028-2025; Resolución MH-DGT-RES-0015-2026, art. 2 (desde el 1/01/2027)');
   const exenciones = Object.entries(c.exenciones ?? {}).filter(([, d]) => d.aplica);
   if (c.modo === 'cambio-edicion' && exenciones.length) {
     err('Las exenciones del párrafo 35.10 son solo para quien adopta la Norma por primera vez. Quien ya aplicaba la segunda edición sigue el Apéndice A y la Sección 10.', 'Apéndice A, párrafos A1 a A49; Sección 35, párrafo 35.10');

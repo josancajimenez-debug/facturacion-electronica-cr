@@ -10,13 +10,12 @@ import { asientoAperturaBalance, type AperturaContable } from './apertura';
 import { ESQUEMA_XML, NOMBRE_COMPROBANTE, type TipoComprobante } from './catalogos';
 import { esCabysServicio } from './calculos';
 import { AVISO_NIIF_COMPLETAS, cuenta, seccionNiif } from './cuentas';
+import { diaCR } from './fechas';
+import { CODIGOS_IVA, FUENTE_IVA_DIFERIDO, PLAZO_IVA_DIFERIDO_DIAS, RegistroIvaDiferido, originaIvaDiferido, type FacturaIvaDiferido } from './ivaDiferido';
 import { desescaparXml, type ComprobanteRecibido } from './recepcion';
 import type { Comprobante, Emisor } from './tipos';
 
 const D = (v: number | string | Decimal) => new Decimal(v);
-
-/** Impuestos de la nota 8 que son IVA: 01 general, 07 cálculo especial, 08 bienes usados. */
-const CODIGOS_IVA = ['01', '07', '08'];
 
 export interface LineaContable {
   cabys: string;
@@ -72,7 +71,17 @@ export interface PoliticasContables {
   prefijosInventario: string[];
   /** Gran Contribuyente Nacional: la DGT le exige NIIF completas, no la NIIF para las PYMES. */
   granContribuyenteNacional?: boolean;
+  /** Salario base (Ley 7337, art. 2) del periodo; por omisión, SALARIO_BASE.monto. */
+  salarioBase?: number;
 }
+
+/**
+ * Salario base de la Ley 7337, art. 2, vigente en 2026 (Consejo Superior del Poder Judicial, Circular
+ * 246-2025; igual al de 2025). Fiscalmente, un activo de costo unitario de hasta el 25 % de este monto
+ * puede llevarse a gasto (Anexo 1, punto 1.1, del Decreto 43198-H; RES-0015-2026, art. 30.10).
+ */
+export const SALARIO_BASE = { monto: 462200, anio: 2026, fuente: 'Ley 7337, art. 2; Consejo Superior del Poder Judicial, Circular 246-2025' };
+export const FUENTE_GASTO_ACTIVO_MENOR = 'Reglamento de la Ley del Impuesto sobre la Renta (Decreto 43198-H), Anexo 1, punto 1.1';
 
 /** El umbral es una política de cada entidad; el valor es solo un punto de partida. */
 export const POLITICAS_PREDETERMINADAS: PoliticasContables = {
@@ -350,6 +359,8 @@ export interface Clasificacion {
   cuenta: string;
   inventario: boolean;
   nota?: string;
+  /** Gasto contable cuyo costo unitario supera el 25 % del salario base: no es deducible de inmediato. */
+  fiscal?: string;
 }
 
 export function clasificarCompra(l: Pick<LineaContable, 'cabys' | 'cantidad' | 'subTotal' | 'esServicio'>, tipoCambio: number, ctx: { esInventario: (cabys: string) => boolean; politicas: PoliticasContables }): Clasificacion {
@@ -359,7 +370,15 @@ export function clasificarCompra(l: Pick<LineaContable, 'cabys' | 'cantidad' | '
   if (regla.bajoUmbral) {
     const unitario = (l.subTotal / (l.cantidad || 1)) * tipoCambio;
     if (unitario < ctx.politicas.umbralCapitalizacion) {
-      return { cuenta: regla.bajoUmbral, inventario: false, nota: `costo unitario bajo el umbral de capitalización (₡${ctx.politicas.umbralCapitalizacion.toLocaleString('es-CR')})` };
+      const tope = (ctx.politicas.salarioBase ?? SALARIO_BASE.monto) * 0.25;
+      return {
+        cuenta: regla.bajoUmbral,
+        inventario: false,
+        nota: `costo unitario bajo el umbral de capitalización (₡${ctx.politicas.umbralCapitalizacion.toLocaleString('es-CR')})`,
+        fiscal: unitario > tope
+          ? `costo unitario de ₡${unitario.toLocaleString('es-CR', { maximumFractionDigits: 2 })}, mayor que el 25 % del salario base (₡${tope.toLocaleString('es-CR')}): para el impuesto sobre la renta se deprecia, salvo autorización de la DGT (${FUENTE_GASTO_ACTIVO_MENOR})`
+          : undefined,
+      };
     }
   }
   return { cuenta: regla.cuenta, inventario: false };
@@ -375,6 +394,8 @@ export interface ContextoContable {
   kardex: Kardex;
   /** Fracción de IVA acreditable de cada compra contabilizada (para sus NC/ND y REP). */
   fraccionAcreditable: Map<string, number>;
+  /** IVA diferido pendiente de cada venta con condición 10 (art. 27 LIVA; art. 40 bis RLIVA). */
+  ivaDiferido?: RegistroIvaDiferido;
 }
 
 /** Acumula importes por cuenta en colones; positivo = debe, negativo = haber. */
@@ -479,8 +500,15 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
     if (doc.sentido === 'venta') {
       contrapartida(pagado, true);
       P.add('1.1.02.01', pagado.negated());
-      P.add('2.1.02.02', iva);
-      P.add('2.1.02.01', iva.negated());
+      const ivaCrc = iva.times(doc.tipoCambio || 1);
+      const { diferido, seguido } = ctx.ivaDiferido?.aplicar(ref?.numero, ivaCrc) ?? { diferido: ivaCrc, seguido: false };
+      // Solo se traslada lo que sigue diferido: si pasaron los 90 días, el IVA ya se trasladó al vencer.
+      P.crc('2.1.02.02', diferido);
+      P.crc('2.1.02.01', diferido.negated());
+      if (seguido && diferido.lessThan(ivaCrc.toDecimalPlaces(2))) {
+        alerta('IVA_DIFERIDO_VENCIDO', `El cobro llega después de los ${PLAZO_IVA_DIFERIDO_DIAS} días naturales: ₡${ivaCrc.minus(diferido).toFixed(2)} de IVA ya se habían trasladado al IVA repercutido al vencer el plazo.`, false);
+        fundamento.add(FUENTE_IVA_DIFERIDO);
+      }
     } else {
       P.add('2.1.01.01', pagado);
       contrapartida(pagado.negated(), true);
@@ -494,7 +522,9 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
     fundamento.add('Ley del IVA (Ley 6826), art. 27 — pago diferido del impuesto');
   } else if (doc.sentido === 'venta') {
     const s = doc.tipo === 'NC' ? -1 : 1;
-    const ivaDiferido = doc.condicionVenta === '10' || doc.condicionVenta === '08';
+    // Una NC sobre una venta con IVA diferido revierte ese IVA aunque la nota traiga otra condición.
+    const refDiferida = doc.tipo === 'NC' && !!ref?.numero && !!ctx.ivaDiferido?.facturas.has(ref.numero);
+    const ivaDiferido = doc.condicionVenta === '10' || doc.condicionVenta === '08' || refDiferida;
     for (const l of doc.lineas) {
       const ingreso = doc.tipo === 'NC' ? '4.1.01.04' : doc.tipo === 'FEE' ? '4.1.01.03' : l.esServicio ? '4.1.01.02' : '4.1.01.01';
       P.add(ingreso, -s * l.subTotal);
@@ -532,7 +562,20 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
     }
     contrapartida(D(s * doc.totalComprobante));
     niif(23);
-    if (ivaDiferido) fundamento.add('Ley del IVA (Ley 6826), art. 27 — pago diferido del impuesto');
+    const ivaCrc = suma(doc.lineas, (l) => l.iva).times(doc.tipoCambio || 1);
+    if (ctx.ivaDiferido && originaIvaDiferido(doc.tipo, doc.condicionVenta)) ctx.ivaDiferido.registrar(doc.clave, doc.fecha, ivaCrc);
+    if (ctx.ivaDiferido && doc.tipo === 'NC' && ivaDiferido) {
+      const { diferido, seguido } = ctx.ivaDiferido.aplicar(ref?.numero, ivaCrc);
+      const yaTrasladado = ivaCrc.minus(diferido);
+      if (seguido && yaTrasladado.greaterThan(0.005)) {
+        // La parte cuyo plazo ya venció está en el IVA repercutido: la nota la rebaja de ahí.
+        P.crc('2.1.02.02', yaTrasladado.negated());
+        P.crc('2.1.02.01', yaTrasladado);
+        alerta('IVA_DIFERIDO_VENCIDO', `₡${yaTrasladado.toFixed(2)} del IVA de la venta ya se habían trasladado al IVA repercutido al vencer los 90 días; la nota los rebaja de esa cuenta.`, false);
+      }
+    }
+    if (doc.condicionVenta === '10' || refDiferida) fundamento.add(FUENTE_IVA_DIFERIDO);
+    else if (ivaDiferido) fundamento.add('Ley del IVA (Ley 6826), art. 27 — pago diferido del impuesto');
     if (doc.condicionVenta === '08') alerta('VERIFICAR_NORMA', 'Servicios prestados al Estado (condición 08): verifique el devengo del IVA.');
     if (doc.tipo === 'TE') fundamento.add('Tiquete electrónico: venta a consumidor final');
   } else {
@@ -580,6 +623,11 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
       const c = clasif[i];
       P.add(c.cuenta, costo.times(s));
       if (c.nota) alerta('CLASIFICACION', `${l.detalle}: ${c.nota}; se registra como gasto.`, false);
+      if (c.fiscal) {
+        alerta('GASTO_NO_DEDUCIBLE_INMEDIATO', `${l.detalle}: ${c.fiscal}.`, false);
+        deducible = 'revisar';
+        fundamento.add(FUENTE_GASTO_ACTIVO_MENOR);
+      }
       if (c.inventario) {
         const crc = costo.times(tc).toDecimalPlaces(2);
         const cantidad = doc.tipo === 'ND' || (doc.tipo === 'NC' && !devolucion) ? 0 : l.cantidad;
@@ -622,6 +670,33 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
     requiereRevision: revisar,
     deducibleRenta: deducible,
     fundamento: [...fundamento],
+    estado: 'borrador',
+  };
+}
+
+/**
+ * Vencimiento del pago diferido: a los 90 días naturales de la emisión el IVA no cobrado se traslada
+ * de «IVA por devengar» a «IVA repercutido» y se declara en ese período (art. 40 bis RLIVA, inc. d y op. 3).
+ */
+export function asientoVencimientoIvaDiferido(f: Pick<FacturaIvaDiferido, 'clave' | 'fecha' | 'vence'>, monto: Decimal.Value, consecutivo?: string): Asiento {
+  const m = D(monto).toDecimalPlaces(2).toNumber();
+  return {
+    numero: 0,
+    fecha: f.vence,
+    periodoTributario: f.vence.slice(0, 7),
+    glosa: `Ajuste — IVA diferido vencido (${PLAZO_IVA_DIFERIDO_DIAS} días) de la venta ${consecutivo ?? f.clave.slice(21, 41)} del ${f.fecha}`,
+    origen: { documento: 'ajuste', clave: f.clave, consecutivo },
+    lineas: [
+      { cuenta: '2.1.02.02', nombre: cuenta('2.1.02.02').nombre, debe: m, haber: 0 },
+      { cuenta: '2.1.02.01', nombre: cuenta('2.1.02.01').nombre, debe: 0, haber: m },
+    ],
+    totalDebe: m,
+    totalHaber: m,
+    cuadrado: true,
+    alertas: [`IVA_DIFERIDO_VENCIDO: venció el plazo de ${PLAZO_IVA_DIFERIDO_DIAS} días naturales sin cobro; el IVA se declara y paga en el período ${f.vence.slice(0, 7)}, se haya cobrado o no.`],
+    requiereRevision: false,
+    deducibleRenta: true,
+    fundamento: [FUENTE_IVA_DIFERIDO],
     estado: 'borrador',
   };
 }
@@ -669,6 +744,8 @@ export interface EntradaLibroDiario {
   cabysInventario: string[];
   politicas?: PoliticasContables;
   apertura?: AperturaContable;
+  /** Día de corte (AAAA-MM-DD) para los vencimientos del IVA diferido; por omisión, hoy en Costa Rica. */
+  fechaCorte?: string;
 }
 
 export interface LibroDiario {
@@ -686,6 +763,7 @@ export function generarLibroDiario(e: EntradaLibroDiario): LibroDiario {
     esInventario: (cabys) => inventario.has(cabys) || politicas.prefijosInventario.some((p) => p && cabys.startsWith(p)),
     kardex: new Kardex(),
     fraccionAcreditable: new Map(),
+    ivaDiferido: new RegistroIvaDiferido(),
   };
   const omitidos: LibroDiario['omitidos'] = [];
   const docs: DocumentoContable[] = [];
@@ -729,7 +807,16 @@ export function generarLibroDiario(e: EntradaLibroDiario): LibroDiario {
     || a.clave.localeCompare(b.clave));
   // El inventario inicial entra al kárdex antes de las operaciones para el costo promedio.
   for (const x of e.apertura?.existencias ?? []) ctx.kardex.entrada(e.apertura!.fecha, 'apertura', x.cabys, x.detalle, x.cantidad, D(x.costo));
-  const asientos = docs.map((d) => generarAsiento(d, ctx));
+  const asientos: Asiento[] = [];
+  const consecutivos = new Map(docs.map((d) => [d.clave, d.consecutivo]));
+  const vencer = (antesDe: string) => {
+    for (const { factura, monto } of ctx.ivaDiferido!.vencer(antesDe)) asientos.push(asientoVencimientoIvaDiferido(factura, monto, consecutivos.get(factura.clave)));
+  };
+  for (const d of docs) {
+    vencer(d.fecha.slice(0, 10));
+    asientos.push(generarAsiento(d, ctx));
+  }
+  vencer(e.fechaCorte ?? diaCR(new Date()));
   const apertura = e.apertura && asientoAperturaBalance(e.apertura);
   if (apertura) asientos.unshift(apertura);
   asientos.sort((a, b) => a.fecha.localeCompare(b.fecha) || Number(b.origen.documento === 'apertura') - Number(a.origen.documento === 'apertura'));

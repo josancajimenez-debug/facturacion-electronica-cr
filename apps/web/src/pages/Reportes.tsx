@@ -1,4 +1,4 @@
-import { MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion, montoRecibidoEnColones, periodoContable } from '@fe-cr/core';
+import { FUENTE_IVA_DIFERIDO, MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion, diaCR, ivaDiferidoDelPeriodo, montoRecibidoEnColones, periodoContable } from '@fe-cr/core';
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -69,8 +69,12 @@ export function Reportes() {
       pendientes: recMes.filter((r) => r.estado === 'pendiente').length,
       imputadosAqui,
       imputadosOtro,
+      diferido: ivaDiferidoDelPeriodo(comprobantes, mes, diaCR(new Date())),
     };
   }, [comprobantes, recibidos, mes]);
+  const dif = datos.diferido;
+  const hayDiferido = dif.diferido || dif.recuperado || dif.vencido || dif.notasSobreDiferido || dif.porVencer.length;
+  const ivaTarifas = datos.tarifas.reduce((s, f) => s + f.impuesto, 0);
 
   const exportar = () =>
     descargar(`reporte-${mes}.csv`, csv([
@@ -87,6 +91,13 @@ export function Reportes() {
       [],
       ['Compras con FEC', datos.compras.toFixed(2), datos.ivaCompras.toFixed(2)],
       ['Recibidos confirmados', datos.recibidosConfirmados, datos.creditoRecibidos.toFixed(2)],
+      [],
+      ['IVA diferido (condición 10; art. 27 LIVA y art. 40 bis RLIVA)', 'Monto'],
+      ['1. Rebajar: ventas a crédito del período no cobradas', (-datos.diferido.diferido).toFixed(2)],
+      ['2. Sumar: cobrado con REP de ventas de períodos anteriores', datos.diferido.recuperado.toFixed(2)],
+      ['3. Sumar: ventas que superaron los 90 días sin cobro', datos.diferido.vencido.toFixed(2)],
+      ['Sumar: notas de crédito sobre IVA todavía diferido', datos.diferido.notasSobreDiferido.toFixed(2)],
+      ['Ajuste neto al IVA por tarifa', datos.diferido.ajuste.toFixed(2)],
       [],
       ['Ajustes por error material (códigos 13/14) imputados a este período', 'Emitido', 'Total', 'Consecutivo'],
       ...datos.imputadosAqui.map((c) => [NOMBRE_COMPROBANTE[c.tipo], c.fechaEmision.slice(0, 10), (c.resumen.totalComprobante * (c.resumen.tipoCambio || 1)).toFixed(2), c.consecutivo]),
@@ -155,6 +166,28 @@ export function Reportes() {
             {datos.pendientes > 0 && <Alerta tipo="warn">{datos.pendientes} comprobante(s) recibidos del período siguen pendientes de confirmar.</Alerta>}
           </div>
         </div>
+        {!!hayDiferido && (
+          <div className="card">
+            <div className="card-head"><h2>IVA diferido (condición 10)</h2></div>
+            <div className="card-body stack">
+              <p className="small muted" style={{ margin: 0 }}>
+                Operaciones del art. 40 bis del Reglamento del IVA sobre el impuesto por tarifa. El IVA de la venta a crédito se paga al cobrarla y, a más tardar, a los 90 días naturales de la emisión.
+              </p>
+              <div className="row" style={{ justifyContent: 'space-between' }}><span>IVA por tarifa del período</span><span className="num">{dinero(ivaTarifas)}</span></div>
+              <div className="row" style={{ justifyContent: 'space-between' }}><span>1. Rebajar ventas a crédito del período no cobradas ({dif.detalle.diferido.length})</span><span className="num">{dinero(-dif.diferido)}</span></div>
+              <div className="row" style={{ justifyContent: 'space-between' }}><span>2. Sumar IVA cobrado con REP de períodos anteriores ({dif.detalle.recuperado.length})</span><span className="num">{dinero(dif.recuperado)}</span></div>
+              <div className="row" style={{ justifyContent: 'space-between' }}><span>3. Sumar ventas que superaron los 90 días sin cobro ({dif.detalle.vencido.length})</span><span className="num">{dinero(dif.vencido)}</span></div>
+              {dif.notasSobreDiferido !== 0 && <div className="row" style={{ justifyContent: 'space-between' }}><span>Sumar notas de crédito sobre IVA todavía diferido</span><span className="num">{dinero(dif.notasSobreDiferido)}</span></div>}
+              <div className="row" style={{ justifyContent: 'space-between' }}><strong>IVA de ventas a declarar</strong><strong className="num">{dinero(ivaTarifas + dif.ajuste)}</strong></div>
+              {dif.porVencer.length > 0 && (
+                <Alerta tipo="warn">
+                  {dif.porVencer.length} venta(s) con condición 10 vencen este mes sin cobro: {dif.porVencer.map((f) => `${f.consecutivo.slice(-10)} (vence ${f.vence})`).join(', ')}. Si no se cobran a esa fecha, su IVA se declara en este período.
+                </Alerta>
+              )}
+              <p className="small muted" style={{ margin: 0 }}>{FUENTE_IVA_DIFERIDO}.</p>
+            </div>
+          </div>
+        )}
         {(datos.imputadosAqui.length > 0 || datos.imputadosOtro.length > 0) && (
           <div className="card">
             <div className="card-head"><h2>Ajustes por error material</h2></div>

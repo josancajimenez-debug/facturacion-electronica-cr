@@ -132,8 +132,17 @@ function depreciacion(asientos: Asiento[], anio: number, vidaUtil: Record<string
     lineas.push({ cuenta: '6.1.01.11', debe: total.toNumber(), haber: 0 }, { cuenta: contra, debe: 0, haber: total.toNumber() });
   }
   if (!lineas.length) return null;
-  return armar(hasta, `Ajuste — depreciación y amortización del periodo ${anio}`, 'ajuste', lineas,
-    [`${seccionNiif(17)} y Sección 18: línea recta sobre el costo, desde el mes de adquisición`], [...new Set(alertas)]);
+  const intangibles = lineas.some((l) => l.cuenta === '1.2.03.02');
+  if (intangibles) {
+    alertas.push('AMORTIZACION_INTANGIBLES: lo pagado por derechos de propiedad intelectual y otros intangibles similares no es deducible de la renta bruta (Ley 7092, art. 9 inc. f; RES-0015-2026, art. 28.6); revise si las licencias de programas de cómputo califican como tales.');
+  }
+  const asiento = armar(hasta, `Ajuste — depreciación y amortización del periodo ${anio}`, 'ajuste', lineas,
+    [
+      `${seccionNiif(17)} y Sección 18: línea recta sobre el costo, desde el mes de adquisición`,
+      'Fiscal: línea recta con la vida útil del Anexo 2 del Reglamento de la Ley del Impuesto sobre la Renta (Decreto 43198-H, Anexo 1; RES-0015-2026, art. 30.2 desde 2027)',
+    ], [...new Set(alertas)]);
+  if (intangibles) asiento.deducibleRenta = 'revisar';
+  return asiento;
 }
 
 /**
@@ -148,9 +157,16 @@ function estimacionIncobrables(asientos: Asiento[], anio: number, porcentaje: nu
   const meta = Decimal.max(clientes, 0).times(porcentaje).dividedBy(100);
   const ajuste = meta.minus(actual).toDecimalPlaces(2);
   if (ajuste.isZero()) return null;
-  return armar(hasta, `Ajuste — deterioro de cuentas por cobrar (${porcentaje} % de la cartera con evidencia objetiva de deterioro)`, 'ajuste',
+  const asiento = armar(hasta, `Ajuste — deterioro de cuentas por cobrar (${porcentaje} % de la cartera con evidencia objetiva de deterioro)`, 'ajuste',
     [{ cuenta: '6.1.01.12', debe: ajuste.toNumber(), haber: 0 }, { cuenta: '1.1.02.02', debe: 0, haber: ajuste.toNumber() }],
-    [`${seccionNiif(11)}, párrafos 11.21 a 11.26: deterioro por evidencia objetiva (pérdidas incurridas), evaluado en grupo por características similares de riesgo crediticio; no se reconocen pérdidas crediticias esperadas futuras`]);
+    [
+      `${seccionNiif(11)}, párrafos 11.21 a 11.26: deterioro por evidencia objetiva (pérdidas incurridas), evaluado en grupo por características similares de riesgo crediticio; no se reconocen pérdidas crediticias esperadas futuras`,
+      'Fiscal: solo se deducen las deudas manifiestamente incobrables, justificadas una a una (Reglamento de la Ley del Impuesto sobre la Renta, Decreto 43198-H, art. 17 inc. g)',
+    ],
+    ['ESTIMACION_NO_DEDUCIBLE: la estimación es una diferencia temporaria (Sección 29); el gasto no es deducible hasta que la deuda resulte manifiestamente incobrable.']);
+  // Estimación global: no es deducible para el impuesto sobre la renta.
+  if (ajuste.greaterThan(0)) asiento.deducibleRenta = false;
+  return asiento;
 }
 
 /** Provisión del impuesto sobre la renta corriente sobre la utilidad antes de impuesto (menos lo ya registrado). */

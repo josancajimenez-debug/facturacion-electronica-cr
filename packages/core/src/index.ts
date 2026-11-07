@@ -20,3 +20,4 @@ export * from './apertura';
 export * from './compras';
 export * from './transicion';
 export * from './indicadores';
+export * from './ivaDiferido';

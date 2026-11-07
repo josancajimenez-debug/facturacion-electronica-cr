@@ -26,6 +26,7 @@ import {
 import { REGEX_CLAVE } from './clave';
 import { validarRegimenVendedor } from './compras';
 import { REGEX_FECHA_RFC3339 } from './fechas';
+import { FUENTE_IVA_DIFERIDO, PLAZO_IVA_DIFERIDO_DIAS, SUJETOS_IVA_DIFERIDO } from './ivaDiferido';
 import { verificarUbicacion } from './ubicacion';
 import type { BorradorComprobante, Emisor, Identificacion, LineaCalculada, Referencia, Resumen, Validacion } from './tipos';
 
@@ -152,6 +153,12 @@ export function validarBorrador(
   if (b.condicionVenta === '99' && !largo(b.condicionVentaOtros, 5, 100)) err('condicionVentaOtros', 'Describa la condición de venta "Otros" (5-100 caracteres).');
   if (['02', '10'].includes(b.condicionVenta) && !(b.plazoCredito && b.plazoCredito > 0 && b.plazoCredito <= 99999)) {
     err('plazoCredito', 'El plazo de crédito (en días, mayor que cero) es obligatorio para crédito.');
+  }
+  if (b.condicionVenta === '10') {
+    adv('condicionVenta', SUJETOS_IVA_DIFERIDO, FUENTE_IVA_DIFERIDO);
+    if ((b.plazoCredito ?? 0) > PLAZO_IVA_DIFERIDO_DIAS) {
+      adv('plazoCredito', `El crédito puede pactarse a ${b.plazoCredito} días, pero el IVA diferido se paga a más tardar a los ${PLAZO_IVA_DIFERIDO_DIAS} días naturales de la emisión, aunque el cliente no haya pagado.`, FUENTE_IVA_DIFERIDO);
+    }
   }
 
   // ---- Moneda ----

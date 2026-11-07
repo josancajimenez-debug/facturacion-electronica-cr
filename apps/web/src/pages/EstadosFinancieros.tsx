@@ -1,4 +1,4 @@
-import { AVISO_NIIF_COMPLETAS, CATEGORIAS_INDICADORES, NOMBRE_EDICION_NIIF, NOMBRE_NIVEL_INDICADOR, NOMBRE_UNIDAD_INDICADOR, PARAMETROS_INDICADORES, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, diagnosticoFinanciero, esAplicacionAnticipadaNiif, estadosFinancieros, formatearIndicador, indicadoresFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
+import { AVISO_NIIF_COMPLETAS, CATEGORIAS_INDICADORES, criterioFiscalNiif, NOMBRE_EDICION_NIIF, NOMBRE_NIVEL_INDICADOR, NOMBRE_UNIDAD_INDICADOR, PARAMETROS_INDICADORES, TIPO_IDENTIFICACION, VIGENCIA_NIIF_2025, descripcion, diagnosticoFinanciero, esAplicacionAnticipadaNiif, estadosFinancieros, formatearIndicador, indicadoresFinancieros, nombreUbicacion, type RenglonEstado, type RenglonFlujo } from '@fe-cr/core';
 import { Download, Printer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -320,7 +320,7 @@ export function EstadosFinancieros() {
               )}
               <p>
                 Los registros contables se llevan conforme al artículo 128 del Código de Normas y Procedimientos Tributarios; las diferencias entre la base contable y la fiscal
-                se tratan según los criterios interpretativos de la Resolución DGT-R-029-2018.
+                se tratan según la {criterioFiscalNiif(desde).resolucion} ({criterioFiscalNiif(desde).detalle}).
               </p>
             </div>
             <div>
