@@ -1,0 +1,11 @@
+{
+  // El recorrido en navegador corre en Node (Playwright), no en el navegador: tiene sus propios tipos.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // DOM: las funciones de page.evaluate() se ejecutan dentro de la página.
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"]
+  },
+  "include": [".", "../playwright.config.ts", "../src/lib/rutas.ts"]
+}

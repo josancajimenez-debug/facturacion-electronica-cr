@@ -8,6 +8,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { Comprobante, Emisor } from '@fe-cr/core';
 import { App } from './App';
+import fuenteApp from './App.tsx?raw';
+import { rutasDeApp } from './lib/rutas';
 import { LocalBackend, borrarDatosLocales } from './backend/local';
 import { AppProvider } from './estado';
 import type { Recibido } from './backend/tipos';
@@ -64,14 +66,17 @@ beforeAll(async () => {
 
 afterAll(() => borrarDatosLocales());
 
-const RUTAS = [
-  '/', '/emitir', '/comprobantes', '/recepcion', '/emisor', '/receptores', '/proveedores', '/productos',
-  '/contabilidad/catalogo', '/contabilidad/apertura', '/contabilidad/transicion', '/contabilidad/diario',
-  '/contabilidad/mayor', '/contabilidad/ajustes-cierre', '/contabilidad/estados-financieros', '/reportes',
-  '/bitacora', '/escenarios', '/primeros-pasos', '/normativa', '/glosario', '/configuracion',
-];
+// Las rutas se leen de App.tsx: una pantalla nueva entra sola en esta prueba.
+const RUTAS = rutasDeApp(fuenteApp);
 
 describe('prueba de humo de la interfaz', () => {
+  it('lee de App.tsx todas las rutas de pantalla', () => {
+    expect(RUTAS).toContain('/');
+    expect(RUTAS).toContain('/contabilidad/estados-financieros');
+    expect(RUTAS).not.toContain('/contabilidad/inventarios-balances'); // solo redirige
+    expect(RUTAS.length).toBeGreaterThanOrEqual(22);
+  });
+
   it.each([...RUTAS, 'detalle'])('la ruta %s carga sin errores', async (ruta) => {
     const errores: string[] = [];
     // Las actualizaciones asíncronas posteriores (tipo de cambio, catálogos) ocurren fuera de act(): ese

@@ -15,3 +15,7 @@ emulator-data/
 # Generados por supabase/construir-edge.mjs
 supabase/functions/_shared/core.js
 supabase/functions/_shared/cabys-codigos.json
+
+# Resultados del recorrido en navegador (Playwright)
+test-results/
+playwright-report/

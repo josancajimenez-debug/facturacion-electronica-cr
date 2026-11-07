@@ -19,3 +19,28 @@ jobs:
       - run: npm run typecheck
       # core + web + supabase (esquema, RLS y función Edge sobre PostgreSQL en PGlite)
       - run: npm test
+
+  # Recorrido en Chromium real (escritorio, tablet, móvil y modo oscuro): cuenta local, datos de
+  # práctica, emisión desde el formulario y cada pantalla de App.tsx sin errores ni desborde.
+  navegador:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx -w apps/web playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run e2e -w apps/web
+        env:
+          CI: true
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorrido-navegador
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+          retention-days: 14
