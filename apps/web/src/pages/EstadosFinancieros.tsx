@@ -169,7 +169,7 @@ export function EstadosFinancieros() {
           <p>Juego completo de estados financieros con sus notas (NIIF para las PYMES, Secciones 3 a 8; Código de Comercio, art. 255).</p>
         </div>
         <div className="row no-print" style={{ alignItems: 'flex-end' }}>
-          <div style={{ width: 170 }}><Texto etiqueta="Corte al cierre de" tipo="month" valor={corte} onCambio={(v) => v && setCorte(v)} /></div>
+          <div className="campo-mes"><Texto etiqueta="Corte al cierre de" tipo="month" valor={corte} onCambio={(v) => v && setCorte(v)} /></div>
           <button className="btn" onClick={exportar}><Download /> CSV</button>
           <button className="btn" onClick={imprimir} title="Imprime o guarda en PDF el juego completo"><Printer /> Imprimir</button>
         </div>

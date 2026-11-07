@@ -65,12 +65,14 @@ export interface DocumentoResumen {
   moneda?: string;
   tipoCambio?: number;
   cabys?: string[];
+  condicionVenta?: string;
 }
 
 export function resumenDocumento(c: Pick<Comprobante, 'clave' | 'tipo' | 'resumen' | 'borrador'>): DocumentoResumen {
   return {
     clave: c.clave,
     tipo: c.tipo,
+    condicionVenta: c.borrador.condicionVenta,
     totalCRC: c.resumen.totalComprobante * (c.resumen.tipoCambio || 1),
     referencias: c.borrador.referencias.map((r) => r.numero ?? '').filter(Boolean),
     moneda: c.resumen.codigoMoneda,

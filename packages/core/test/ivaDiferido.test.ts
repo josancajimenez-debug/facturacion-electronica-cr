@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { resumenDocumento } from '../src/actualizacion';
 import { generarLibroDiario } from '../src/contabilidad';
-import { EMISOR_DEMO } from '../src/datos-demo';
+import { contextoSimuladorDemo, EMISOR_DEMO } from '../src/datos-demo';
+import { validarComoHacienda } from '../src/simulador';
 import { construirComprobante } from '../src/emision';
 import { ivaDiferidoDelPeriodo, venceIvaDiferido } from '../src/ivaDiferido';
 import type { BorradorComprobante, Comprobante } from '../src/tipos';
@@ -69,6 +71,27 @@ describe('IVA diferido (condición 10; art. 27 LIVA y art. 40 bis RLIVA)', () =>
     expect(asientoRep.alertas.join(' ')).toContain('IVA_DIFERIDO_VENCIDO');
     expect(saldo(l, '2.1.02.02')).toBeCloseTo(0, 2);
     expect(saldo(l, '2.1.02.01')).toBeCloseTo(13000, 2);
+  });
+
+  it('regresión: un REP sobre una venta a crédito sin IVA diferido (condición 02) no traslada IVA', () => {
+    const fe = emitir(borrador({ condicionVenta: '02', plazoCredito: 30, mediosPago: [] }), 1, '2026-01-10T10:00:00-06:00');
+    const l = libro([fe, rep(fe, 2, '2026-02-01T10:00:00-06:00')], '2026-12-31');
+    const asientoRep = l.asientos.find((a) => a.origen.tipo === 'REP')!;
+    expect(asientoRep.lineas.map((x) => x.cuenta)).not.toContain('2.1.02.02');
+    expect(asientoRep.alertas.join(' ')).toContain('REP_SIN_IVA_DIFERIDO');
+    expect(saldo(l, '2.1.02.02')).toBeCloseTo(0, 2);
+    expect(saldo(l, '2.1.02.01')).toBeCloseTo(13000, 2);
+  });
+
+  it('el simulador advierte un REP sobre una venta cuya condición no difiere el IVA', () => {
+    const fe = emitir(borrador({ condicionVenta: '02', plazoCredito: 30, mediosPago: [] }), 1, '2026-01-10T10:00:00-06:00');
+    const r = rep(fe, 2, '2026-02-01T10:00:00-06:00');
+    const h = validarComoHacienda(r, { ...contextoSimuladorDemo(), ahora: new Date('2026-02-01T10:05:00-06:00'), cabysValido: () => true, documentosAceptados: [resumenDocumento(fe)] });
+    expect(h.detalle).toEqual([]);
+    expect(h.advertencias?.join(' ')).toContain('su IVA no está diferido');
+    const conDiez = venta();
+    const ok = validarComoHacienda(rep(conDiez, 3, '2026-02-01T10:00:00-06:00'), { ...contextoSimuladorDemo(), ahora: new Date('2026-02-01T10:05:00-06:00'), cabysValido: () => true, documentosAceptados: [resumenDocumento(conDiez)] });
+    expect(ok.advertencias?.join(' ') ?? '').not.toContain('su IVA no está diferido');
   });
 
   it('nota de crédito sobre IVA ya vencido: lo rebaja del IVA repercutido', () => {

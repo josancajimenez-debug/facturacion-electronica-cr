@@ -501,12 +501,16 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
       contrapartida(pagado, true);
       P.add('1.1.02.01', pagado.negated());
       const ivaCrc = iva.times(doc.tipoCambio || 1);
+      const conDiferido = !!ref?.numero && !!ctx.ivaDiferido?.facturas.has(ref.numero);
       const { diferido, seguido } = ctx.ivaDiferido?.aplicar(ref?.numero, ivaCrc) ?? { diferido: ivaCrc, seguido: false };
-      // Solo se traslada lo que sigue diferido: si pasaron los 90 días, el IVA ya se trasladó al vencer.
+      // Solo se traslada lo que sigue diferido: si pasaron los 90 días, el IVA ya se trasladó al vencer, y
+      // si la venta no difirió el IVA (p. ej. crédito con condición 02) ya está en el IVA repercutido.
       P.crc('2.1.02.02', diferido);
       P.crc('2.1.02.01', diferido.negated());
-      if (seguido && diferido.lessThan(ivaCrc.toDecimalPlaces(2))) {
-        alerta('IVA_DIFERIDO_VENCIDO', `El cobro llega después de los ${PLAZO_IVA_DIFERIDO_DIAS} días naturales: ₡${ivaCrc.minus(diferido).toFixed(2)} de IVA ya se habían trasladado al IVA repercutido al vencer el plazo.`, false);
+      if (seguido && !conDiferido) {
+        alerta('REP_SIN_IVA_DIFERIDO', 'El comprobante pagado no difirió el IVA (su condición de venta no es 08 ni 10): el impuesto ya estaba en el IVA repercutido y el recibo no lo traslada.');
+      } else if (seguido && diferido.lessThan(ivaCrc.toDecimalPlaces(2))) {
+        alerta('IVA_DIFERIDO_VENCIDO', `El cobro llega después de los ${PLAZO_IVA_DIFERIDO_DIAS} días naturales o supera el IVA pendiente: ₡${ivaCrc.minus(diferido).toFixed(2)} de IVA ya estaban en el IVA repercutido.`, false);
         fundamento.add(FUENTE_IVA_DIFERIDO);
       }
     } else {
@@ -563,7 +567,11 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
     contrapartida(D(s * doc.totalComprobante));
     niif(23);
     const ivaCrc = suma(doc.lineas, (l) => l.iva).times(doc.tipoCambio || 1);
-    if (ctx.ivaDiferido && originaIvaDiferido(doc.tipo, doc.condicionVenta)) ctx.ivaDiferido.registrar(doc.clave, doc.fecha, ivaCrc);
+    if (ctx.ivaDiferido && doc.tipo !== 'NC') {
+      if (originaIvaDiferido(doc.tipo, doc.condicionVenta)) ctx.ivaDiferido.registrar(doc.clave, doc.fecha, ivaCrc);
+      else if (doc.condicionVenta === '08') ctx.ivaDiferido.registrar(doc.clave, doc.fecha, ivaCrc, false);
+      else ctx.ivaDiferido.conocer(doc.clave);
+    }
     if (ctx.ivaDiferido && doc.tipo === 'NC' && ivaDiferido) {
       const { diferido, seguido } = ctx.ivaDiferido.aplicar(ref?.numero, ivaCrc);
       const yaTrasladado = ivaCrc.minus(diferido);
@@ -678,7 +686,7 @@ export function generarAsiento(doc: DocumentoContable, ctx: ContextoContable): A
  * Vencimiento del pago diferido: a los 90 días naturales de la emisión el IVA no cobrado se traslada
  * de «IVA por devengar» a «IVA repercutido» y se declara en ese período (art. 40 bis RLIVA, inc. d y op. 3).
  */
-export function asientoVencimientoIvaDiferido(f: Pick<FacturaIvaDiferido, 'clave' | 'fecha' | 'vence'>, monto: Decimal.Value, consecutivo?: string): Asiento {
+export function asientoVencimientoIvaDiferido(f: Pick<FacturaIvaDiferido, 'clave' | 'fecha'> & { vence: string }, monto: Decimal.Value, consecutivo?: string): Asiento {
   const m = D(monto).toDecimalPlaces(2).toNumber();
   return {
     numero: 0,

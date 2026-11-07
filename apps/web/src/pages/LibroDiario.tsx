@@ -42,8 +42,8 @@ export function LibroDiario() {
         <div className="row" style={{ alignItems: 'flex-end' }}>
           {!clave && (
             <>
-              <div style={{ width: 160 }}><Texto etiqueta="Desde" tipo="month" valor={desde} onCambio={(v) => { if (!v) return; setDesde(v); if (v > hasta) setHasta(v); }} /></div>
-              <div style={{ width: 160 }}><Texto etiqueta="Hasta" tipo="month" valor={hasta} onCambio={(v) => { if (!v) return; setHasta(v); if (v < desde) setDesde(v); }} /></div>
+              <div className="campo-mes"><Texto etiqueta="Desde" tipo="month" valor={desde} onCambio={(v) => { if (!v) return; setDesde(v); if (v > hasta) setHasta(v); }} /></div>
+              <div className="campo-mes"><Texto etiqueta="Hasta" tipo="month" valor={hasta} onCambio={(v) => { if (!v) return; setHasta(v); if (v < desde) setDesde(v); }} /></div>
             </>
           )}
           <button className="btn" onClick={exportar} disabled={asientos.length === 0}><Download /> CSV</button>

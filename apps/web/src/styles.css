@@ -157,6 +157,8 @@ code, .mono { font-family: var(--mono); font-size: 12.5px; }
 .split { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
 .sticky { position: sticky; top: 72px; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+/* Selector de mes: el texto más largo («septiembre de 2026») más el ícono necesita ~200 px. */
+.campo-mes { flex: 0 1 205px; min-width: 0; max-width: 100%; }
 .stack { display: flex; flex-direction: column; gap: 12px; }
 
 .btn {

@@ -115,7 +115,7 @@ export function Reportes() {
           <p>Resumen del período a partir de comprobantes aceptados por el simulador. Útil como apoyo, no sustituye la declaración de IVA (D-104) en TRIBU-CR.</p>
         </div>
         <div className="row" style={{ alignItems: 'flex-end' }}>
-          <div style={{ width: 170 }}><Texto etiqueta="Período" tipo="month" valor={mes} onCambio={(v) => setMes(v || mesCR())} /></div>
+          <div className="campo-mes"><Texto etiqueta="Período" tipo="month" valor={mes} onCambio={(v) => setMes(v || mesCR())} /></div>
           <button className="btn" onClick={exportar}><Download /> CSV</button>
         </div>
       </div>
@@ -152,7 +152,7 @@ export function Reportes() {
           <div className="table-wrap">
             <table>
               <thead><tr><th>Tipo</th><th className="right">Cant.</th><th className="right">Venta neta</th><th className="right">Impuesto</th></tr></thead>
-              <tbody>{datos.tipos.map((f) => <tr key={f.clave}><td>{f.etiqueta}</td><td className="num">{f.cantidad}</td><td className="num">{dinero(f.base)}</td><td className="num">{dinero(f.impuesto)}</td></tr>)}</tbody>
+              <tbody>{datos.tipos.length === 0 && <tr><td colSpan={4} className="muted">Sin comprobantes aceptados en el período.</td></tr>}{datos.tipos.map((f) => <tr key={f.clave}><td>{f.etiqueta}</td><td className="num">{f.cantidad}</td><td className="num">{dinero(f.base)}</td><td className="num">{dinero(f.impuesto)}</td></tr>)}</tbody>
             </table>
           </div>
         </div>

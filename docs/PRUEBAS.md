@@ -7,6 +7,35 @@
 | `npm run build` | Paquete de la función Edge y compilación de la web | Node | ✔ |
 | `npm audit` | Vulnerabilidades conocidas en dependencias | Node | 0 ✔ |
 
+## Revisión integral del 7/11/2026
+
+**Pruebas de propiedades** (`propiedades.test.ts`, semilla fija y reproducible):
+
+- 500 comprobantes al azar (líneas, cantidades fraccionarias, colones y dólares, tarifas 0,5-13 %, exentos, descuentos, exoneraciones, otros cargos, contado y crédito). Cada comprobante que la app da por válido:
+  - cuadra (total = Σ líneas + otros cargos − IVA devuelto; línea = subtotal + impuesto neto);
+  - no contiene `NaN`, `Infinity` ni `undefined`;
+  - el simulador lo acepta;
+  - genera un asiento cuadrado.
+- Ocho años simulados de operaciones con crédito, REP parciales y notas de crédito:
+  - los estados financieros cuadran;
+  - el saldo de «IVA por devengar» coincide con el IVA que el reporte del art. 40 bis dejó sin declarar.
+
+**Navegador real** (Chromium sin interfaz, modo local, con datos de demostración y los 15 escenarios):
+
+- 22 rutas en escritorio (1366 px), tablet (820 px), móvil (375 px) y modo oscuro: sin errores ni advertencias de consola, sin excepciones, sin solicitudes fallidas y sin desborde horizontal.
+- 85 botones no destructivos pulsados en 21 rutas: sin errores.
+- Emisión completa desde el formulario (receptor, producto, envío y aceptación).
+- Eliminación con confirmación en Productos, Receptores y Proveedores.
+- Descarga de XML y PDF de los 14 comprobantes y CSV de siete páginas: sin `undefined`, `NaN` ni `[object Object]`.
+- `npm audit --omit=dev`: 0 vulnerabilidades.
+
+| Error | Causa | Prueba |
+| --- | --- | --- |
+| Un REP sobre una venta a crédito sin IVA diferido (condición 02) trasladaba su IVA de «IVA por devengar» a «IVA repercutido»: la cuenta quedaba negativa y el IVA se contaba dos veces | El libro suponía que todo REP paga IVA diferido | `ivaDiferido.test.ts` › regresión: un REP sobre una venta a crédito sin IVA diferido; `propiedades.test.ts` |
+| El simulador no advertía un REP que paga una venta cuya condición no difiere el IVA | No consultaba la condición del comprobante referenciado | `ivaDiferido.test.ts` › el simulador advierte un REP… |
+| El selector de mes cortaba el año («noviembre de 202…») en Libro diario, Libro mayor, Estados financieros y Reportes | Ancho fijo de 160-170 px | Recorrido en navegador (capturas en 375 px) |
+| La tabla «Por tipo de comprobante» de Reportes quedaba vacía sin mensaje | Faltaba el estado vacío | Recorrido en navegador |
+
 ## Pruebas de regresión de la revisión integral (23/10/2026)
 
 Cada error corregido quedó cubierto por una prueba automática:

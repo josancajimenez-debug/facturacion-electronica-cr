@@ -155,6 +155,18 @@ export function validarComoHacienda(c: Comprobante, ctx: ContextoSimulador = {})
       }
     }
 
+    // El REP documenta el pago de una venta con IVA diferido: condición 11 para las ventas con la 10 y
+    // condición 09 para los servicios al Estado (08) (nota 5). Otro caso no difiere el IVA.
+    if (c.tipo === 'REP' && ctx.documentosAceptados) {
+      const esperada: Record<string, string> = { '11': '10', '09': '08' };
+      for (const r of c.borrador.referencias) {
+        const d = r.numero ? ctx.documentosAceptados.find((x) => x.clave === r.numero) : undefined;
+        if (d?.condicionVenta && d.condicionVenta !== esperada[c.borrador.condicionVenta]) {
+          advertencias.push(`El REP con condición ${c.borrador.condicionVenta} paga ventas con condición ${esperada[c.borrador.condicionVenta]}, pero el comprobante ${r.numero!.slice(21, 41)} tiene la condición ${d.condicionVenta}: su IVA no está diferido (Anexo v4.4, nota 5; LIVA art. 27) (advertencia).`);
+        }
+      }
+    }
+
     if (ctx.forzarRechazo) detalle.push(`Nivel 3: ${ctx.forzarRechazo}`);
     if (detalle.length) nivelFallido = 3;
   }

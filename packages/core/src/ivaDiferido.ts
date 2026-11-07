@@ -38,37 +38,55 @@ export function venceIvaDiferido(fechaEmision: string): string {
 export interface FacturaIvaDiferido {
   clave: string;
   fecha: string;
-  vence: string;
+  /** Último día de pago (condición 10). Sin valor: el IVA se difiere hasta el cobro, sin plazo (condición 08). */
+  vence?: string;
   /** IVA diferido original en colones. */
   iva: Decimal;
   /** IVA todavía diferido (no cobrado, no vencido, no anulado). */
   pendiente: Decimal;
 }
 
-/** Saldo del IVA diferido de cada factura con condición 10, en colones. */
+/**
+ * Saldo del IVA diferido de cada venta, en colones. Conoce además todas las ventas contabilizadas, para
+ * que un cobro sobre una venta sin IVA diferido no traslade un IVA que nunca estuvo «por devengar».
+ */
 export class RegistroIvaDiferido {
   readonly facturas = new Map<string, FacturaIvaDiferido>();
+  private readonly conocidas = new Set<string>();
 
-  registrar(clave: string, fecha: string, iva: Decimal.Value): void {
+  /** Venta contabilizada; si difiere IVA, se registra con su plazo (o sin plazo en la condición 08). */
+  registrar(clave: string, fecha: string, iva: Decimal.Value, conPlazo = true): void {
+    this.conocidas.add(clave);
     const monto = new Decimal(iva);
     if (monto.lessThanOrEqualTo(0)) return;
-    this.facturas.set(clave, { clave, fecha: fecha.slice(0, 10), vence: venceIvaDiferido(fecha), iva: monto, pendiente: monto });
+    this.facturas.set(clave, { clave, fecha: fecha.slice(0, 10), vence: conPlazo ? venceIvaDiferido(fecha) : undefined, iva: monto, pendiente: monto });
   }
 
-  /** Aplica un cobro (REP) o una nota de crédito: devuelve la parte que seguía diferida. */
+  /** Venta contabilizada sin IVA diferido (contado, crédito normal, etc.). */
+  conocer(clave: string): void {
+    this.conocidas.add(clave);
+  }
+
+  /**
+   * Aplica un cobro (REP) o una nota de crédito: devuelve la parte que seguía diferida. `seguido` indica
+   * que la venta está en el registro; si no se conoce (p. ej. es anterior al libro), todo el monto se
+   * trata como diferido, que es lo que supone el comprobante.
+   */
   aplicar(clave: string | undefined, monto: Decimal.Value): { diferido: Decimal; seguido: boolean } {
-    const f = clave ? this.facturas.get(clave) : undefined;
     const m = Decimal.max(new Decimal(monto), 0);
-    if (!f) return { diferido: m, seguido: false };
+    if (!clave || !this.conocidas.has(clave)) return { diferido: m, seguido: false };
+    const f = this.facturas.get(clave);
+    if (!f) return { diferido: new Decimal(0), seguido: true };
     const diferido = Decimal.min(m, f.pendiente);
     f.pendiente = f.pendiente.minus(diferido);
     return { diferido, seguido: true };
   }
 
   /** Facturas cuyo plazo venció antes de `fecha` (AAAA-MM-DD) con IVA pendiente: lo devenga y lo devuelve. */
-  vencer(antesDe: string): { factura: FacturaIvaDiferido; monto: Decimal }[] {
-    const out: { factura: FacturaIvaDiferido; monto: Decimal }[] = [];
-    for (const f of [...this.facturas.values()].sort((a, b) => a.vence.localeCompare(b.vence) || a.clave.localeCompare(b.clave))) {
+  vencer(antesDe: string): { factura: FacturaIvaDiferido & { vence: string }; monto: Decimal }[] {
+    const out: { factura: FacturaIvaDiferido & { vence: string }; monto: Decimal }[] = [];
+    const conPlazo = [...this.facturas.values()].filter((f): f is FacturaIvaDiferido & { vence: string } => !!f.vence);
+    for (const f of conPlazo.sort((a, b) => a.vence.localeCompare(b.vence) || a.clave.localeCompare(b.clave))) {
       if (f.vence < antesDe && f.pendiente.greaterThan(0)) {
         out.push({ factura: f, monto: f.pendiente });
         f.pendiente = new Decimal(0);
@@ -166,7 +184,7 @@ export function ivaDiferidoDelPeriodo(comprobantes: Comprobante[], mes: string, 
   vencerHasta(corte);
   for (const f of reg.facturas.values()) {
     if (enMes(f.fecha) && f.pendiente.greaterThan(0)) { r.diferido += f.pendiente.toNumber(); r.detalle.diferido.push(fila(f.clave, f.fecha, f.pendiente, f.vence)); }
-    if (enMes(f.vence) && f.pendiente.greaterThan(0)) r.porVencer.push(fila(f.clave, f.fecha, f.pendiente, f.vence));
+    if (f.vence && enMes(f.vence) && f.pendiente.greaterThan(0)) r.porVencer.push(fila(f.clave, f.fecha, f.pendiente, f.vence));
   }
   const dos = (n: number) => new Decimal(n).toDecimalPlaces(2).toNumber();
   r.diferido = dos(r.diferido);
