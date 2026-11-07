@@ -359,6 +359,34 @@ export function descripcion(catalogo: Codigo[], codigo: string | undefined): str
   return catalogo.find((c) => c.codigo === codigo)?.descripcion ?? codigo;
 }
 
+/**
+ * «código – descripción»: deja identificar el código que viaja en el XML junto con su significado.
+ * Si el código no está en el catálogo se muestra tal cual.
+ */
+export function conCodigo(catalogo: Codigo[], codigo: string | undefined): string {
+  if (!codigo) return '';
+  const d = catalogo.find((c) => c.codigo === codigo)?.descripcion;
+  return d ? `${codigo} – ${d}` : codigo;
+}
+
+const NOMBRE_MENSAJE_RECEPTOR: Record<TipoMensajeReceptor, string> = {
+  CCE: 'Confirmación de aceptación',
+  CPCE: 'Confirmación de aceptación parcial',
+  RCE: 'Confirmación de rechazo',
+};
+
+/** Nota 3: «01 – Factura Electrónica (FE)», con el código de las posiciones 9 y 10 del consecutivo. */
+export function codigoComprobante(tipo: TipoComprobante | TipoMensajeReceptor): string {
+  const nombre = tipo in NOMBRE_MENSAJE_RECEPTOR ? NOMBRE_MENSAJE_RECEPTOR[tipo as TipoMensajeReceptor] : NOMBRE_COMPROBANTE[tipo as TipoComprobante];
+  return `${CODIGO_TIPO_DOCUMENTO[tipo]} – ${nombre} (${tipo})`;
+}
+
+/** Nombre del tipo de comprobante a partir del código de la nota 3 («01» → «01 – Factura Electrónica (FE)»). */
+export function comprobantePorCodigo(codigo: string): string {
+  const sigla = (Object.keys(CODIGO_TIPO_DOCUMENTO) as (TipoComprobante | TipoMensajeReceptor)[]).find((s) => CODIGO_TIPO_DOCUMENTO[s] === codigo);
+  return sigla ? codigoComprobante(sigla) : codigo;
+}
+
 export function tarifaIva(codigo: string | undefined): TarifaIva | undefined {
   return TARIFA_IVA.find((t) => t.codigo === codigo);
 }

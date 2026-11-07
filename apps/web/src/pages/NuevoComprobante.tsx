@@ -1,6 +1,8 @@
 import {
   CODIGO_DESCUENTO,
+  CODIGO_IMPUESTO,
   CODIGO_REFERENCIA,
+  CODIGO_TIPO_DOCUMENTO,
   CONDICION_VENTA,
   FORMA_FARMACEUTICA,
   FORMAS_FARMACEUTICAS_MINSA,
@@ -18,6 +20,8 @@ import {
   TIPO_TRANSACCION,
   UNIDAD_MEDIDA,
   ajustarFecAlRegimen,
+  codigoComprobante,
+  conCodigo,
   fechaEmisionCR,
   infoRegimen,
   previsualizar,
@@ -30,11 +34,12 @@ import {
   type TipoComprobante,
   type Validacion,
 } from '@fe-cr/core';
+import { actividadCiiu4 } from '@fe-cr/core/actividades';
 import { Plus, Send, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorConValidaciones } from '../backend/tipos';
-import { CabysBuscador } from '../components/CabysBuscador';
+import { CabysBuscador, DescripcionCabys } from '../components/CabysBuscador';
 import { UbicacionCampos } from '../components/UbicacionCampos';
 import { Alerta, Campo, ListaValidaciones, Selector, Texto } from '../components/ui';
 import { useApp } from '../estado';
@@ -227,15 +232,15 @@ export function NuevoComprobante() {
     <>
       <div className="page-head">
         <div>
-          <h1>Emitir {NOMBRE_COMPROBANTE[b.tipo]}</h1>
-          <p>El consecutivo y la clave numérica se asignan al emitir; si hay errores no se consume numeración.</p>
+          <h1>Emitir {NOMBRE_COMPROBANTE[b.tipo]} <span className="badge mono" title="Código del tipo de comprobante (nota 3): posiciones 9 y 10 del consecutivo">{CODIGO_TIPO_DOCUMENTO[b.tipo]} · {b.tipo}</span></h1>
+          <p>Tipo de comprobante {codigoComprobante(b.tipo)} (nota 3). El consecutivo y la clave numérica se asignan al emitir; si hay errores no se consume numeración.</p>
         </div>
       </div>
 
       <div className="segmented" role="tablist" aria-label="Tipo de comprobante" style={{ marginBottom: 16 }}>
         {TIPOS.map((t) => (
-          <button key={t.codigo} role="tab" aria-selected={b.tipo === t.codigo} className={b.tipo === t.codigo ? 'on' : ''} onClick={() => set({ tipo: t.codigo })}>
-            {t.corto}
+          <button key={t.codigo} role="tab" aria-selected={b.tipo === t.codigo} className={b.tipo === t.codigo ? 'on' : ''} onClick={() => set({ tipo: t.codigo })} title={codigoComprobante(t.codigo)}>
+            <span className="mono small">{CODIGO_TIPO_DOCUMENTO[t.codigo]}</span> {t.corto}
           </button>
         ))}
       </div>
@@ -330,7 +335,9 @@ export function NuevoComprobante() {
                 <Alerta tipo="info">Este receptor tiene exoneración {receptor.exoneracion.numeroDocumento} ({receptor.exoneracion.tarifaExonerada}%). Se aplicará a las líneas que agregue.</Alerta>
               )}
               {!esFEC && (
-                <Texto etiqueta="Actividad económica del receptor" valor={b.codigoActividadReceptor} onCambio={(v) => set({ codigoActividadReceptor: v || undefined })} ayuda="Para FE: cuando el receptor la requiera para crédito o gasto (el MH comunicará su obligatoriedad)." deshabilitado={['TE', 'FEE', 'REP'].includes(b.tipo)} />
+                <Texto etiqueta="Actividad económica del receptor" valor={b.codigoActividadReceptor} onCambio={(v) => set({ codigoActividadReceptor: v || undefined })} ayuda={b.codigoActividadReceptor
+                  ? actividadCiiu4(b.codigoActividadReceptor) ? `${b.codigoActividadReceptor} – ${actividadCiiu4(b.codigoActividadReceptor)!.descripcion}` : `El código ${b.codigoActividadReceptor} no está en el listado CIIU 4 de TRIBU-CR.`
+                  : 'Para FE: cuando el receptor la requiera para crédito o gasto (el MH comunicará su obligatoriedad).'} deshabilitado={['TE', 'FEE', 'REP'].includes(b.tipo)} />
               )}
             </div>
           </div>
@@ -367,13 +374,18 @@ export function NuevoComprobante() {
                           <input id={id} className="mono" value={l.codigoCabys} onChange={(e) => setLinea(i, { codigoCabys: e.target.value.replace(/\D/g, '').slice(0, 13) })} />
                           <button className="btn btn-sm" onClick={() => setBuscarCabysEn(buscarCabysEn === i ? null : i)}>Buscar</button>
                         </div>
-                      )}</Campo></div>
+                      )}</Campo><DescripcionCabys codigo={l.codigoCabys} /></div>
                       <div style={{ gridColumn: 'span 2' }}><Texto etiqueta="Detalle" valor={l.detalle} onCambio={(v) => setLinea(i, { detalle: v })} max={200} /></div>
                       <Texto etiqueta="Cantidad" tipo="number" paso="0.001" valor={l.cantidad} onCambio={(v) => setLinea(i, { cantidad: Number(v) })} />
                       <Selector etiqueta="Unidad" valor={l.unidadMedida} mostrarCodigo={false} onCambio={(v) => setLinea(i, { unidadMedida: v })} opciones={UNIDAD_MEDIDA.map((u) => ({ codigo: u.codigo, descripcion: `${u.codigo} – ${u.descripcion}` }))} />
                       <Texto etiqueta={b.tipo === 'REP' ? 'Monto del pago' : 'Precio unitario'} tipo="number" paso="0.00001" valor={l.precioUnitario} onCambio={(v) => setLinea(i, { precioUnitario: Number(v) })} />
                       <Selector etiqueta="Tarifa IVA" valor={l.codigoTarifaIva} mostrarCodigo={false} onCambio={(v) => setLinea(i, { codigoTarifaIva: v })} opciones={TARIFA_IVA.filter((t) => !t.soloAjustes || ['NC', 'ND'].includes(b.tipo)).map((t) => ({ codigo: t.codigo, descripcion: `${t.codigo} – ${t.descripcion}` }))} />
                     </div>
+                    {l.impuestosAdicionales?.length ? (
+                      <p className="small muted" style={{ margin: '6px 0 0' }}>
+                        Impuestos adicionales (nota 8): {l.impuestosAdicionales.map((x) => `${conCodigo(CODIGO_IMPUESTO, x.codigo)}${x.codigoOtro ? ` «${x.codigoOtro}»` : ''} (${x.tarifa} %)`).join(' · ')}
+                      </p>
+                    ) : null}
                     <details style={{ marginTop: 8 }}>
                       <summary className="small" style={{ cursor: 'pointer' }}>Descuentos, exoneración y datos adicionales</summary>
                       <div className="stack" style={{ marginTop: 8 }}>
@@ -547,7 +559,7 @@ export function NuevoComprobante() {
                     {r.totalDescuentos > 0 && <tr><td>Descuentos</td><td className="num">−{dinero(r.totalDescuentos, b.moneda)}</td></tr>}
                     <tr><td>Venta neta</td><td className="num">{dinero(r.totalVentaNeta, b.moneda)}</td></tr>
                     {r.totalDesgloseImpuesto.filter((d) => d.totalMontoImpuesto > 0).map((d) => (
-                      <tr key={`${d.codigo}${d.codigoTarifaIva}`}><td className="small muted">Impuesto {d.codigo}{d.codigoTarifaIva ? ` · tarifa ${d.codigoTarifaIva}` : ''}</td><td className="num small">{dinero(d.totalMontoImpuesto, b.moneda)}</td></tr>
+                      <tr key={`${d.codigo}${d.codigoTarifaIva}`}><td className="small muted">{conCodigo(CODIGO_IMPUESTO, d.codigo)}{d.codigoTarifaIva ? ` · tarifa ${conCodigo(TARIFA_IVA, d.codigoTarifaIva)}` : ''}</td><td className="num small">{dinero(d.totalMontoImpuesto, b.moneda)}</td></tr>
                     ))}
                     <tr><td>Total impuesto</td><td className="num">{dinero(r.totalImpuesto, b.moneda)}</td></tr>
                     {r.totalImpAsumEmisorFabrica > 0 && <tr><td>Impuesto asumido por el emisor</td><td className="num">{dinero(r.totalImpAsumEmisorFabrica, b.moneda)}</td></tr>}

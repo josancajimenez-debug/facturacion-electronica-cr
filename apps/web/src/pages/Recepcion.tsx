@@ -1,4 +1,4 @@
-import { CONDICION_IMPUESTO, MENSAJE, limiteConfirmacionReceptor, nombresArchivo, type Validacion } from '@fe-cr/core';
+import { CONDICION_IMPUESTO, MENSAJE, codigoComprobante, type TipoMensajeReceptor, limiteConfirmacionReceptor, nombresArchivo, type Validacion } from '@fe-cr/core';
 import { Download, Inbox, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -106,7 +106,7 @@ export function Recepcion() {
             {viendo.confirmacion && <button className="btn" onClick={() => descargar(nombresArchivo.confirmacion(viendo.clave, viendo.confirmacion!.consecutivo), viendo.confirmacion!.xml)}><Download /> Mensaje receptor</button>}
           </>}>
           <div className="stack">
-            {viendo.confirmacion && <Alerta tipo="ok">Confirmación {viendo.confirmacion.tipo} · consecutivo <span className="mono">{viendo.confirmacion.consecutivo}</span> · respuesta Hacienda: {viendo.confirmacion.respuestaHacienda}</Alerta>}
+            {viendo.confirmacion && <Alerta tipo="ok">{codigoComprobante(viendo.confirmacion.tipo as TipoMensajeReceptor)} · consecutivo <span className="mono">{viendo.confirmacion.consecutivo}</span> · respuesta Hacienda: {viendo.confirmacion.respuestaHacienda}</Alerta>}
             {viendo.confirmacion?.advertencias?.map((a, i) => <Alerta key={i} tipo="warn">{a}</Alerta>)}
             <VisorXml xml={viendo.confirmacion?.xml ?? viendo.xml ?? ''} />
           </div>

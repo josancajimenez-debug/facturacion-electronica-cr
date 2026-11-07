@@ -52,3 +52,33 @@ export function CabysBuscador({ onElegir }: { onElegir: (item: ItemCabys) => voi
     </div>
   );
 }
+
+/**
+ * Muestra a qué bien o servicio corresponde el código CAByS escrito en la línea, para que se identifique
+ * el código antes de emitir (nota 17). Avisa si el código no existe en el catálogo 2025.
+ */
+export function DescripcionCabys({ codigo }: { codigo: string }) {
+  const [texto, setTexto] = useState<{ ok: boolean; texto: string } | null>(null);
+  useEffect(() => {
+    let vigente = true;
+    if (codigo.length !== 13) {
+      setTexto(codigo ? { ok: false, texto: `Faltan ${13 - codigo.length} dígitos (el CAByS tiene 13).` } : null);
+      return;
+    }
+    cargarCabys().then(
+      (c) => {
+        if (!vigente) return;
+        const item = c.porCodigo.get(codigo);
+        setTexto(item
+          ? { ok: true, texto: `${item.descripcion} · IVA ${item.impuesto}${item.codigoTarifaIva ? ` (tarifa ${item.codigoTarifaIva} – ${descripcion(TARIFA_IVA, item.codigoTarifaIva)})` : ''}` }
+          : { ok: false, texto: 'El código no existe en el catálogo CAByS 2025.' });
+      },
+      () => vigente && setTexto(null),
+    );
+    return () => {
+      vigente = false;
+    };
+  }, [codigo]);
+  if (!texto) return null;
+  return <div className="field" style={{ marginTop: 4 }}><span className={texto.ok ? 'hint' : 'error'} aria-live="polite">{texto.texto}</span></div>;
+}

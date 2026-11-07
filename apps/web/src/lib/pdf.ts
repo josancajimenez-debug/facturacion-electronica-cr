@@ -6,6 +6,9 @@
  *   lo comunique; por eso es opcional y está desactivado por defecto (Configuración).
  */
 import {
+  CODIGO_IMPUESTO,
+  CODIGO_REFERENCIA,
+  CODIGO_TIPO_DOCUMENTO,
   CONDICION_VENTA,
   FORMA_FARMACEUTICA,
   FORMAS_FARMACEUTICAS_MINSA,
@@ -15,11 +18,20 @@ import {
   nombreUbicacion,
   TIPO_DOC_REFERENCIA,
   TIPO_IDENTIFICACION,
+  conCodigo,
   descripcion,
   type Comprobante,
   type Contraparte,
 } from '@fe-cr/core';
+import { actividadCiiu4 } from '@fe-cr/core/actividades';
 import { fechaHora, numero } from './formato';
+
+/** «6920.0 – Actividades de contabilidad…» cuando el código está en el listado CIIU 4. */
+function actividadConNombre(codigo: string | undefined): string {
+  if (!codigo) return '';
+  const a = actividadCiiu4(codigo);
+  return a ? `${codigo} – ${a.descripcion}` : codigo;
+}
 
 export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean }): Promise<Blob> {
   const { jsPDF } = await import('jspdf');
@@ -44,7 +56,7 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
   // Bloque del documento (Nota 1: tipo, clave y consecutivo juntos)
   const bx = 118;
   doc.setDrawColor(15, 118, 110).setLineWidth(0.4).roundedRect(bx, y, 210 - M - bx, 34, 2, 2);
-  doc.setTextColor(15, 118, 110).setFontSize(11.5).text(NOMBRE_COMPROBANTE[c.tipo], bx + 3, y + 6);
+  doc.setTextColor(15, 118, 110).setFontSize(11.5).text(`${NOMBRE_COMPROBANTE[c.tipo]} (${CODIGO_TIPO_DOCUMENTO[c.tipo]})`, bx + 3, y + 6);
   doc.setTextColor(30, 41, 59).setFontSize(7.5).setFont('helvetica', 'normal');
   doc.text('Clave numérica:', bx + 3, y + 11.5);
   doc.setFont('courier', 'normal').setFontSize(7.6);
@@ -91,10 +103,10 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
   // Condiciones
   doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(30, 41, 59);
   const cond = [
-    `Condición de venta: ${descripcion(CONDICION_VENTA, c.borrador.condicionVenta)}${c.borrador.plazoCredito ? ` (${c.borrador.plazoCredito} días)` : ''}`,
-    `Medio(s) de pago: ${c.resumen.mediosPago.map((m) => (m.tipo === '99' ? m.otros : descripcion(MEDIO_PAGO, m.tipo))).join(', ') || 'No aplica (crédito)'}`,
+    `Condición de venta: ${conCodigo(CONDICION_VENTA, c.borrador.condicionVenta)}${c.borrador.plazoCredito ? ` (${c.borrador.plazoCredito} días)` : ''}`,
+    `Medio(s) de pago: ${c.resumen.mediosPago.map((m) => (m.tipo === '99' && m.otros ? `99 – ${m.otros}` : conCodigo(MEDIO_PAGO, m.tipo))).join(', ') || 'No aplica (crédito)'}`,
     `Moneda: ${mon}${mon !== 'CRC' ? ` · Tipo de cambio: ${c.resumen.tipoCambio}` : ''}`,
-    `Actividad económica: ${c.tipo === 'FEC' ? c.borrador.codigoActividadReceptor ?? '' : c.borrador.codigoActividadEmisor ?? ''}`,
+    `Actividad económica: ${actividadConNombre(c.tipo === 'FEC' ? c.borrador.codigoActividadReceptor : c.borrador.codigoActividadEmisor)}`,
   ];
   cond.forEach((t, i) => doc.text(doc.splitTextToSize(t, 80), bx, y + i * 4.4));
   y = Math.max(yReceptor, y + 18) + 4;
@@ -199,7 +211,7 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
   doc.setFont('helvetica', 'bold').setFontSize(8).text('Desglose de impuestos', M, yDesglose);
   doc.setFont('helvetica', 'normal');
   r.totalDesgloseImpuesto.forEach((d, i) => {
-    doc.text(`${d.codigo === '01' ? 'Impuesto sobre el Valor Agregado' : `Impuesto ${d.codigo}`} ${d.codigoTarifaIva ? descripcion(TARIFA_IVA, d.codigoTarifaIva) : ''}: ${$(d.totalMontoImpuesto)}`, M, yDesglose + 4.4 * (i + 1));
+    doc.text(`${conCodigo(CODIGO_IMPUESTO, d.codigo)}${d.codigoTarifaIva ? ` · ${conCodigo(TARIFA_IVA, d.codigoTarifaIva)}` : ''}: ${$(d.totalMontoImpuesto)}`, M, yDesglose + 4.4 * (i + 1));
   });
   y = Math.max(y, yDesglose + 4.4 * (r.totalDesgloseImpuesto.length + 1)) + 10;
 
@@ -209,7 +221,7 @@ export async function generarPdf(c: Comprobante, opciones: { incluirQr: boolean 
     doc.setFont('helvetica', 'bold').setFontSize(8).setTextColor(30, 41, 59).text('Información de referencia', M, y);
     doc.setFont('helvetica', 'normal');
     c.borrador.referencias.forEach((ref) => {
-      const texto = doc.splitTextToSize(`${descripcion(TIPO_DOC_REFERENCIA, ref.tipoDoc)} ${ref.numero ?? ''} — ${ref.razon ?? ''}`, ancho - 35) as string[];
+      const texto = doc.splitTextToSize(`${conCodigo(TIPO_DOC_REFERENCIA, ref.tipoDoc)} ${ref.numero ?? ''}${ref.codigo ? ` · Código ${conCodigo(CODIGO_REFERENCIA, ref.codigo)}` : ''} — ${ref.razon ?? ''}`, ancho - 35) as string[];
       asegurar(texto.length * 3.6 + 4.2);
       y += 4.2;
       doc.text(texto, M, y);

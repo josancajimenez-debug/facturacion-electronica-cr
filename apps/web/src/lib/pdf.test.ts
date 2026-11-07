@@ -32,5 +32,11 @@ describe('representación gráfica (PDF)', () => {
     expect(paginas).toBeGreaterThan(1);
     expect(texto.match(/ENTORNO DE SIMULACI/g)).toHaveLength(paginas);
     for (let i = 1; i <= paginas; i++) expect(texto).toContain(`Página ${i} de ${paginas}`);
+    // Los códigos que viajan en el XML se identifican en la representación gráfica.
+    // En el PDF los paréntesis de los textos se guardan escapados con «\».
+    expect(texto).toMatch(/Factura Electrónica \\?\(01\\?\)/);
+    expect(texto).toMatch(/Condición de venta: 01 \S Contado/);
+    expect(texto).toMatch(/01 \S Efectivo/);
+    expect(texto).toMatch(/Actividad económica: 6920\.0 \S \S/);
   });
 });

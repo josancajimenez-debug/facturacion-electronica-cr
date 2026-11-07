@@ -4,9 +4,14 @@ import {
   CONDICION_VENTA,
   MEDIO_PAGO,
   NOMBRE_COMPROBANTE,
+  SITUACION,
   TARIFA_IVA,
   TIPO_DOC_REFERENCIA,
+  codigoComprobante,
+  comprobantePorCodigo,
+  conCodigo,
   descomponerClave,
+  descomponerConsecutivo,
   descripcion,
   nombresArchivo,
   periodoContable,
@@ -58,6 +63,7 @@ export function DetalleComprobante() {
     return <Alerta tipo="warn">Comprobante no encontrado. <Link to="/comprobantes">Volver</Link></Alerta>;
   }
   const partes = descomponerClave(c.clave)!;
+  const consecutivo = descomponerConsecutivo(c.consecutivo);
   const asiento = libro?.asientos.find((a) => a.origen.clave === c.clave);
   const m = c.resumen.codigoMoneda;
 
@@ -178,7 +184,7 @@ export function DetalleComprobante() {
         <div>
           <Link to="/comprobantes" className="small"><ArrowLeft size={14} /> Comprobantes</Link>
           <h1 style={{ marginTop: 6 }}>{NOMBRE_COMPROBANTE[c.tipo]} <Estado estado={c.estado} /></h1>
-          <p className="mono">Consecutivo {c.consecutivo}</p>
+          <p><span className="badge mono">{codigoComprobante(c.tipo)}</span> <span className="mono">Consecutivo {c.consecutivo}</span></p>
         </div>
         <div className="row">
           <button className="btn" onClick={() => descargar(nombresArchivo.xml(c.clave), c.xml)}><Download /> XML</button>
@@ -244,8 +250,8 @@ export function DetalleComprobante() {
                   </div>
                   <div>
                     <h3>Condiciones</h3>
-                    <p className="small" style={{ margin: '4px 0' }}>{descripcion(CONDICION_VENTA, c.borrador.condicionVenta)}{c.borrador.plazoCredito ? ` · ${c.borrador.plazoCredito} días` : ''}</p>
-                    <p className="small" style={{ margin: 0 }}>{c.resumen.mediosPago.map((mp) => `${descripcion(MEDIO_PAGO, mp.tipo)}${mp.monto !== undefined ? ` ${dinero(mp.monto, m)}` : ''}`).join(' · ') || 'Sin medio de pago (crédito)'}</p>
+                    <p className="small" style={{ margin: '4px 0' }}>{conCodigo(CONDICION_VENTA, c.borrador.condicionVenta)}{c.borrador.plazoCredito ? ` · ${c.borrador.plazoCredito} días` : ''}</p>
+                    <p className="small" style={{ margin: 0 }}>{c.resumen.mediosPago.map((mp) => `${conCodigo(MEDIO_PAGO, mp.tipo)}${mp.tipo === '99' && mp.otros ? ` (${mp.otros})` : ''}${mp.monto !== undefined ? ` ${dinero(mp.monto, m)}` : ''}`).join(' · ') || 'Sin medio de pago (crédito)'}</p>
                   </div>
                 </div>
                 <div className="table-wrap">
@@ -259,7 +265,7 @@ export function DetalleComprobante() {
                           <td>{l.detalle}{l.impuestos[0]?.exoneracion && <span className="badge info" style={{ marginLeft: 6 }}>Exonerado {l.impuestos[0].exoneracion.tarifaExonerada}%</span>}</td>
                           <td className="num">{l.cantidad}</td>
                           <td className="num">{dinero(l.subTotal, m)}</td>
-                          <td className="small">{descripcion(TARIFA_IVA, l.impuestos[0]?.codigoTarifaIva)}</td>
+                          <td className="small">{conCodigo(TARIFA_IVA, l.impuestos[0]?.codigoTarifaIva)}</td>
                           <td className="num">{dinero(l.impuestoNeto, m)}</td>
                           <td className="num">{dinero(l.montoTotalLinea, m)}</td>
                         </tr>
@@ -272,7 +278,8 @@ export function DetalleComprobante() {
                     <h3>Referencias</h3>
                     {c.borrador.referencias.map((r, i) => (
                       <p key={i} className="small" style={{ margin: '4px 0' }}>
-                        {descripcion(TIPO_DOC_REFERENCIA, r.tipoDoc)} · <span className="mono">{r.numero}</span> · {r.razon}{' '}
+                        Tipo {conCodigo(TIPO_DOC_REFERENCIA, r.tipoDoc)} · <span className="mono">{r.numero}</span>
+                        {r.codigo && <> · Código {conCodigo(CODIGO_REFERENCIA, r.codigo)}</>} · {r.razon}{' '}
                         {comprobantes.some((x) => x.clave === r.numero) && <Link to={`/comprobantes/${r.numero}`}>ver</Link>}
                       </p>
                     ))}
@@ -328,7 +335,15 @@ export function DetalleComprobante() {
                 <tr><td>Día/mes/año</td><td className="mono">{partes.dia}/{partes.mes}/{partes.anio}</td></tr>
                 <tr><td>Identificación (12)</td><td className="mono">{partes.identificacion}</td></tr>
                 <tr><td>Consecutivo (20)</td><td className="mono">{partes.consecutivo}</td></tr>
-                <tr><td>Situación</td><td className="mono">{partes.situacion}</td></tr>
+                {consecutivo && (
+                  <>
+                    <tr><td>· Sucursal</td><td className="mono">{consecutivo.sucursal}</td></tr>
+                    <tr><td>· Terminal</td><td className="mono">{consecutivo.terminal}</td></tr>
+                    <tr><td>· Tipo (nota 3)</td><td>{comprobantePorCodigo(consecutivo.tipoDocumento)}</td></tr>
+                    <tr><td>· Número</td><td className="mono">{consecutivo.numero}</td></tr>
+                  </>
+                )}
+                <tr><td>Situación</td><td><span className="mono">{partes.situacion}</span> {descripcion(SITUACION, partes.situacion)}</td></tr>
                 <tr><td>Código de seguridad</td><td className="mono">{partes.codigoSeguridad}</td></tr>
               </tbody></table>
             </div>

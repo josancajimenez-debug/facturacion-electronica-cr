@@ -1,4 +1,4 @@
-import { CONDICION_VENTA, MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, descripcion } from '@fe-cr/core';
+import { CODIGO_TIPO_DOCUMENTO, CONDICION_VENTA, MEDIO_PAGO, NOMBRE_COMPROBANTE, TARIFA_IVA, codigoComprobante, conCodigo, descripcion } from '@fe-cr/core';
 import { Download, FileText, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -100,10 +100,10 @@ export function Comprobantes() {
                 {lista.map((c) => (
                   <tr key={c.clave} className="clickable" onClick={() => navegar(`/comprobantes/${c.clave}`)} title="Ver el comprobante">
                     <td className="nowrap">{fechaHora(c.fechaEmision)}</td>
-                    <td><span className="badge">{c.tipo}</span></td>
+                    <td><span className="badge" title={codigoComprobante(c.tipo)}><span className="mono">{CODIGO_TIPO_DOCUMENTO[c.tipo]}</span> {c.tipo}</span></td>
                     <td className="mono"><Link to={`/comprobantes/${c.clave}`} onClick={(e) => e.stopPropagation()}>{c.consecutivo}</Link></td>
                     <td>{c.contraparte?.nombre ?? <span className="muted">Consumidor final</span>}</td>
-                    <td className="small">{descripcion(CONDICION_VENTA, c.borrador.condicionVenta)}</td>
+                    <td className="small">{conCodigo(CONDICION_VENTA, c.borrador.condicionVenta)}</td>
                     <td className="num">{dinero(c.resumen.totalComprobante, c.resumen.codigoMoneda)}</td>
                     <td><Estado estado={c.estado} /></td>
                   </tr>

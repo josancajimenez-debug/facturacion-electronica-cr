@@ -45,7 +45,8 @@ export function construirComprobante(p: ParametrosEmision): Comprobante {
   const { borrador, emisor, numero, ambiente } = p;
   const fecha = p.fecha ?? new Date();
   const { lineas, resumen } = calcularComprobante(borrador);
-  const validaciones = validarBorrador(borrador, emisor, resumen, lineas);
+  // Las reglas se aplican según la fecha de emisión del comprobante, no según el reloj del sistema.
+  const validaciones = validarBorrador(borrador, emisor, resumen, lineas, fecha);
   if (hayErrores(validaciones)) throw new ErrorValidacion(validaciones);
 
   const consecutivo = generarConsecutivo(borrador.sucursal, borrador.terminal, borrador.tipo, numero);
